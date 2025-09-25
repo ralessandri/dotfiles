@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+## Description: Export the current project's database and save it as a compressed file with timestamp and project name.
+## Usage: dump
+## Example: ddev dump
+## OSTypes: darwin,linux,wsl2
+## HostBinaryExists: /usr/bin/ddev
+
+set -e
+
+DBNAME="${1:-db}"
+
+if [ "$DBNAME" = "db" ]; then
+  OUTFILE="$(basename $(pwd))-$(date +%Y%m%d-%H%M%S).sql"
+else
+  OUTFILE="$(basename $(pwd))-${DBNAME}-$(date +%Y%m%d-%H%M%S).sql"
+fi
+
+# Export the database and compress it directly
+ddev export-db -d "$DBNAME" -f "$OUTFILE.gz"

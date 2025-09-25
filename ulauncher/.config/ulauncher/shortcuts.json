@@ -1,0 +1,72 @@
+{
+    "cc496c1a-be33-42e3-a411-8b49186f4383": {
+        "id": "cc496c1a-be33-42e3-a411-8b49186f4383",
+        "name": "Google Search",
+        "keyword": "g",
+        "cmd": "https://google.com/search?q=%s",
+        "icon": "/usr/share/ulauncher/media/google-search-icon.png",
+        "is_default_search": true,
+        "run_without_argument": false,
+        "added": 1752823612.9975348
+    },
+    "55bc9c58-94b7-4228-aa43-44b84b7655a6": {
+        "id": "55bc9c58-94b7-4228-aa43-44b84b7655a6",
+        "name": "Stack Overflow",
+        "keyword": "so",
+        "cmd": "https://stackoverflow.com/search?q=%s",
+        "icon": "/usr/share/ulauncher/media/stackoverflow-icon.svg",
+        "is_default_search": true,
+        "run_without_argument": false,
+        "added": 1752823612.9976027
+    },
+    "b46c96c9-d893-4d62-bb7a-b387f47d9a67": {
+        "id": "b46c96c9-d893-4d62-bb7a-b387f47d9a67",
+        "name": "Wikipedia",
+        "keyword": "wiki",
+        "cmd": "https://en.wikipedia.org/wiki/%s",
+        "icon": "/usr/share/ulauncher/media/wikipedia-icon.png",
+        "is_default_search": true,
+        "run_without_argument": false,
+        "added": 1752823612.9976492
+    },
+    "46ae55ac-eef0-4c69-9f07-54d04e2691bc": {
+        "id": "46ae55ac-eef0-4c69-9f07-54d04e2691bc",
+        "name": "Teleboy",
+        "keyword": "tb",
+        "cmd": "https://www.teleboy.ch/search?query=title:%s",
+        "icon": null,
+        "is_default_search": false,
+        "run_without_argument": false,
+        "added": 1758706158.664294
+    },
+    "98c85a00-ff46-4264-afbc-7c3903801c41": {
+        "id": "98c85a00-ff46-4264-afbc-7c3903801c41",
+        "name": "TMDB",
+        "keyword": "tmdb",
+        "cmd": "https://www.themoviedb.org/search?query=%s",
+        "icon": null,
+        "is_default_search": false,
+        "run_without_argument": false,
+        "added": 1758706483.9701338
+    },
+    "2db76342-4d72-49be-ab76-dc1819f8d2ac": {
+        "id": "2db76342-4d72-49be-ab76-dc1819f8d2ac",
+        "name": "PHP",
+        "keyword": "php",
+        "cmd": "https://www.php.net/search.php#gsc.q=%s",
+        "icon": null,
+        "is_default_search": false,
+        "run_without_argument": false,
+        "added": 1758706693.268789
+    },
+    "05579fd5-3b85-4a9e-8284-e151f08b4532": {
+        "id": "05579fd5-3b85-4a9e-8284-e151f08b4532",
+        "name": "Youtube",
+        "keyword": "yt",
+        "cmd": "https://www.youtube.com/results?search_query=%s",
+        "icon": null,
+        "is_default_search": false,
+        "run_without_argument": false,
+        "added": 1758707136.4898527
+    }
+}
