@@ -14,4 +14,4 @@
 	lg = log --oneline --graph --decorate --all
 	sw = switch
 	swc = switch -c
-	sw-track = "!f() { git switch -c $1 --track origin/$1; }; f"
+	swct = "!f() { git switch -c $1 --track origin/$1; }; f"
