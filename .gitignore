@@ -1,5 +1,6 @@
+.idea
+.vscode
+
 /_old
-/icons
-/ssh/.ssh/config.d/
 /.history
-/.packages.txt
+/icons
