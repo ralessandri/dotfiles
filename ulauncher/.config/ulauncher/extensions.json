@@ -5,12 +5,5 @@
         "updated_at": "2025-07-21T11:54:34.124867",
         "last_commit": "1e2a19aa0cdcbb10cfe958d36764147a0b1e3e35",
         "last_commit_time": "2025-05-25T10:41:21"
-    },
-    "com.github.ngencokamin.ulauncher-bitwarden-rbw": {
-        "id": "com.github.ngencokamin.ulauncher-bitwarden-rbw",
-        "url": "https://github.com/ngencokamin/ulauncher-bitwarden-rbw",
-        "updated_at": "2025-07-21T11:57:07.216886",
-        "last_commit": "14a82bc06a0f79c0d286584372848e420c9baaa2",
-        "last_commit_time": "2025-05-09T15:16:31"
     }
 }

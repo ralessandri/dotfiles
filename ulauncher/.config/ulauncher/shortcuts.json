@@ -68,5 +68,15 @@
         "is_default_search": false,
         "run_without_argument": false,
         "added": 1758707136.4898527
+    },
+    "119e196c-d0c2-4fb5-9b1c-6169541ba3bf": {
+        "id": "119e196c-d0c2-4fb5-9b1c-6169541ba3bf",
+        "name": "Terminal",
+        "keyword": "r",
+        "cmd": "#!/bin/bash\n\ngnome-terminal -- $@",
+        "icon": null,
+        "is_default_search": false,
+        "run_without_argument": false,
+        "added": 1759576820.2815995
     }
 }
