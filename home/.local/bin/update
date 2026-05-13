@@ -35,11 +35,11 @@ update_dnf() {
 update_flatpak() {
   print_header "Flatpak Update"
 
-  run_and_report "flatpak update -y" \
+  run_and_report "sudo flatpak update -y" \
     "Flatpak update completed." \
     "Error during Flatpak update."
 
-  run_and_report "flatpak uninstall --unused" \
+  run_and_report "sudo flatpak uninstall --unused" \
     "Unused Flatpak packages removed." \
     "Error during Flatpak cleanup."
 }
@@ -69,10 +69,10 @@ update_brew() {
 }
 
 main() {
-  available apt     && update_apt
-  available dnf     && update_dnf
+  available apt && update_apt
+  available dnf && update_dnf
   available flatpak && update_flatpak
-  available brew    && update_brew
+  available brew && update_brew
 }
 
 main "$@"
