@@ -23,7 +23,7 @@ update_apt() {
 update_dnf() {
   print_header "DNF Update"
 
-  run_and_report "sudo dnf upgrade -y" \
+  run_and_report "sudo dnf upgrade --refresh -y" \
     "DNF upgrade completed." \
     "Error during DNF upgrade."
 
@@ -76,3 +76,4 @@ main() {
 }
 
 main "$@"
+
