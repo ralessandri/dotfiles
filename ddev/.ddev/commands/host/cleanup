@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+## Description: Cleans up unused Docker images associated with the current project using ddev.
+## Usage: cleanup
+## Example: ddev cleanup
+## OSTypes: darwin,linux,wsl2
+## HostBinaryExists: /usr/bin/ddev
+
+set -e
+
+# delete unused docker images
+ddev delete images
