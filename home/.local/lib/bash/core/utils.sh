@@ -36,7 +36,6 @@ info_message() {
   printf "${PASTEL_BLUE}ℹ️  %s${NC}\n" "$1"
 }
 
-
 error_message() {
   printf "${PASTEL_PINK}❌ %s${NC}\n" "$1"
 }

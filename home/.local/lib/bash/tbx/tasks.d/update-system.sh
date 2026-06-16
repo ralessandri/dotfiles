@@ -5,7 +5,7 @@ IFS=$'\n\t'
 source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
 
 update_apt() {
-  print_header "APT Update"
+  print_section "APT Update"
 
   run_and_report "sudo apt update -qq" \
     "APT update completed." \
@@ -21,9 +21,9 @@ update_apt() {
 }
 
 update_dnf() {
-  print_header "DNF Update"
+  print_section "DNF Update"
 
-  run_and_report "sudo dnf upgrade --refresh -y" \
+  run_and_report "sudo dnf upgrade -y" \
     "DNF upgrade completed." \
     "Error during DNF upgrade."
 
@@ -33,19 +33,19 @@ update_dnf() {
 }
 
 update_flatpak() {
-  print_header "Flatpak Update"
+  print_section "Flatpak Update"
 
-  run_and_report "sudo flatpak update -y" \
+  run_and_report "flatpak update -y" \
     "Flatpak update completed." \
     "Error during Flatpak update."
 
-  run_and_report "sudo flatpak uninstall --unused" \
+  run_and_report "flatpak uninstall --unused" \
     "Unused Flatpak packages removed." \
     "Error during Flatpak cleanup."
 }
 
 update_brew() {
-  print_header "Homebrew Update"
+  print_section "Homebrew Update"
 
   run_and_report "brew update" \
     "Homebrew update completed." \

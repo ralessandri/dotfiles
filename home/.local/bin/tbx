@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/common.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/gui/gui-gum.sh"
+
+print_section ":: Welcome to MyLinux Toolbox!"
+
+if ! available gum; then
+  print_section "Installing gum..."
+  sudo dnf install -y gum
+fi
+
+TASKS_DIR="$HOME/.dotfiles/home/.local/lib/bash/tbx/tasks.d/"
+show_menu "$TASKS_DIR"
