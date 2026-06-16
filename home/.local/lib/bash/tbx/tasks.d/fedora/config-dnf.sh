@@ -2,7 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+[[ -f "$HOME/.env" ]] && source "$HOME/.env" || {
+  echo "Error: $HOME/.env not found" >&2
+  exit 1
+}
+source "$TBX_UTILS"
 
 print_section "Configuring  DNF..."
 sudo sed -i '/^max_parallel_downloads=/c\max_parallel_downloads=10' /etc/dnf/dnf.conf || echo 'max_parallel_downloads=10' >>/etc/dnf/dnf.conf

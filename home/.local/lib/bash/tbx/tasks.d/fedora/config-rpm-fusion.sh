@@ -2,7 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+[[ -f "$HOME/.env" ]] && source "$HOME/.env" || {
+  echo "Error: $HOME/.env not found" >&2
+  exit 1
+}
+source "$TBX_UTILS"
 
 if [ ! -e /etc/yum.repos.d/rpmfusion-free.repo ] || [ ! -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
   print_section "Installing RPM Fusion..."

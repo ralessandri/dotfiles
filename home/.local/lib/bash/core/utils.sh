@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Load colors from ~/.env if available, else use defaults
+# Load colors and path settings from ~/.env if available, else use defaults
 if [[ -f ~/.env ]]; then
   source ~/.env
 fi

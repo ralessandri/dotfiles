@@ -2,7 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+[[ -f "$HOME/.env" ]] && source "$HOME/.env" || {
+  echo "Error: $HOME/.env not found" >&2
+  exit 1
+}
+source "$TBX_UTILS"
 
 # Add DDEV releases to your package repository
 if [ ! -e /etc/yum.repos.d/ddev.repo ]; then
@@ -34,4 +38,3 @@ if ! mkcert -CAROOT &>/dev/null; then
 else
   info_message "mkcert already initialized"
 fi
-

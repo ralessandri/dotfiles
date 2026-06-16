@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # gui-gum.sh — gum-based menu, colors inherited from utils.sh
 
-source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+[[ -f "$HOME/.env" ]] && source "$HOME/.env" || {
+  echo "Error: $HOME/.env not found" >&2
+  exit 1
+}
+source "$TBX_UTILS"
 
 # utils.sh provides ANSI codes for printf; gum requires hex or ANSI-256.
 # If hex equivalents are defined in ~/.env, those are used,
@@ -38,7 +42,7 @@ show_menu() {
   while true; do
     clear
     gum_header "Linux TBX (Toolbox)"
-    gum style --foreground "$GUM_YELLOW" --faint "(Current: ${current_dir#./})"
+    #gum style --foreground "$GUM_YELLOW" --faint "(Current: ${current_dir#./})"
     echo
 
     # Collect subfolders and scripts

@@ -2,7 +2,15 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+# Load path configuration from .env
+if [[ -f "$HOME/.env" ]]; then
+  source "$HOME/.env"
+else
+  echo "Error: $HOME/.env not found" >&2
+  exit 1
+fi
+
+source "$TBX_UTILS"
 
 if [ -e /etc/yum.repos.d/rpmfusion-free.repo ] && [ -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
   print_section "Installing Multimedia Codecs"
@@ -24,4 +32,3 @@ if [ -e /etc/yum.repos.d/rpmfusion-free.repo ] && [ -e /etc/yum.repos.d/rpmfusio
 else
   error_message "RPM Fusion repositories not found. Please set up RPM Fusion first!"
 fi
-
