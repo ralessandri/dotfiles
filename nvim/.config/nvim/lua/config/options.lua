@@ -13,8 +13,8 @@ vim.opt.listchars = {
   trail = "·",
 }
 
-LazyVim.root.git = function()
-  local buf = vim.api.nvim_get_current_buf()
-  local path = LazyVim.root.bufpath(buf) or vim.uv.cwd()
-  return vim.fs.root(path, ".git") or LazyVim.root.get()
-end
+-- LazyVim.root.git = function()
+--   local buf = vim.api.nvim_get_current_buf()
+--   local path = LazyVim.root.bufpath(buf) or vim.uv.cwd()
+--   return vim.fs.root(path, ".git") or LazyVim.root.get()
+-- end
