@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/home/.local/lib/bash/core/utils.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 update_apt() {
   print_section "APT Update"

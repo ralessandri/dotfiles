@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-
 # echo -e "one\ntwo\nthree" | dmenu
 
 #ptyxis -- bash -c "fzf $* < /proc/$$/fd/0 > /proc/$$/fd/1"
 foot -a 'dmenu' -e bash -c "fzf $* < /proc/$$/fd/0 > /proc/$$/fd/1" 2>/dev/null
+

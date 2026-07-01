@@ -2,11 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-[[ -f "$HOME/.env" ]] && source "$HOME/.env" || {
-  echo "Error: $HOME/.env not found" >&2
-  exit 1
-}
-source "$TBX_UTILS"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 # Add DDEV releases to your package repository
 if [ ! -e /etc/yum.repos.d/ddev.repo ]; then

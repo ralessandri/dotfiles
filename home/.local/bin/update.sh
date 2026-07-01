@@ -2,8 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Load path configuration from .env
-[[ -f "$HOME/.env" ]] && source "$HOME/.env" || { echo "Error: $HOME/.env not found" >&2; exit 1; }; source "$TBX_UTILS"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 update_apt() {
   print_header "APT Update"

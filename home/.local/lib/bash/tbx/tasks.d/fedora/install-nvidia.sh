@@ -2,15 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Load path configuration from .env
-if [[ -f "$HOME/.env" ]]; then
-  source "$HOME/.env"
-else
-  echo "Error: $HOME/.env not found" >&2
-  exit 1
-fi
-
-source "$TBX_UTILS"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 if [ -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
   # Check if NVIDIA driver is already installed

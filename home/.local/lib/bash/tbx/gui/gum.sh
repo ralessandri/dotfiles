@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
-# gui-gum.sh — gum-based menu, colors inherited from utils.sh
-
-[[ -f "$HOME/.env" ]] && source "$HOME/.env" || {
-  echo "Error: $HOME/.env not found" >&2
-  exit 1
-}
-source "$TBX_UTILS"
+# gum.sh — gum-based menu, colors inherited from utils.sh
 
 # utils.sh provides ANSI codes for printf; gum requires hex or ANSI-256.
 # If hex equivalents are defined in ~/.env, those are used,
