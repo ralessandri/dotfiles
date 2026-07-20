@@ -1,3 +1,5 @@
+alias tm='tm.sh'
+
 # --- Shortcuts (frequently used, kept short) ---
 tma() { tmsa "$@"; }
 tmn() { tmsn "$@"; }
@@ -62,39 +64,6 @@ tmsn() {
   fi
 
   tmux new-session ${session_name:+-s "$session_name"}
-}
-
-tmsa() {
-  if ! command -v gum &>/dev/null; then
-    echo "Error: gum is not installed. See https://github.com/charmbracelet/gum" >&2
-    return 1
-  fi
-
-  local sessions session_count selected session_name
-
-  sessions=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
-
-  if [[ -z "$sessions" ]]; then
-    # No sessions exist
-    if gum confirm "No tmux sessions found. Create a new one?"; then
-      session_name=$(gum input --placeholder "Session name (leave empty for default)")
-      tmux new-session ${session_name:+-s "$session_name"}
-    else
-      return 1
-    fi
-    return
-  fi
-
-  session_count=$(wc -l <<<"$sessions")
-
-  if [[ "$session_count" -eq 1 ]]; then
-    # Exactly one session exists
-    tmux attach-session -t "$sessions"
-  else
-    # Multiple sessions exist
-    selected=$(gum choose --header "Select a tmux session" <<<"$sessions")
-    [[ -n "$selected" ]] && tmux attach-session -t "$selected"
-  fi
 }
 
 tmsk() {
