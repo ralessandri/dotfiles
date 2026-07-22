@@ -8,4 +8,5 @@
 
 common/.config/niri/dms/*
 !common/.config/niri/dms/binds.kdl
+!common/.config/niri/dms/windowrules.kdl
 common/.config/niri/config.kdl.*
