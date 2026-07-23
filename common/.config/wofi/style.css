@@ -1,7 +1,7 @@
 @define-color bg          rgba(30, 30, 30, 0.8);
 @define-color bg-input    rgba(30, 30, 30, 0.9);
 @define-color accent      rgba(144, 206, 244, 1);
-@defing-color text        rgba(205, 214, 244, 1)
+@define-color text        rgba(205, 214, 244, 1);
 @define-color text-active rgba(0, 0, 0, 1);
 @define-color shadow      rgba(0, 0, 0, 0.4);
 
