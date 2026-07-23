@@ -1,8 +1,8 @@
-@define-color bg          rgba(30, 30, 30, 0.8);
-@define-color bg-input    rgba(30, 30, 30, 0.9);
-@define-color accent      rgba(144, 206, 244, 1);
-@define-color text        rgba(205, 214, 244, 1);
-@define-color text-active rgba(0, 0, 0, 1);
+@define-color bg          {{ colors.surface.default.rgba | set_alpha: 0.8 }};
+@define-color bg-input    {{ colors.surface.default.rgba | set_alpha: 0.9 }};
+@define-color accent      {{ colors.primary.default.rgba | set_alpha: 1.0 }};
+@define-color text        {{ colors.on_surface.default.rgba | set_alpha: 1.0 }};
+@define-color text-active {{ colors.on_primary.default.rgba | set_alpha: 1.0 }};
 @define-color shadow      rgba(0, 0, 0, 0.4);
 
 window {
