@@ -25,3 +25,10 @@ gui:
       - "#db4b4b"
     defaultFgColor:
       - "#c0caf5"
+customCommands:
+  - key: "<c-g>"
+    context: "files"
+    description: "AI commit message"
+    command: '~/.local/bin/ai-commit.sh -m ""'
+    loadingText: "Generate commit message..."
+    output: terminal
