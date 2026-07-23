@@ -11,7 +11,7 @@ workspace_actions=(
   "move-workspace-up"
 )
 
-selected=$(printf '%s\n' "${workspace_actions[@]}" | wofi --dmenu --prompt "Niri Action")
+selected=$(printf '%s\n' "${workspace_actions[@]}" | wofi --dmenu --prompt "Niri Action" -L "${#workspace_actions[@]}")
 
 # Abbrechen, wenn nichts ausgewählt wurde (z.B. Esc gedrückt)
 [ -z "$selected" ] && exit 0
