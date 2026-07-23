@@ -1,5 +1,5 @@
 [config]
 
 [templates.wofi]
-input_path = "~/.config/matugen/templates/wofi.css"
-output_path = "~/.config/wofi/style.css"
+input_path = "~/.dotfiles/common/.config/matugen/templates/wofi.css"
+output_path = "~/.dotfiles/common/.config/wofi/style.css"
