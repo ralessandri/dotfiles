@@ -142,17 +142,14 @@ _attach_to_session() {
   fi
 }
 _new_session() {
-  local name="${1:-}" start_dir="${2:-}"
-  local -a opts=()
+  local name="${1:-}" start_dir="${2:-}" init_cmd="${3:-}"
+  local -a opts=(-d)
   [[ -n "$name" ]] && opts+=(-s "$name")
   [[ -n "$start_dir" ]] && opts+=(-c "$start_dir")
-  if [[ -n "${TMUX:-}" ]]; then
-    tmux new-session -d "${opts[@]}"
-    local target="${name:-$(tmux list-sessions -F '#{session_name}' | tail -n1)}"
-    _attach_to_session "$target"
-  else
-    tmux new-session "${opts[@]}"
-  fi
+  tmux new-session "${opts[@]}"
+  local target="${name:-$(tmux list-sessions -F '#{session_name}' | tail -n1)}"
+  [[ -n "$init_cmd" ]] && tmux send-keys -t "$target" "$init_cmd" C-m
+  _attach_to_session "$target"
 }
 # ---------------------------------------------------------------------------
 # Help
@@ -211,8 +208,9 @@ EOF
     ;;
   sessionizer | s)
     cat <<EOF
-Usage: ${SCRIPT_NAME} sessionizer|s
+Usage: ${SCRIPT_NAME} sessionizer|s [-n|--nvim]
 Fuzzy selects from zoxide directory history and creates/attaches a named session.
+-n, --nvim   Automatically start nvim (LazyVim) in the newly created session.
 EOF
     ;;
   *)
@@ -377,8 +375,28 @@ cmd_list() {
 }
 cmd_sessionizer() {
   _require_gum && _require_tmux && _require_zoxide && _require_tty || return 1
-  # ... (unchanged)
-  local candidates selected session_name dir existing_path
+  local open_nvim=false opt
+  while getopts ":n-:" opt; do
+    case "${opt}" in
+    n) open_nvim=true ;;
+    -)
+      case "${OPTARG}" in
+      nvim) open_nvim=true ;;
+      *)
+        _err "Unknown option --${OPTARG}"
+        return 1
+        ;;
+      esac
+      ;;
+    *)
+      _err "Unknown option"
+      return 1
+      ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  local candidates selected session_name dir existing_path init_cmd=""
   candidates=$(zoxide query -l 2>/dev/null)
   if [[ -z "$candidates" ]]; then
     _err "zoxide has no tracked directories yet."
@@ -402,7 +420,8 @@ cmd_sessionizer() {
     session_name=$(gum input --placeholder "Enter a different session name" --value "${session_name}-2")
     [[ -z "$session_name" ]] && return 1
   fi
-  _new_session "$session_name" "$selected"
+  [[ "$open_nvim" == true ]] && init_cmd="nvim"
+  _new_session "$session_name" "$selected" "$init_cmd"
 }
 # ---------------------------------------------------------------------------
 # Dispatcher
