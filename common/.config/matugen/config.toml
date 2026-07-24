@@ -3,3 +3,7 @@
 [templates.wofi]
 input_path = "~/.dotfiles/common/.config/matugen/templates/wofi.css"
 output_path = "~/.config/wofi/style.css"
+
+[templates.spotifyplayer]
+input_path = "~/.dotfiles/common/.config/matugen/templates/spotify_player.toml"
+output_path = "~/.config/spotify-player/theme.toml"

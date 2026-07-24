@@ -1,0 +1,39 @@
+[[themes]]
+name = "Matugen"
+
+[themes.palette]
+# background = "{{colors.background.default.hex}}"
+foreground = "{{colors.on_background.default.hex}}"
+
+black = "{{colors.background.default.hex}}"
+red = "{{colors.error.default.hex}}"
+green = "{{colors.primary.default.hex}}"
+yellow = "{{colors.secondary.default.hex}}"
+blue = "{{colors.primary.default.hex}}"
+magenta = "{{colors.tertiary.default.hex}}"
+cyan = "{{colors.secondary.default.hex}}"
+white = "{{colors.on_surface.default.hex}}"
+
+bright_black = "{{colors.surface_container.default.hex}}"
+bright_red = "{{colors.error_container.default.hex}}"
+bright_green = "{{colors.primary_container.default.hex}}"
+bright_yellow = "{{colors.secondary_container.default.hex}}"
+bright_blue = "{{colors.primary_container.default.hex}}"
+bright_magenta = "{{colors.tertiary_container.default.hex}}"
+bright_cyan = "{{colors.secondary_container.default.hex}}"
+bright_white = "{{colors.on_background.default.hex}}"
+
+[themes.component_style]
+selection = { bg = "{{colors.surface_container_high.default.hex}}", modifiers = ["Bold"] }
+block_title = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
+playback_track = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
+playback_album = { fg = "{{colors.secondary.default.hex}}" }
+playback_metadata = { fg = "{{colors.on_surface_variant.default.hex}}" }
+playback_progress_bar = { bg = "{{colors.surface_container.default.hex}}", fg = "{{colors.primary.default.hex}}" }
+current_playing = { fg = "{{colors.tertiary.default.hex}}", modifiers = ["Bold"] }
+page_desc = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
+table_header = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
+border = { fg = "{{colors.outline.default.hex}}" }
+playback_status = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
+playback_artists = { fg = "{{colors.secondary.default.hex}}", modifiers = ["Bold"] }
+playlist_desc = { fg = "{{colors.on_surface_variant.default.hex}}" }
