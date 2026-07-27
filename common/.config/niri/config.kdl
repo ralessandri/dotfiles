@@ -131,10 +131,9 @@ layout {
         // Proportion sets the width as a fraction of the output width, taking gaps into account.
         // For example, you can perfectly fit four windows sized "proportion 0.25" on an output.
         // The default preset widths are 1/3, 1/2 and 2/3 of the output.
-        proportion 0.25
+        proportion 0.33333
         proportion 0.5
-        proportion 0.75
-
+        proportion 0.66667
         // Fixed sets the width in logical pixels exactly.
         // fixed 1920
     }
@@ -309,6 +308,14 @@ animations {
     // slowdown 3.0
 }
 
+layer-rule {
+  match namespace="^wofi$"
+  background-effect {
+    // blur true
+  }
+
+}
+
 // Window rules let you adjust behavior for individual windows.
 // Find more information on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Window-Rules
@@ -326,7 +333,7 @@ window-rule {
 window-rule {
 
     match app-id="^Alacritty$"
-    
+
     default-column-width { proportion 0.25; }
     background-effect {
         blur true
@@ -646,9 +653,21 @@ binds {
     Mod+Shift+P { power-off-monitors; }
 }
 
+output "Philips Consumer Electronics Company PHL 346B1C UK02151015618" {
+    layout {
+        preset-column-widths {
+            proportion 0.25
+            proportion 0.5
+            proportion 0.75
+        }
+    }
+}
+
 // DMS Include Configs
 include "dms/binds.kdl"
 include "dms/outputs.kdl"
 include "dms/cursor.kdl"
 include "dms/layout.kdl"
 include "dms/windowrules.kdl"
+
+include optional=true "colors.kdl"

@@ -1,40 +1,24 @@
+[general]
+import = ["~/.config/alacritty/dank-theme.toml"]
+
 [window]
-opacity = 0.8
+ opacity = 0.8
 decorations = 'none'
 # blur = true
-# padding = {x = 5, y = 5}
+# padding = {x = 6, y = 6}
 # Default colors
+
+[env]
+TERM = "xterm-256color"
 
 [font]
 normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
+offset = {x = 0, y = 1}
 
 size = 11.0
 
-# [colors.primary]
-# background = '#24283b'
-# foreground = '#c0caf5'
-#
-# # Normal colors
-# [colors.normal]
-# black = '#1d202f'
-# red = '#f7768e'
-# green = '#9ece6a'
-# yellow = '#e0af68'
-# blue = '#7aa2f7'
-# magenta = '#bb9af7'
-# cyan = '#7dcfff'
-# white = '#a9b1d6'
-#
-# # Bright colors
-# [colors.bright]
-# black = '#414868'
-# red = '#ff899d'
-# green = '#9fe044'
-# yellow = '#faba4a'
-# blue = '#8db0ff'
-# magenta = '#c7a9ff'
-# cyan = '#a4daff'
-# white = '#c0caf5'
+[colors.primary]
+background = '#282c34'
