@@ -11,4 +11,6 @@ common/.config/niri/dms/*
 !common/.config/niri/dms/windowrules.kdl
 common/.config/niri/config.kdl.*
 
+common/.config/alacritty/dank-theme.toml
 common/.config/wofi/style.css
+common/.config/ghostty/themes
