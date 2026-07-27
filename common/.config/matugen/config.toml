@@ -1,5 +1,10 @@
 [config]
 
+
+[templates.niri]
+input_path = "~/.dotfiles/common/.config/matugen/templates/niri.kdl"
+output_path = "~/.config/niri/colors.kdl"
+
 [templates.wofi]
 input_path = "~/.dotfiles/common/.config/matugen/templates/wofi.css"
 output_path = "~/.config/wofi/style.css"
