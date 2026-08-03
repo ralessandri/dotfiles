@@ -1,0 +1,10 @@
+window-rule {
+  match is-active=false
+  opacity 0.8
+}
+
+window-rule {
+  match is-focused=true
+  opacity 0.95
+}
+

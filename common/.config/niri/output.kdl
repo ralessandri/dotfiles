@@ -1,0 +1,10 @@
+
+output "Philips Consumer Electronics Company PHL 346B1C UK02151015618" {
+    layout {
+        preset-column-widths {
+            proportion 0.25
+            proportion 0.5
+            proportion 0.75
+        }
+    }
+}

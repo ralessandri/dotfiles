@@ -24,13 +24,13 @@ bright_cyan = "{{colors.secondary_container.default.hex}}"
 bright_white = "{{colors.on_background.default.hex}}"
 
 [themes.component_style]
-selection = { bg = "{{colors.surface_container_high.default.hex}}", modifiers = ["Bold"] }
+selection = { bg = "{{colors.surface_container_high.default.hex}}", fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
 block_title = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
 playback_track = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
 playback_album = { fg = "{{colors.secondary.default.hex}}" }
 playback_metadata = { fg = "{{colors.on_surface_variant.default.hex}}" }
 playback_progress_bar = { bg = "{{colors.surface_container.default.hex}}", fg = "{{colors.primary.default.hex}}" }
-current_playing = { fg = "{{colors.tertiary.default.hex}}", modifiers = ["Bold"] }
+current_playing = { bg = "{{colors.surface_container_high.default.hex}}", fg = "{{colors.tertiary.default.hex}}", modifiers = ["Bold"] }
 page_desc = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
 table_header = { fg = "{{colors.primary.default.hex}}", modifiers = ["Bold"] }
 border = { fg = "{{colors.outline.default.hex}}" }

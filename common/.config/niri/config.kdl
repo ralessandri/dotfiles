@@ -327,7 +327,11 @@ window-rule {
     // since this is the default config, and we want no false positives.
     // You can get away with just app-id="wezterm" if you want.
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    default-column-width {}
+    default-column-width { proportion 0.25; }
+
+    background-effect {
+      blur true
+    }
 }
 
 window-rule {
@@ -653,16 +657,6 @@ binds {
     Mod+Shift+P { power-off-monitors; }
 }
 
-output "Philips Consumer Electronics Company PHL 346B1C UK02151015618" {
-    layout {
-        preset-column-widths {
-            proportion 0.25
-            proportion 0.5
-            proportion 0.75
-        }
-    }
-}
-
 // DMS Include Configs
 include "dms/binds.kdl"
 include "dms/outputs.kdl"
@@ -671,3 +665,5 @@ include "dms/layout.kdl"
 include "dms/windowrules.kdl"
 
 include optional=true "colors.kdl"
+include optional=true "output.kdl"
+include optional=true "windowrules.kdl"
