@@ -1,7 +1,7 @@
 {
   "extras": [
-    "lazyvim.plugins.extras.lang.php",
-    "lazyvim.plugins.extras.lang.sql"
+    "lazyvim.plugins.extras.ai.sidekick",
+    "lazyvim.plugins.extras.util.mini-hipatterns"
   ],
   "install_version": 8,
   "news": {
