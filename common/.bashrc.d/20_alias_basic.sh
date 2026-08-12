@@ -228,6 +228,8 @@ alias sest='sestatus'
 # Export the current DDEV database with a timestamp
 alias ddev-dump='ddev export-db > $(basename $(pwd))-$(date +%Y%m%d-%H%M%S).sql.gz'
 
+alias n='nvim'
+
 ###############################################################################
 # Desktop
 ###############################################################################
