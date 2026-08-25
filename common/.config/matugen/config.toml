@@ -1,5 +1,8 @@
 [config]
 
+[templates.starship]
+input_path = "~/.dotfiles/common/.config/matugen/templates/starship.toml"
+output_path = "~/.config/starship/starship.toml"
 
 [templates.niri]
 input_path = "~/.dotfiles/common/.config/matugen/templates/niri.kdl"

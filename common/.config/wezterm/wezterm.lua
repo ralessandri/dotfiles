@@ -6,7 +6,7 @@ local mod = "ALT"
 
 config.color_scheme = "Catppuccin Macchiato"
 config.font = wezterm.font("JetBrainsMono Nerd Font")
-config.font_size = 11.5
+config.font_size = 11
 config.hide_tab_bar_if_only_one_tab = true
 
 config.colors = {
@@ -24,8 +24,8 @@ config.leader = {
 
 config.window_padding = {
   bottom = 0,
-  -- left = 0,
-  -- right = 0,
+  --left = 0,
+  --right = 0,
 }
 
 config.ssh_domains = {

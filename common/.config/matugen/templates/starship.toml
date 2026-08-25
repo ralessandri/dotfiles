@@ -1,0 +1,26 @@
+palette = "matugen"
+format = "$username$hostname $directory$line_break$character "
+
+[palettes.matugen]
+primary = "{{colors.primary.default.hex}}"
+secondary = "{{colors.secondary.default.hex}}"
+tertiary = "{{colors.tertiary.default.hex}}"
+on_background = "{{colors.on_background.default.hex}}"
+error = "{{colors.error.default.hex}}"
+
+[username]
+show_always = true
+format = "[$user]($style)"
+style_user = "secondary"
+
+[hostname]
+ssh_only = false
+format = "[@$hostname]($style)"
+style = "secondary"
+
+[directory]
+style = "primary"
+
+[character]
+success_symbol = "[❯](tertiary)"
+error_symbol = "[❯](error)"
