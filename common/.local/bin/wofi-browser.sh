@@ -6,7 +6,7 @@
 application_ids=(
   "org.mozilla.firefox.desktop"
   "com.vivaldi.Vivaldi.desktop"
-  "chromium-browser.desktop"
+  "org.chromium.Chromium.desktop"
 )
 
 # Standard locations where .desktop files can live
