@@ -1,4 +1,4 @@
-@define-color bg          {{ colors.surface.default.rgba | set_alpha: 0.8 }};
+@define-color bg          {{ colors.surface.default.rgba | set_alpha: 1 }};
 @define-color bg-input    {{ colors.surface.default.rgba | set_alpha: 0.9 }};
 @define-color accent      {{ colors.primary.default.rgba | set_alpha: 1.0 }};
 @define-color text        {{ colors.on_surface.default.rgba | set_alpha: 1.0 }};
@@ -19,6 +19,8 @@ window {
   color: @accent;
   border: 2px solid @accent;
   outline: none;
+  margin-bottom: 10px;
+  border-radius: 0;
 }
 
 #input:focus {
@@ -31,6 +33,7 @@ window {
 
 #outer-box {
   background-color: transparent;
+  margin: 10px;
 }
 
 #scroll {
