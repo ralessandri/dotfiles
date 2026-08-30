@@ -244,6 +244,9 @@ alias controller-off='sudo bash -c "echo N > /sys/module/bluetooth/parameters/di
 # Custom Scripts
 ###############################################################################
 
+# Basic ai connector
+alias ai="ai.sh"
+
 # Generate an AI-assisted Git commit message
 alias ai-commit='ai-commit.sh'
 

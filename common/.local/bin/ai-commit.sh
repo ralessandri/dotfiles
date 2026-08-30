@@ -2,23 +2,6 @@
 #
 # ai-commit.sh
 #
-# Generates a git commit message using an AI provider and opens it in the
-# configured git editor (vi by default) for review before committing.
-#
-# The staged diff that was sent to the AI is appended below the generated
-# message as a git comment block, so it is visible for reference but is
-# automatically stripped by git and NOT part of the final commit message.
-#
-# Requirements:
-#   - git
-#   - gum   (https://github.com/charmbracelet/gum)
-#   - ai    (existing wrapper script: `ai "prompt"` -> prints AI response)
-#
-# Usage:
-#   ai-commit.sh              Interactive mode, asks whether to add extra context
-#   ai-commit.sh -m "text"    Non-interactive, adds "text" as extra context
-#   ai-commit.sh -h           Show help
-#
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
@@ -26,6 +9,8 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 readonly SCRIPT_NAME="$(basename "$0")"
 readonly TMP_MSG_FILE="$(mktemp -t ai-commit-msg.XXXXXX)"
+readonly GLOBAL_RULES_FILE="${HOME}/.config/ai-commit/.commitrules"
+readonly PROJECT_RULES_FILENAME=".commitrules"
 
 # ---------------------------------------------------------------------------
 # Cleanup
@@ -52,7 +37,7 @@ info() {
 # ---------------------------------------------------------------------------
 check_dependencies() {
   local dep
-  for dep in git gum ai; do
+  for dep in git gum ai.sh; do
     command -v "${dep}" >/dev/null 2>&1 ||
       die "Required command '${dep}' not found in PATH."
   done
@@ -73,39 +58,30 @@ check_staged_changes() {
 # Argument parsing
 # ---------------------------------------------------------------------------
 EXTRA_MESSAGE=""
-# Tracks whether -m was passed explicitly at all (even as an empty string),
-# as opposed to not being passed. This lets callers opt out of the
-# interactive prompt on purpose (e.g. in CI / non-interactive shells) by
-# passing -m "", while an omitted -m still triggers the interactive dialog.
 MESSAGE_FLAG_SET=false
+TARGET_PROJECT_DIR=""
 
 usage() {
   cat <<EOF
-Usage: ${SCRIPT_NAME} [-m "additional context"] [-h]
+Usage: ${SCRIPT_NAME} [-m "additional context"] [-p "project path"] [-h]
 
 Options:
   -m MESSAGE   Provide additional context for the AI prompt directly.
-               Skips the interactive prompt entirely - even when MESSAGE
-               is an empty string ("") - which is useful for
-               non-interactive/CI usage.
+               Skips the interactive prompt entirely.
+  -p PATH      Target git project directory (useful for external calls).
   -h           Show this help message
-
-If -m is omitted, you will be asked interactively whether you want to add
-extra context for the AI.
-
-The commit message is generated from 'git diff --staged' via the 'ai'
-command, opened in the configured git editor for review, and the diff
-is appended as a comment block for reference (it is stripped automatically
-and will not be part of the final commit).
 EOF
 }
 
 parse_args() {
-  while getopts ":m:h" opt; do
+  while getopts ":m:p:h" opt; do
     case "${opt}" in
     m)
       EXTRA_MESSAGE="${OPTARG}"
       MESSAGE_FLAG_SET=true
+      ;;
+    p)
+      TARGET_PROJECT_DIR="${OPTARG}"
       ;;
     h)
       usage
@@ -121,8 +97,7 @@ parse_args() {
 # Core logic
 # ---------------------------------------------------------------------------
 
-# Interactively ask the user whether they want to add extra context for the
-# AI prompt, unless -m was passed explicitly (with or without a value).
+# Interactively ask for additional context if -m was not provided.
 prompt_for_extra_context() {
   if [[ "${MESSAGE_FLAG_SET}" == true ]]; then
     return
@@ -133,14 +108,33 @@ prompt_for_extra_context() {
   fi
 }
 
-# Build the prompt that is sent to the 'ai' command. Enforces the
-# Conventional Commits specification (https://www.conventionalcommits.org/).
-build_ai_prompt() {
-  local diff="$1"
-  local prompt
+# Retrieve system instructions using cascading project-level, global, or fallback rules.
+get_system_instruction() {
+  local repo_root
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
-  prompt="$(
-    cat <<'PROMPT_EOF'
+  local project_rules="${repo_root}/${PROJECT_RULES_FILENAME}"
+
+  # Safe check: File exists, size > 0, and contains non-whitespace content
+  if [[ -n "${repo_root}" && -s "${project_rules}" ]]; then
+    local content
+    content="$(tr -d '[:space:]' <"${project_rules}" || true)"
+    if [[ -n "${content}" ]]; then
+      cat "${project_rules}"
+      return
+    fi
+  fi
+
+  if [[ -s "${GLOBAL_RULES_FILE}" ]]; then
+    local content
+    content="$(tr -d '[:space:]' <"${GLOBAL_RULES_FILE}" || true)"
+    if [[ -n "${content}" ]]; then
+      cat "${GLOBAL_RULES_FILE}"
+      return
+    fi
+  fi
+
+  cat <<'RULES_EOF'
 Generate a git commit message for the following staged diff, strictly
 following the Conventional Commits specification.
 
@@ -165,25 +159,31 @@ Rules:
   additional context.
 - Respond with the raw commit message only - no explanations, no markdown
   code fences, no surrounding quotes.
-PROMPT_EOF
-  )"
+RULES_EOF
+}
+
+# Build user prompt containing optional context and staged diff.
+build_user_prompt() {
+  local diff="$1"
+  local prompt=""
 
   if [[ -n "${EXTRA_MESSAGE}" ]]; then
-    prompt+=$'\n\n'"Additional context from the developer: ${EXTRA_MESSAGE}"
+    prompt+="Additional context from the developer: ${EXTRA_MESSAGE}"$'\n\n'
   fi
 
-  prompt+=$'\n\n'"Diff:"$'\n'"${diff}"
+  prompt+="Diff:"$'\n'"${diff}"
 
   printf '%s' "${prompt}"
 }
 
-# Call the AI command with a spinner and return its output.
+# Send system instruction and user prompt to the ai wrapper script.
 generate_ai_message() {
-  local prompt="$1"
+  local system_instruction="$1"
+  local user_prompt="$2"
   local message
 
   message="$(gum spin --spinner dot --title "Generating commit message via AI..." \
-    --show-output -- ai "${prompt}")" ||
+    --show-output -- ai.sh -c --system "${system_instruction}" "${user_prompt}")" ||
     die "AI command failed to generate a commit message."
 
   if [[ -z "${message//[[:space:]]/}" ]]; then
@@ -193,8 +193,7 @@ generate_ai_message() {
   printf '%s' "${message}"
 }
 
-# Write the AI message plus the diff (as a comment block) to the temp file
-# that will be opened in the editor.
+# Write generated message and reference diff into temporary commit edit file.
 build_commit_template() {
   local ai_message="$1"
   local diff="$2"
@@ -217,6 +216,10 @@ build_commit_template() {
 main() {
   parse_args "$@"
 
+  if [[ -n "${TARGET_PROJECT_DIR}" ]]; then
+    cd "${TARGET_PROJECT_DIR}"
+  fi
+
   check_dependencies
   check_git_repository
   check_staged_changes
@@ -229,18 +232,17 @@ main() {
 
   prompt_for_extra_context
 
-  local prompt
-  prompt="$(build_ai_prompt "${diff}")"
+  local system_instruction
+  system_instruction="$(get_system_instruction)"
+
+  local user_prompt
+  user_prompt="$(build_user_prompt "${diff}")"
 
   local ai_message
-  ai_message="$(generate_ai_message "${prompt}")"
+  ai_message="$(generate_ai_message "${system_instruction}" "${user_prompt}")"
 
   build_commit_template "${ai_message}" "${diff}"
 
-  # Open the template in the configured git editor (vi by default).
-  # Comment lines (starting with '#') are stripped automatically by git
-  # (default cleanup mode "strip"), so the diff never ends up in the
-  # actual commit message.
   git commit --edit --file="${TMP_MSG_FILE}"
 }
 
