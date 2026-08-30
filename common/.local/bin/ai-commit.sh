@@ -97,6 +97,12 @@ parse_args() {
 # Core logic
 # ---------------------------------------------------------------------------
 
+# Return success only when a rules file contains at least one non-whitespace
+# character. Empty files and files containing only whitespace use the defaults.
+has_rules_content() {
+  [[ -f "$1" ]] && grep -q '[^[:space:]]' "$1"
+}
+
 # Interactively ask for additional context if -m was not provided.
 prompt_for_extra_context() {
   if [[ "${MESSAGE_FLAG_SET}" == true ]]; then
@@ -115,23 +121,14 @@ get_system_instruction() {
 
   local project_rules="${repo_root}/${PROJECT_RULES_FILENAME}"
 
-  # Safe check: File exists, size > 0, and contains non-whitespace content
-  if [[ -n "${repo_root}" && -s "${project_rules}" ]]; then
-    local content
-    content="$(tr -d '[:space:]' <"${project_rules}" || true)"
-    if [[ -n "${content}" ]]; then
-      cat "${project_rules}"
-      return
-    fi
+  if [[ -n "${repo_root}" ]] && has_rules_content "${project_rules}"; then
+    cat "${project_rules}"
+    return
   fi
 
-  if [[ -s "${GLOBAL_RULES_FILE}" ]]; then
-    local content
-    content="$(tr -d '[:space:]' <"${GLOBAL_RULES_FILE}" || true)"
-    if [[ -n "${content}" ]]; then
-      cat "${GLOBAL_RULES_FILE}"
-      return
-    fi
+  if has_rules_content "${GLOBAL_RULES_FILE}"; then
+    cat "${GLOBAL_RULES_FILE}"
+    return
   fi
 
   cat <<'RULES_EOF'
