@@ -8,6 +8,10 @@ output_path = "~/.config/starship/starship.toml"
 input_path = "~/.dotfiles/common/.config/matugen/templates/niri.kdl"
 output_path = "~/.config/niri/colors.kdl"
 
+[templates.rofi]
+input_path = "~/.dotfiles/common/.config/matugen/templates/rofi.rasi"
+output_path = "~/.config/rofi/colors.rasi"
+
 [templates.wofi]
 input_path = "~/.dotfiles/common/.config/matugen/templates/wofi.css"
 output_path = "~/.config/wofi/style.css"

@@ -1,0 +1,39 @@
+* {
+    background:                   {{colors.background.default.hex}};
+    background-color:             transparent;
+    foreground:                   {{colors.on_background.default.hex}};
+    normal-background:            transparent;
+    normal-foreground:            @foreground;
+
+    window-background:            {{colors.background.default.rgba}};
+    window-bordercolor:            {{colors.primary.default.hex}};
+
+    lightbg:                      {{colors.surface_container.default.hex}};
+    lightfg:                      {{colors.on_surface_variant.default.hex}};
+
+    selected-normal-background:   {{colors.primary.default.hex}};
+    selected-normal-foreground:   {{colors.on_primary.default.hex}};
+
+    active-background:            transparent;
+    active-foreground:            {{colors.tertiary.default.hex}};
+    selected-active-background:   {{colors.tertiary.default.hex}};
+    selected-active-foreground:   {{colors.on_tertiary.default.hex}};
+
+    urgent-background:            transparent;
+    urgent-foreground:            {{colors.error.default.hex}};
+    selected-urgent-background:   {{colors.error.default.hex}};
+    selected-urgent-foreground:   {{colors.on_error.default.hex}};
+
+    alternate-normal-background:  transparent;
+    alternate-normal-foreground:  @foreground;
+    alternate-active-background:  transparent;
+    alternate-active-foreground:  @active-foreground;
+    alternate-urgent-background:  transparent;
+    alternate-urgent-foreground:  @urgent-foreground;
+
+    bordercolor:                  {{colors.primary.default.hex}};
+    border-color:                 @bordercolor;
+    separatorcolor:               @bordercolor;
+
+    spacing:                      2;
+}
