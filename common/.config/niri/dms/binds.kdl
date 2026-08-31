@@ -9,7 +9,7 @@ binds {
     Mod+Ctrl+Down { move-window-down-or-to-workspace-down; }
     Mod+Ctrl+Up { move-window-up-or-to-workspace-up; }
     Mod+Down { focus-window-or-workspace-down; }
-    Mod+Shift+D { spawn "wofi-niri-workspaces.sh"; }
+    Mod+Shift+D { spawn "rofi-niri-workspaces.sh"; }
     Mod+Up { focus-window-or-workspace-up; }
     Mod+Ctrl+Left { move-column-left-or-to-monitor-left; }
     Mod+Ctrl+Right { move-column-right-or-to-monitor-right; }
@@ -18,7 +18,7 @@ binds {
     Mod+Shift+Left { consume-or-expel-window-left; }
     Mod+Shift+Right { consume-or-expel-window-right; }
     Mod+Return hotkey-overlay-title="Open a Terminal: wezterm" { spawn "wezterm"; }
-    Mod+Shift+B { spawn "wofi-browser.sh"; }
+    Mod+Shift+B { spawn "rofi-browser.sh"; }
     Mod+T hotkey-overlay-title="Open a Terminal: wezterm" { spawn "wezterm"; }
     Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
 }

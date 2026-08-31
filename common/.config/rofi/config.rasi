@@ -1,0 +1,103 @@
+@import "colors.rasi"
+
+configuration {
+    font: "Adwaita Sans 11";
+}
+window {
+    background-color: @window-background;
+    border-color: @window-bordercolor;
+    border:            2;
+    padding:           5;
+    width: 600px;
+}
+mainbox {
+    padding: 1px;
+}
+message {
+    border:       2px 0px 0px;
+    border-color: @bordercolor;
+    padding:      5px;
+}
+textbox {
+    text-color: @foreground;
+}
+listview {
+  dynamic:      true;
+    fixed-height: false;
+    border: 0;
+    scrollbar:    false;
+    margin:      2px 0px 0px;
+    lines:        10;
+}
+element {
+    padding: 14px 14px;
+}
+element-text {
+    background-color: inherit;
+    text-color:       inherit;
+}
+element.normal.normal {
+    background-color: @normal-background;
+    text-color:       @normal-foreground;
+}
+element.normal.urgent {
+    background-color: @urgent-background;
+    text-color:       @urgent-foreground;
+}
+element.normal.active {
+    background-color: @active-background;
+    text-color:       @active-foreground;
+}
+element.selected.normal {
+    background-color: @selected-normal-background;
+    text-color:       @selected-normal-foreground;
+}
+element.selected.urgent {
+    background-color: @selected-urgent-background;
+    text-color:       @selected-urgent-foreground;
+}
+element.selected.active {
+    background-color: @selected-active-background;
+    text-color:       @selected-active-foreground;
+}
+element.alternate.normal {
+    background-color: @alternate-normal-background;
+    text-color:       @alternate-normal-foreground;
+}
+element.alternate.urgent {
+    background-color: @alternate-urgent-background;
+    text-color:       @alternate-urgent-foreground;
+}
+element.alternate.active {
+    background-color: @alternate-active-background;
+    text-color:       @alternate-active-foreground;
+}
+scrollbar {
+    width:        4px;
+    handle-width: 8px;
+    padding:      0;
+}
+mode-switcher {
+    border:       2px 0px 0px;
+    border-color: @bordercolor;
+}
+button.selected {
+    background-color: @selected-normal-background;
+    text-color:       @selected-normal-foreground;
+}
+inputbar {
+    border: 0px 0px 2px;
+    border-color: @bordercolor;
+    children:   [ prompt, textbox-prompt-colon, entry, case-indicator ];
+    text-color: @normal-foreground;
+    padding:    16px 10px;
+}
+prompt, entry, case-indicator, button {
+    text-color: @normal-foreground;
+}
+textbox-prompt-colon {
+    expand:     false;
+    str:        ":";
+    margin:     0px 0.3em 0em 0em;
+    text-color: @normal-foreground;
+}
