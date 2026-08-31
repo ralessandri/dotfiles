@@ -29,6 +29,6 @@ customCommands:
   - key: "<c-g>"
     context: "files"
     description: "AI commit message"
-    command: '~/.local/bin/ai-commit.sh -m ""'
+    command: '~/.local/bin/ai-commit.sh -p "$(git rev-parse --show-toplevel)" -m ""'
     loadingText: "Generate commit message..."
     output: terminal
