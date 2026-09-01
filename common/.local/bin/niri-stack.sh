@@ -13,6 +13,8 @@ PROG_NAME="$(basename "$0")"
 
 IPC_SETTLE_DELAY="0.02"
 IPC_WAIT_TIMEOUT_MS=750
+FOCUS_POLL_INTERVAL_SECONDS="0.01"
+FOCUS_POLL_INCREMENT_MS=10
 
 SCREEN_TRANSITION_DELAY_MS=650
 
@@ -22,7 +24,10 @@ MAIN_WINDOW="left"
 RESTORE_FOCUS="focus-at-restore"
 
 FLATTEN_MAX_ITERATIONS=100
+STATE_VERSION=1
 
+# Set while a state transition is in progress so interrupted operations do
+# not leave a state file describing a partial layout.
 ACTIVE_STATE_FILE=""
 
 # ─────────────────────────────────────────────────────────────
@@ -116,7 +121,10 @@ start_screen_transition() {
 }
 
 niri_act() {
-  niri msg action "$@" >/dev/null
+  if ! niri msg action "$@" >/dev/null; then
+    die "niri action failed: $*"
+  fi
+
   ipc_settle
 }
 
@@ -239,8 +247,8 @@ wait_for_focus() {
       return 0
     fi
 
-    sleep 0.01
-    elapsed=$((elapsed + 10))
+    sleep "$FOCUS_POLL_INTERVAL_SECONDS"
+    elapsed=$((elapsed + FOCUS_POLL_INCREMENT_MS))
   done
 
   return 1
@@ -339,6 +347,213 @@ restore_column_widths() {
   )
 }
 
+save_stack_state() {
+  local state_file="$1"
+  local workspace_id="$2"
+  local focused_id="$3"
+  local main_id="$4"
+  local secondary_id="$5"
+  local main_window="$6"
+  local restore_focus="$7"
+  local restore_widths="$8"
+  local windows="$9"
+
+  jq \
+    --argjson ws "$workspace_id" \
+    --argjson focused "$focused_id" \
+    --argjson main_id "$main_id" \
+    --argjson secondary_id "$secondary_id" \
+    --arg main_width "$MAIN_WIDTH" \
+    --arg secondary_width "$SECONDARY_WIDTH" \
+    --arg main_window "$main_window" \
+    --arg restore_focus "$restore_focus" \
+    --argjson version "$STATE_VERSION" \
+    --argjson restore_widths "$restore_widths" \
+    '
+        {
+            version: $version,
+            layout: "column-stack",
+            workspace_id: $ws,
+
+            options: {
+                main_width: ($main_width | if . == "" then null else . end),
+                secondary_width: ($secondary_width | if . == "" then null else . end),
+                main_window: $main_window,
+                restore_widths: $restore_widths,
+                restore_focus: $restore_focus
+            },
+
+            focus: {
+                original_id: $focused,
+                initial_main_id: $main_id,
+                main_id: $main_id,
+                secondary_id: $secondary_id
+            },
+
+            windows: [
+                .[]
+                | {
+                    id: .id,
+                    column: .layout.pos_in_scrolling_layout[0],
+                    row: .layout.pos_in_scrolling_layout[1],
+                    tile_size: .layout.tile_size
+                }
+            ]
+        }
+        ' \
+    <<<"$windows" \
+    >"${state_file}.tmp"
+
+  chmod 600 "${state_file}.tmp"
+  mv "${state_file}.tmp" "$state_file"
+}
+
+build_stack_from_singleton_columns() {
+  local stack_anchor
+  local i
+  local -a ordered_ids
+
+  ordered_ids=("$@")
+  stack_anchor="${ordered_ids[1]}"
+
+  order_columns "${ordered_ids[@]}"
+
+  for ((i = 2; i < ${#ordered_ids[@]}; i++)); do
+    focus_window_sync "$stack_anchor"
+    niri_act consume-window-into-column
+  done
+}
+
+apply_stack_geometry() {
+  local workspace_id="$1"
+  shift
+  local -a ordered_ids=("$@")
+
+  flatten_workspace "$workspace_id"
+  build_stack_from_singleton_columns "${ordered_ids[@]}"
+}
+
+apply_stack_widths() {
+  local main_id="$1"
+  local secondary_id="$2"
+  local main_width="$3"
+  local secondary_width="$4"
+
+  if [[ -n "$main_width" ]]; then
+    set_column_width "$main_id" "$main_width"
+  fi
+
+  if [[ -n "$secondary_width" ]]; then
+    set_column_width "$secondary_id" "$secondary_width"
+  fi
+}
+
+get_state_window_ids() {
+  local state_file="$1"
+  local present_ids="$2"
+
+  jq -r --argjson present "$present_ids" '
+    .windows
+    | map(. as $window | select(($present | index($window.id)) != null))
+    | sort_by(.column, .row)
+    | .[].id
+  ' "$state_file"
+}
+
+get_state_columns() {
+  local state_file="$1"
+  local present_ids="$2"
+
+  jq -c --argjson present "$present_ids" '
+    .windows
+    | map(. as $window | select(($present | index($window.id)) != null))
+    | sort_by(.column, .row)
+    | group_by(.column)
+    | .[]
+  ' "$state_file"
+}
+
+rebuild_columns_from_state() {
+  local state_file="$1"
+  local present_ids="$2"
+  local column_json
+  local anchor
+  local count
+  local i
+  local -a ordered_ids
+
+  mapfile -t ordered_ids < <(
+    get_state_window_ids "$state_file" "$present_ids"
+  )
+
+  order_columns "${ordered_ids[@]}"
+
+  while IFS= read -r column_json; do
+    anchor="$(jq -r '.[0].id' <<<"$column_json")"
+    count="$(jq 'length' <<<"$column_json")"
+
+    for ((i = 1; i < count; i++)); do
+      focus_window_sync "$anchor"
+      niri_act consume-window-into-column
+    done
+  done < <(
+    get_state_columns "$state_file" "$present_ids"
+  )
+}
+
+apply_focus_strategy() {
+  local state_file="$1"
+  local restore_focus_id="$2"
+  local focus_strategy
+  local candidate
+
+  local -a focus_candidates
+  local -a saved_ids=("${@:3}")
+
+  focus_strategy="$(jq -r '.options.restore_focus // "focus-at-restore"' "$state_file")"
+
+  case "$focus_strategy" in
+  focus-at-restore)
+    focus_candidates=("$restore_focus_id")
+    ;;
+  focus-at-stack)
+    focus_candidates=(
+      "$(jq -r '.focus.original_id // empty' "$state_file")"
+    )
+    ;;
+  main-at-stack)
+    focus_candidates=(
+      "$(jq -r '.focus.initial_main_id // .focus.main_id // empty' "$state_file")"
+    )
+    ;;
+  main-after-promote)
+    focus_candidates=(
+      "$(jq -r '.focus.main_id // empty' "$state_file")"
+    )
+    ;;
+  esac
+
+  # Use safe fallbacks when the requested focus target is no longer present.
+  focus_candidates+=(
+    "$restore_focus_id"
+    "$(jq -r '.focus.main_id // empty' "$state_file")"
+    "${saved_ids[@]}"
+  )
+
+  for candidate in "${focus_candidates[@]}"; do
+    [[ -n "$candidate" ]] ||
+      continue
+
+    if get_windows | jq -e --arg id "$candidate" \
+      'any(.[]; (.id | tostring) == $id)' >/dev/null; then
+      focus_window_sync "$candidate"
+      return 0
+    fi
+  done
+
+  return 0
+}
+
 # ─────────────────────────────────────────────────────────────
 # Normalize layout
 # ─────────────────────────────────────────────────────────────
@@ -424,11 +639,46 @@ get_present_saved_ids() {
       '
 }
 
+find_id_index() {
+  local target_id="$1"
+  local id
+  local index=0
+
+  shift
+  for id in "$@"; do
+    if [[ "$id" == "$target_id" ]]; then
+      printf '%s\n' "$index"
+      return 0
+    fi
+
+    index=$((index + 1))
+  done
+
+  return 1
+}
+
+update_active_stack_roles() {
+  local state_file="$1"
+  local main_id="$2"
+  local secondary_id="$3"
+
+  jq \
+    --argjson main_id "$main_id" \
+    --argjson secondary_id "$secondary_id" \
+    '.focus.main_id = $main_id
+     | .focus.secondary_id = $secondary_id' \
+    "$state_file" \
+    >"${state_file}.tmp"
+
+  chmod 600 "${state_file}.tmp"
+  mv "${state_file}.tmp" "$state_file"
+}
+
 validate_state_file() {
   local state_file="$1"
 
-  jq -e '
-    .version == 1
+  jq -e --argjson version "$STATE_VERSION" '
+    .version == $version
     and .layout == "column-stack"
     and (.options | type == "object")
     and (.focus | type == "object")
@@ -504,12 +754,10 @@ stack_layout() {
   local focused_id
   local state_file
   local windows
-  local stack_anchor
   local main_id
   local restore_widths
   local context
   local id
-  local i
 
   local -a ids
   local -a ordered_ids
@@ -529,8 +777,10 @@ stack_layout() {
     die "stack mode is already active on this workspace"
   fi
 
+  # Keep the state registered until all stack phases complete successfully.
   ACTIVE_STATE_FILE="$state_file"
 
+  # Capture the current tiled windows and resolve their stack roles.
   windows="$(get_workspace_windows "$workspace_id")"
 
   mapfile -t ids < <(
@@ -560,90 +810,30 @@ stack_layout() {
     restore_widths=true
   fi
 
-  # Save the effective layout options together with the original layout.
-  jq \
-    --argjson ws "$workspace_id" \
-    --argjson focused "$focused_id" \
-    --argjson main_id "$main_id" \
-    --argjson secondary_id "${ordered_ids[1]}" \
-    --arg main_width "$MAIN_WIDTH" \
-    --arg secondary_width "$SECONDARY_WIDTH" \
-    --arg main_window "$MAIN_WINDOW" \
-    --arg restore_focus "$RESTORE_FOCUS" \
-    --argjson restore_widths "$restore_widths" \
-    '
-        {
-            version: 1,
-            layout: "column-stack",
-            workspace_id: $ws,
+  # Persist the original layout before changing any window geometry.
+  save_stack_state \
+    "$state_file" \
+    "$workspace_id" \
+    "$focused_id" \
+    "$main_id" \
+    "${ordered_ids[1]}" \
+    "$MAIN_WINDOW" \
+    "$RESTORE_FOCUS" \
+    "$restore_widths" \
+    "$windows"
 
-            options: {
-                main_width: ($main_width | if . == "" then null else . end),
-                secondary_width: ($secondary_width | if . == "" then null else . end),
-                main_window: $main_window,
-                restore_widths: $restore_widths,
-                restore_focus: $restore_focus
-            },
+  # Normalize columns and build the main-plus-secondary stack.
+  apply_stack_geometry \
+    "$workspace_id" \
+    "${ordered_ids[@]}"
 
-            focus: {
-                original_id: $focused,
-                initial_main_id: $main_id,
-                main_id: $main_id,
-                secondary_id: $secondary_id
-            },
+  # Apply configured column widths, then restore the pre-stack focus.
+  apply_stack_widths \
+    "$main_id" \
+    "${ordered_ids[1]}" \
+    "$MAIN_WIDTH" \
+    "$SECONDARY_WIDTH"
 
-            windows: [
-                .[]
-                | {
-                    id: .id,
-                    column: .layout.pos_in_scrolling_layout[0],
-                    row: .layout.pos_in_scrolling_layout[1],
-                    tile_size: .layout.tile_size
-                }
-            ]
-        }
-        ' \
-    <<<"$windows" \
-    >"${state_file}.tmp"
-
-  chmod 600 "${state_file}.tmp"
-
-  mv \
-    "${state_file}.tmp" \
-    "$state_file"
-
-  # Turn every tiled window into a singleton column.
-  flatten_workspace "$workspace_id"
-
-  # Restore the exact flattened left-to-right order.
-  order_columns "${ordered_ids[@]}"
-
-  # The selected main window is the first column.
-  # The next window is the anchor of the secondary stack.
-  # All following windows are consumed into that column.
-  stack_anchor="${ordered_ids[1]}"
-
-  for ((i = 2; i < ${#ordered_ids[@]}; i++)); do
-    focus_window_sync "$stack_anchor"
-
-    niri_act \
-      consume-window-into-column
-  done
-
-  # Apply the configured column widths.
-  if [[ -n "$MAIN_WIDTH" ]]; then
-    set_column_width \
-      "$main_id" \
-      "$MAIN_WIDTH"
-  fi
-
-  if [[ -n "$SECONDARY_WIDTH" ]]; then
-    set_column_width \
-      "$stack_anchor" \
-      "$SECONDARY_WIDTH"
-  fi
-
-  # Preserve the focus that was active before entering stack mode.
   focus_window_sync "$focused_id"
 }
 
@@ -656,8 +846,6 @@ promote_layout() {
   local main_id
   local main_width
   local secondary_width
-  local id
-  local i
   local main_index=-1
   local selected_index=-1
 
@@ -672,6 +860,7 @@ promote_layout() {
 
   state_file="$(state_file_for_workspace "$workspace_id")"
 
+  # Promotion is intentionally a silent no-op outside an active stack.
   [[ -f "$state_file" ]] ||
     return 0
 
@@ -689,20 +878,14 @@ promote_layout() {
       "$state_file"
   )
 
-  for i in "${!present_ids[@]}"; do
-    id="${present_ids[$i]}"
+  main_index="$(find_id_index "$main_id" "${present_ids[@]}" 2>/dev/null || true)"
+  selected_index="$(find_id_index "$focused_id" "${present_ids[@]}" 2>/dev/null || true)"
 
-    [[ "$id" == "$main_id" ]] &&
-      main_index="$i"
-
-    [[ "$id" == "$focused_id" ]] &&
-      selected_index="$i"
-  done
-
-  ((main_index >= 0 && selected_index >= 0)) ||
+  [[ -n "$main_index" && -n "$selected_index" ]] ||
     return 0
 
   start_screen_transition
+  # Keep the state registered until every promotion phase completes.
   ACTIVE_STATE_FILE="$state_file"
 
   flatten_saved_workspace \
@@ -715,60 +898,33 @@ promote_layout() {
       "$state_file"
   )
 
-  main_index=-1
-  selected_index=-1
+  main_index="$(find_id_index "$main_id" "${present_ids[@]}" 2>/dev/null || true)"
+  selected_index="$(find_id_index "$focused_id" "${present_ids[@]}" 2>/dev/null || true)"
 
-  for i in "${!present_ids[@]}"; do
-    id="${present_ids[$i]}"
-
-    [[ "$id" == "$main_id" ]] &&
-      main_index="$i"
-
-    [[ "$id" == "$focused_id" ]] &&
-      selected_index="$i"
-  done
-
-  ((main_index >= 0 && selected_index >= 0)) ||
+  [[ -n "$main_index" && -n "$selected_index" ]] ||
     die "main or selected window disappeared during promotion"
 
   ordered_ids=("${present_ids[@]}")
   ordered_ids[$main_index]="$focused_id"
   ordered_ids[$selected_index]="$main_id"
 
-  order_columns "${ordered_ids[@]}"
-
-  for ((i = 2; i < ${#ordered_ids[@]}; i++)); do
-    focus_window_sync "${ordered_ids[1]}"
-    niri_act consume-window-into-column
-  done
+  build_stack_from_singleton_columns "${ordered_ids[@]}"
 
   main_width="$(jq -r '.options.main_width // empty' "$state_file")"
   secondary_width="$(jq -r '.options.secondary_width // empty' "$state_file")"
 
-  if [[ -n "$main_width" ]]; then
-    set_column_width \
-      "${ordered_ids[0]}" \
-      "$main_width"
-  fi
-
-  if [[ -n "$secondary_width" ]]; then
-    set_column_width \
-      "${ordered_ids[1]}" \
-      "$secondary_width"
-  fi
+  apply_stack_widths \
+    "${ordered_ids[0]}" \
+    "${ordered_ids[1]}" \
+    "$main_width" \
+    "$secondary_width"
 
   focus_window_sync "${ordered_ids[0]}"
 
-  jq \
-    --argjson main_id "${ordered_ids[0]}" \
-    --argjson secondary_id "${ordered_ids[1]}" \
-    '.focus.main_id = $main_id
-     | .focus.secondary_id = $secondary_id' \
+  update_active_stack_roles \
     "$state_file" \
-    >"${state_file}.tmp"
-
-  chmod 600 "${state_file}.tmp"
-  mv "${state_file}.tmp" "$state_file"
+    "${ordered_ids[0]}" \
+    "${ordered_ids[1]}"
 
   ACTIVE_STATE_FILE=""
 }
@@ -783,17 +939,10 @@ restore_layout() {
   local state_file
   local restore_widths
   local context
-  local focus_strategy
   local present_ids_json
-
-  local column_json
-  local anchor
-  local count
-  local i
 
   local -a all_ids
   local -a present_ids
-  local -a focus_candidates
 
   if [[ -z "$workspace_id" || -z "$restore_focus_id" ]]; then
     context="$(get_focused_context)"
@@ -811,6 +960,7 @@ restore_layout() {
   [[ -f "$state_file" ]] ||
     die "no saved layout for this workspace"
 
+  # Keep the state registered until the original layout is fully restored.
   ACTIVE_STATE_FILE="$state_file"
 
   if ! validate_state_file "$state_file"; then
@@ -818,6 +968,7 @@ restore_layout() {
     return 0
   fi
 
+  # Identify saved windows that still exist on the focused workspace.
   mapfile -t present_ids < <(
     get_present_saved_ids \
       "$workspace_id" \
@@ -835,7 +986,7 @@ restore_layout() {
       "$state_file"
   )"
 
-  # Convert only the saved windows back into singleton columns. Additional
+  # Separate only the saved windows into singleton columns. Additional
   # windows remain where they are, including any columns they share.
   flatten_saved_workspace \
     "$workspace_id" \
@@ -862,48 +1013,11 @@ restore_layout() {
       '
   )"
 
-  # Restore the original flattened left-to-right order.
+  # Restore the original column order and grouping.
   mapfile -t all_ids < <(
-    jq -r --argjson present "$present_ids_json" '
-            .windows
-      | map(. as $window | select(($present | index($window.id)) != null))
-            | sort_by(.column, .row)
-            | .[].id
-        ' "$state_file"
+    get_state_window_ids "$state_file" "$present_ids_json"
   )
-
-  order_columns "${all_ids[@]}"
-
-  # Rebuild all original multi-window columns.
-  while IFS= read -r column_json; do
-    anchor="$(
-      jq -r \
-        '.[0].id' \
-        <<<"$column_json"
-    )"
-
-    count="$(
-      jq \
-        'length' \
-        <<<"$column_json"
-    )"
-
-    for ((i = 1; i < count; i++)); do
-      focus_window_sync "$anchor"
-
-      niri_act \
-        consume-window-into-column
-    done
-
-  done < <(
-    jq -c --argjson present "$present_ids_json" '
-            .windows
-            | map(. as $window | select(($present | index($window.id)) != null))
-            | sort_by(.column, .row)
-            | group_by(.column)
-            | .[]
-        ' "$state_file"
-  )
+  rebuild_columns_from_state "$state_file" "$present_ids_json"
 
   # Restore the original column widths when the stack changed them.
   if [[ "$restore_widths" == "true" ]]; then
@@ -912,46 +1026,10 @@ restore_layout() {
       "$present_ids_json"
   fi
 
-  focus_strategy="$(jq -r '.options.restore_focus // "focus-at-restore"' "$state_file")"
-
-  case "$focus_strategy" in
-  focus-at-restore)
-    focus_candidates=("$restore_focus_id")
-    ;;
-  focus-at-stack)
-    focus_candidates=(
-      "$(jq -r '.focus.original_id // empty' "$state_file")"
-    )
-    ;;
-  main-at-stack)
-    focus_candidates=(
-      "$(jq -r '.focus.initial_main_id // .focus.main_id // empty' "$state_file")"
-    )
-    ;;
-  main-after-promote)
-    focus_candidates=(
-      "$(jq -r '.focus.main_id // empty' "$state_file")"
-    )
-    ;;
-  esac
-
-  # Fall back to the current focus, then main, then the first saved window.
-  focus_candidates+=(
-    "$restore_focus_id"
-    "$(jq -r '.focus.main_id // empty' "$state_file")"
-  )
-  focus_candidates+=("${all_ids[@]}")
-
-  for restore_focus_id in "${focus_candidates[@]}"; do
-    [[ -n "$restore_focus_id" ]] ||
-      continue
-
-    if get_windows | jq -e --arg id "$restore_focus_id" \
-      'any(.[]; (.id | tostring) == $id)' >/dev/null; then
-      focus_window_sync "$restore_focus_id"
-      break
-    fi
-  done
+  apply_focus_strategy \
+    "$state_file" \
+    "$restore_focus_id" \
+    "${all_ids[@]}"
 
   rm -f "$state_file" "${state_file}.tmp"
   ACTIVE_STATE_FILE=""
