@@ -55,6 +55,7 @@ Options:
   -m, --main-width PERCENT      The other width uses the remaining space
   -s, --secondary-width PERCENT The other width uses the remaining space
   -f, --restore-focus STRATEGY  current|original|main|secondary
+  -d, --screen-transition-delay MS
 EOF
 }
 
@@ -149,6 +150,9 @@ validate_options() {
     die "--restore-focus must be one of: current, original, main, secondary"
     ;;
   esac
+
+  [[ "$SCREEN_TRANSITION_DELAY_MS" =~ ^[0-9]+$ ]] ||
+    die "--screen-transition-delay must be a non-negative integer"
 }
 
 resolve_widths() {
@@ -869,6 +873,13 @@ while (($# > 0)); do
     (($# >= 2)) ||
       die "missing value for $1"
     RESTORE_FOCUS="$2"
+    shift
+    ;;
+
+  --screen-transition-delay | -d)
+    (($# >= 2)) ||
+      die "missing value for $1"
+    SCREEN_TRANSITION_DELAY_MS="$2"
     shift
     ;;
 
