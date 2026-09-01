@@ -7,16 +7,16 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────────────
 
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/niri-stack-${UID}"
+LOCK_FILE="$STATE_DIR/lock"
 
 IPC_SETTLE_DELAY="0.02"
 IPC_WAIT_TIMEOUT_MS=750
 
 SCREEN_TRANSITION_DELAY_MS=650
 
-SPLIT_MAIN_WIDTH="75%"
-SPLIT_STACK_WIDTH="25%"
-
-USE_SPLIT=false
+MAIN_WIDTH=""
+SECONDARY_WIDTH=""
+RESTORE_FOCUS="current"
 
 mkdir -p "$STATE_DIR"
 chmod 700 "$STATE_DIR" 2>/dev/null || true
@@ -28,6 +28,21 @@ chmod 700 "$STATE_DIR" 2>/dev/null || true
 die() {
   printf 'niri-stack: %s\n' "$*" >&2
   exit 1
+}
+
+print_usage() {
+  cat <<EOF
+Usage:
+  $(basename "$0") toggle [OPTIONS]
+  $(basename "$0") stack [OPTIONS]
+  $(basename "$0") restore
+  $(basename "$0") status
+
+Options:
+  -m, --main-width PERCENT
+  -s, --secondary-width PERCENT
+  -f, --restore-focus STRATEGY
+EOF
 }
 
 ipc_settle() {
@@ -66,6 +81,41 @@ start_screen_transition() {
     --delay-ms "$SCREEN_TRANSITION_DELAY_MS" \
     >/dev/null 2>&1 ||
     true
+}
+
+validate_percent() {
+  local name="$1"
+  local value="$2"
+
+  [[ -z "$value" ]] &&
+    return 0
+
+  [[ "$value" =~ ^(100|[1-9][0-9]?)%$ ]] ||
+    die "$name must be a percentage between 1% and 100%"
+}
+
+validate_options() {
+  local main_value
+  local secondary_value
+
+  validate_percent "--main-width" "$MAIN_WIDTH"
+  validate_percent "--secondary-width" "$SECONDARY_WIDTH"
+
+  if [[ -n "$MAIN_WIDTH" && -n "$SECONDARY_WIDTH" ]]; then
+    main_value="${MAIN_WIDTH%%%}"
+    secondary_value="${SECONDARY_WIDTH%%%}"
+
+    ((main_value + secondary_value <= 100)) ||
+      die "--main-width and --secondary-width must add up to at most 100%"
+  fi
+
+  case "$RESTORE_FOCUS" in
+  current | original | main | secondary)
+    ;;
+  *)
+    die "--restore-focus must be one of: current, original, main, secondary"
+    ;;
+  esac
 }
 
 # ─────────────────────────────────────────────────────────────
@@ -294,6 +344,25 @@ validate_restore_state() {
   fi
 }
 
+validate_state_file() {
+  local state_file="$1"
+
+  jq -e '
+    .version == 1
+    and .layout == "column-stack"
+    and (.options | type == "object")
+    and (.focus | type == "object")
+    and (.windows | type == "array" and length >= 2)
+    and (([.windows[].id] | unique | length) == (.windows | length))
+    and all(.windows[];
+      (.id | type == "number")
+      and (.column | type == "number")
+      and (.row | type == "number")
+      and (.tile_size | type == "array")
+    )
+  ' "$state_file" >/dev/null
+}
+
 discard_restore_state() {
   local state_file="$1"
 
@@ -309,8 +378,13 @@ flatten_saved_workspace() {
   local state_file="$2"
   local windows
   local id
+  local iterations=0
+  local max_iterations=100
 
   while :; do
+    ((iterations++ < max_iterations)) ||
+      die "timed out while separating saved windows"
+
     windows="$(get_workspace_windows "$workspace_id")"
 
     id="$(
@@ -353,7 +427,7 @@ stack_layout() {
   local state_file
   local windows
   local stack_anchor
-  local split_json
+  local restore_widths
   local i
 
   local -a ids
@@ -383,23 +457,38 @@ stack_layout() {
     die "at least two tiled windows are required"
   fi
 
-  # Store whether this stack uses the fixed 2/3 + 1/3 split.
-  if [[ "$USE_SPLIT" == true ]]; then
-    split_json=true
-  else
-    split_json=false
+  restore_widths=false
+
+  if [[ -n "$MAIN_WIDTH" || -n "$SECONDARY_WIDTH" ]]; then
+    restore_widths=true
   fi
 
-  # Save the complete original layout state before changing it.
+  # Save the effective layout options together with the original layout.
   jq \
     --argjson ws "$workspace_id" \
     --argjson focused "$focused_id" \
-    --argjson split "$split_json" \
+    --arg main_width "$MAIN_WIDTH" \
+    --arg secondary_width "$SECONDARY_WIDTH" \
+    --arg restore_focus "$RESTORE_FOCUS" \
+    --argjson restore_widths "$restore_widths" \
     '
         {
+            version: 1,
+            layout: "column-stack",
             workspace_id: $ws,
-            focused_id: $focused,
-            split: $split,
+
+            options: {
+                main_width: ($main_width | if . == "" then null else . end),
+                secondary_width: ($secondary_width | if . == "" then null else . end),
+                restore_widths: $restore_widths,
+                restore_focus: $restore_focus
+            },
+
+            focus: {
+                original_id: $focused,
+                main_id: .[0].id,
+                secondary_id: .[1].id
+            },
 
             windows: [
                 .[]
@@ -443,15 +532,17 @@ stack_layout() {
     ipc_settle
   done
 
-  # Apply the optional fixed horizontal split.
-  if [[ "$USE_SPLIT" == true ]]; then
+  # Apply the configured column widths.
+  if [[ -n "$MAIN_WIDTH" ]]; then
     set_column_width \
       "${ids[0]}" \
-      "$SPLIT_MAIN_WIDTH"
+      "$MAIN_WIDTH"
+  fi
 
+  if [[ -n "$SECONDARY_WIDTH" ]]; then
     set_column_width \
       "$stack_anchor" \
-      "$SPLIT_STACK_WIDTH"
+      "$SECONDARY_WIDTH"
   fi
 
   # Preserve the focus that was active before entering stack mode.
@@ -466,7 +557,7 @@ restore_layout() {
   local workspace_id
   local restore_focus_id
   local state_file
-  local split_enabled
+  local restore_widths
 
   local column_json
   local anchor
@@ -474,6 +565,7 @@ restore_layout() {
   local i
 
   local -a all_ids
+  local -a focus_candidates
 
   workspace_id="$(get_workspace_id)"
 
@@ -493,6 +585,11 @@ restore_layout() {
   [[ -f "$state_file" ]] ||
     die "no saved layout for this workspace"
 
+  if ! validate_state_file "$state_file"; then
+    discard_restore_state "$state_file"
+    return 0
+  fi
+
   if ! validate_restore_state \
     "$workspace_id" \
     "$state_file"; then
@@ -500,9 +597,9 @@ restore_layout() {
     return 0
   fi
 
-  split_enabled="$(
+  restore_widths="$(
     jq -r \
-      '.split // false' \
+      '.options.restore_widths // false' \
       "$state_file"
   )"
 
@@ -565,14 +662,43 @@ restore_layout() {
         ' "$state_file"
   )
 
-  # Restore the original column widths only when the temporary
-  # stack was created with --split.
-  if [[ "$split_enabled" == "true" ]]; then
+  # Restore the original column widths when the stack changed them.
+  if [[ "$restore_widths" == "true" ]]; then
     restore_column_widths "$state_file"
   fi
 
-  # Return focus to the window selected while stack mode was active.
-  focus_window_sync "$restore_focus_id"
+  # Restore focus according to the strategy saved when stack mode was enabled.
+  mapfile -t focus_candidates < <(
+    case "$(jq -r '.options.restore_focus // "current"' "$state_file")" in
+    current)
+      printf '%s\n' "$restore_focus_id"
+      ;;
+    original)
+      jq -r '.focus.original_id // empty' "$state_file"
+      ;;
+    main)
+      jq -r '.focus.main_id // empty' "$state_file"
+      ;;
+    secondary)
+      jq -r '.focus.secondary_id // empty' "$state_file"
+      ;;
+    esac
+
+    printf '%s\n' "$restore_focus_id"
+    jq -r '.focus.main_id // empty' "$state_file"
+    jq -r '.windows | sort_by(.column, .row) | .[].id' "$state_file"
+  )
+
+  for restore_focus_id in "${focus_candidates[@]}"; do
+    [[ -n "$restore_focus_id" ]] ||
+      continue
+
+    if get_windows | jq -e --arg id "$restore_focus_id" \
+      'any(.[]; (.id | tostring) == $id)' >/dev/null; then
+      focus_window_sync "$restore_focus_id"
+      break
+    fi
+  done
 
   rm -f "$state_file"
 }
@@ -584,7 +710,9 @@ restore_layout() {
 status_layout() {
   local workspace_id
   local state_file
-  local split_enabled
+  local main_width
+  local secondary_width
+  local restore_focus
 
   workspace_id="$(get_workspace_id)"
 
@@ -598,17 +726,28 @@ status_layout() {
     return
   fi
 
-  split_enabled="$(
+  main_width="$(
     jq -r \
-      '.split // false' \
+      '.options.main_width // "auto"' \
       "$state_file"
   )"
 
-  if [[ "$split_enabled" == "true" ]]; then
-    printf 'stacked (split)\n'
-  else
-    printf 'stacked\n'
-  fi
+  secondary_width="$(
+    jq -r \
+      '.options.secondary_width // "auto"' \
+      "$state_file"
+  )"
+
+  restore_focus="$(
+    jq -r \
+      '.options.restore_focus // "current"' \
+      "$state_file"
+  )"
+
+  printf 'stacked (main: %s, secondary: %s, restore-focus: %s)\n' \
+    "$main_width" \
+    "$secondary_width" \
+    "$restore_focus"
 }
 
 # ─────────────────────────────────────────────────────────────
@@ -645,11 +784,38 @@ COMMAND="${1:-toggle}"
 
 shift || true
 
+if [[ "$COMMAND" == "--help" || "$COMMAND" == "-h" ]]; then
+  print_usage
+  exit 0
+fi
+
 while (($# > 0)); do
   case "$1" in
 
-  --split | -s)
-    USE_SPLIT=true
+  --main-width | -m)
+    (($# >= 2)) ||
+      die "missing value for $1"
+    MAIN_WIDTH="$2"
+    shift
+    ;;
+
+  --secondary-width | -s)
+    (($# >= 2)) ||
+      die "missing value for $1"
+    SECONDARY_WIDTH="$2"
+    shift
+    ;;
+
+  --restore-focus | -f)
+    (($# >= 2)) ||
+      die "missing value for $1"
+    RESTORE_FOCUS="$2"
+    shift
+    ;;
+
+  --help | -h)
+    print_usage
+    exit 0
     ;;
 
   --)
@@ -665,6 +831,12 @@ while (($# > 0)); do
 
   shift
 done
+
+validate_options
+
+exec 9>"$LOCK_FILE"
+flock -n 9 ||
+  die "another niri-stack operation is already running"
 
 # ─────────────────────────────────────────────────────────────
 # CLI
@@ -691,13 +863,7 @@ status)
   ;;
 
 *)
-  cat >&2 <<EOF
-Usage:
-  $(basename "$0") toggle [--split|-s]
-  $(basename "$0") stack [--split|-s]
-  $(basename "$0") restore
-  $(basename "$0") status
-EOF
+  print_usage >&2
   exit 2
   ;;
 
