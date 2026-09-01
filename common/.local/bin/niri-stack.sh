@@ -49,6 +49,7 @@ print_usage() {
 Usage:
   $PROG_NAME toggle [OPTIONS]   Toggle stack mode
   $PROG_NAME stack [OPTIONS]    Activate stack mode
+  $PROG_NAME promote            Promote the focused secondary window
   $PROG_NAME restore             Restore the saved layout
   $PROG_NAME status              Show the current layout status
 
@@ -645,6 +646,132 @@ stack_layout() {
   focus_window_sync "$focused_id"
 }
 
+# Swap the focused secondary window with the active main window.
+promote_layout() {
+  local workspace_id
+  local focused_id
+  local context
+  local state_file
+  local main_id
+  local main_width
+  local secondary_width
+  local id
+  local i
+  local main_index=-1
+  local selected_index=-1
+
+  local -a present_ids
+  local -a ordered_ids
+
+  context="$(get_focused_context)"
+  IFS=$'\t' read -r workspace_id focused_id <<<"$context"
+
+  [[ -n "$workspace_id" && -n "$focused_id" ]] ||
+    return 0
+
+  state_file="$(state_file_for_workspace "$workspace_id")"
+
+  [[ -f "$state_file" ]] ||
+    return 0
+
+  validate_state_file "$state_file" ||
+    return 0
+
+  main_id="$(jq -r '.focus.main_id // empty' "$state_file")"
+
+  [[ -n "$main_id" && "$focused_id" != "$main_id" ]] ||
+    return 0
+
+  mapfile -t present_ids < <(
+    get_present_saved_ids \
+      "$workspace_id" \
+      "$state_file"
+  )
+
+  for i in "${!present_ids[@]}"; do
+    id="${present_ids[$i]}"
+
+    [[ "$id" == "$main_id" ]] &&
+      main_index="$i"
+
+    [[ "$id" == "$focused_id" ]] &&
+      selected_index="$i"
+  done
+
+  ((main_index >= 0 && selected_index >= 0)) ||
+    return 0
+
+  start_screen_transition
+  ACTIVE_STATE_FILE="$state_file"
+
+  flatten_saved_workspace \
+    "$workspace_id" \
+    "$state_file"
+
+  mapfile -t present_ids < <(
+    get_present_saved_ids \
+      "$workspace_id" \
+      "$state_file"
+  )
+
+  main_index=-1
+  selected_index=-1
+
+  for i in "${!present_ids[@]}"; do
+    id="${present_ids[$i]}"
+
+    [[ "$id" == "$main_id" ]] &&
+      main_index="$i"
+
+    [[ "$id" == "$focused_id" ]] &&
+      selected_index="$i"
+  done
+
+  ((main_index >= 0 && selected_index >= 0)) ||
+    die "main or selected window disappeared during promotion"
+
+  ordered_ids=("${present_ids[@]}")
+  ordered_ids[$main_index]="$focused_id"
+  ordered_ids[$selected_index]="$main_id"
+
+  order_columns "${ordered_ids[@]}"
+
+  for ((i = 2; i < ${#ordered_ids[@]}; i++)); do
+    focus_window_sync "${ordered_ids[1]}"
+    niri_act consume-window-into-column
+  done
+
+  main_width="$(jq -r '.options.main_width // empty' "$state_file")"
+  secondary_width="$(jq -r '.options.secondary_width // empty' "$state_file")"
+
+  if [[ -n "$main_width" ]]; then
+    set_column_width \
+      "${ordered_ids[0]}" \
+      "$main_width"
+  fi
+
+  if [[ -n "$secondary_width" ]]; then
+    set_column_width \
+      "${ordered_ids[1]}" \
+      "$secondary_width"
+  fi
+
+  focus_window_sync "${ordered_ids[0]}"
+
+  jq \
+    --argjson main_id "${ordered_ids[0]}" \
+    --argjson secondary_id "${ordered_ids[1]}" \
+    '.focus.main_id = $main_id
+     | .focus.secondary_id = $secondary_id' \
+    "$state_file" \
+    >"${state_file}.tmp"
+
+  chmod 600 "${state_file}.tmp"
+  mv "${state_file}.tmp" "$state_file"
+
+  ACTIVE_STATE_FILE=""
+}
+
 # ─────────────────────────────────────────────────────────────
 # Restore layout
 # ─────────────────────────────────────────────────────────────
@@ -991,6 +1118,10 @@ case "$COMMAND" in
 stack)
   start_screen_transition
   stack_layout
+  ;;
+
+promote)
+  promote_layout
   ;;
 
 restore)
