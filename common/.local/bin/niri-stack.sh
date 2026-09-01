@@ -19,7 +19,7 @@ SCREEN_TRANSITION_DELAY_MS=650
 MAIN_WIDTH=""
 SECONDARY_WIDTH=""
 MAIN_WINDOW="left"
-RESTORE_FOCUS="current"
+RESTORE_FOCUS="focus-at-restore"
 
 FLATTEN_MAX_ITERATIONS=100
 
@@ -57,7 +57,7 @@ Options:
   -m, --main-width PERCENT      The other width uses the remaining space
   -s, --secondary-width PERCENT The other width uses the remaining space
   -w, --main-window POSITION    left|current|right
-  -f, --restore-focus STRATEGY  current|original|main|secondary
+  -f, --restore-focus TARGET    focus-at-restore|focus-at-stack|main-at-stack|main-after-promote
   -d, --screen-transition-delay MS
 EOF
 }
@@ -147,10 +147,10 @@ validate_options() {
   fi
 
   case "$RESTORE_FOCUS" in
-  current | original | main | secondary)
+  focus-at-restore | focus-at-stack | main-at-stack | main-after-promote)
     ;;
   *)
-    die "--restore-focus must be one of: current, original, main, secondary"
+    die "--restore-focus must be one of: focus-at-restore, focus-at-stack, main-at-stack, main-after-promote"
     ;;
   esac
 
@@ -587,6 +587,7 @@ stack_layout() {
 
             focus: {
                 original_id: $focused,
+                initial_main_id: $main_id,
                 main_id: $main_id,
                 secondary_id: $secondary_id
             },
@@ -911,25 +912,25 @@ restore_layout() {
       "$present_ids_json"
   fi
 
-  focus_strategy="$(jq -r '.options.restore_focus // "current"' "$state_file")"
+  focus_strategy="$(jq -r '.options.restore_focus // "focus-at-restore"' "$state_file")"
 
   case "$focus_strategy" in
-  current)
+  focus-at-restore)
     focus_candidates=("$restore_focus_id")
     ;;
-  original)
+  focus-at-stack)
     focus_candidates=(
       "$(jq -r '.focus.original_id // empty' "$state_file")"
     )
     ;;
-  main)
+  main-at-stack)
     focus_candidates=(
-      "$(jq -r '.focus.main_id // empty' "$state_file")"
+      "$(jq -r '.focus.initial_main_id // .focus.main_id // empty' "$state_file")"
     )
     ;;
-  secondary)
+  main-after-promote)
     focus_candidates=(
-      "$(jq -r '.focus.secondary_id // empty' "$state_file")"
+      "$(jq -r '.focus.main_id // empty' "$state_file")"
     )
     ;;
   esac
@@ -993,7 +994,7 @@ status_layout() {
 
   restore_focus="$(
     jq -r \
-      '.options.restore_focus // "current"' \
+      '.options.restore_focus // "focus-at-restore"' \
       "$state_file"
   )"
 
