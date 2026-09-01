@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
 workspace_actions=(
-  "move-workspace-to-monitor-left"
-  "move-workspace-to-monitor-right"
-  "move-workspace-to-monitor-up"
-  "move-workspace-to-monitor-down"
-  "focus-monitor-left"
-  "focus-monitor-right"
   "move-workspace-down"
   "move-workspace-up"
+  "move-workspace-to-monitor-left"
+  "move-workspace-to-monitor-right"
+  "focus-monitor-left"
+  "focus-monitor-right"
 )
 
 selected=$(
