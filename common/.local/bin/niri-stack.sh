@@ -300,6 +300,7 @@ set_column_width() {
 
 restore_column_widths() {
   local state_file="$1"
+  local present_ids="${2:-[]}"
 
   local column_json
   local anchor
@@ -327,8 +328,9 @@ restore_column_widths() {
       "$width"
 
   done < <(
-    jq -c '
+    jq -c --argjson present "$present_ids" '
       .windows
+      | map(. as $window | select(($present | index($window.id)) != null))
       | sort_by(.column, .row)
       | group_by(.column)
       | .[]
@@ -405,37 +407,20 @@ order_columns() {
 # Restore validation
 # ─────────────────────────────────────────────────────────────
 
-validate_restore_state() {
+get_present_saved_ids() {
   local workspace_id="$1"
   local state_file="$2"
 
-  local saved
-  local current
-
-  saved="$(
+  get_workspace_windows "$workspace_id" |
     jq -r \
-      '.windows[].id' \
-      "$state_file" |
-      sort
-  )"
-
-  current="$(
-    get_workspace_windows "$workspace_id" |
-      jq -r '.[].id' |
-      sort
-  )"
-
-  # The saved windows must all still be present, but windows opened after
-  # entering stack mode are deliberately not part of this comparison.
-  if [[ -n "$(
-    comm -23 \
-      <(printf '%s\n' "$saved") \
-      <(printf '%s\n' "$current")
-  )" ]]; then
-    return 1
-  fi
-
-  return 0
+      --slurpfile state "$state_file" \
+      '
+        ($state[0].windows | map(.id)) as $saved
+        | .[]
+        | . as $window
+        | select(($saved | index($window.id)) != null)
+        | .id
+      '
 }
 
 validate_state_file() {
@@ -671,6 +656,7 @@ restore_layout() {
   local restore_widths
   local context
   local focus_strategy
+  local present_ids_json
 
   local column_json
   local anchor
@@ -678,6 +664,7 @@ restore_layout() {
   local i
 
   local -a all_ids
+  local -a present_ids
   local -a focus_candidates
 
   if [[ -z "$workspace_id" || -z "$restore_focus_id" ]]; then
@@ -703,9 +690,13 @@ restore_layout() {
     return 0
   fi
 
-  if ! validate_restore_state \
-    "$workspace_id" \
-    "$state_file"; then
+  mapfile -t present_ids < <(
+    get_present_saved_ids \
+      "$workspace_id" \
+      "$state_file"
+  )
+
+  if ((${#present_ids[@]} == 0)); then
     discard_restore_state "$state_file"
     return 0
   fi
@@ -723,18 +714,31 @@ restore_layout() {
     "$state_file"
 
   # A window can disappear while the multi-step IPC sequence is running.
-  # Do not leave a stale state file behind in that case either.
-  if ! validate_restore_state \
-    "$workspace_id" \
-    "$state_file"; then
+  # Continue with the remaining saved windows when possible.
+  mapfile -t present_ids < <(
+    get_present_saved_ids \
+      "$workspace_id" \
+      "$state_file"
+  )
+
+  if ((${#present_ids[@]} == 0)); then
     discard_restore_state "$state_file"
     return 0
   fi
 
+  present_ids_json="$(
+    printf '%s\n' "${present_ids[@]}" |
+      jq -Rsc '
+        split("\n")
+        | map(select(length > 0) | tonumber)
+      '
+  )"
+
   # Restore the original flattened left-to-right order.
   mapfile -t all_ids < <(
-    jq -r '
+    jq -r --argjson present "$present_ids_json" '
             .windows
+      | map(. as $window | select(($present | index($window.id)) != null))
             | sort_by(.column, .row)
             | .[].id
         ' "$state_file"
@@ -764,8 +768,9 @@ restore_layout() {
     done
 
   done < <(
-    jq -c '
+    jq -c --argjson present "$present_ids_json" '
             .windows
+            | map(. as $window | select(($present | index($window.id)) != null))
             | sort_by(.column, .row)
             | group_by(.column)
             | .[]
@@ -774,7 +779,9 @@ restore_layout() {
 
   # Restore the original column widths when the stack changed them.
   if [[ "$restore_widths" == "true" ]]; then
-    restore_column_widths "$state_file"
+    restore_column_widths \
+      "$state_file" \
+      "$present_ids_json"
   fi
 
   focus_strategy="$(jq -r '.options.restore_focus // "current"' "$state_file")"
