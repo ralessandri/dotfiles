@@ -18,6 +18,7 @@ SCREEN_TRANSITION_DELAY_MS=650
 
 MAIN_WIDTH=""
 SECONDARY_WIDTH=""
+MAIN_WINDOW="left"
 RESTORE_FOCUS="current"
 
 FLATTEN_MAX_ITERATIONS=100
@@ -54,6 +55,7 @@ Usage:
 Options:
   -m, --main-width PERCENT      The other width uses the remaining space
   -s, --secondary-width PERCENT The other width uses the remaining space
+  -w, --main-window POSITION    left|current|right
   -f, --restore-focus STRATEGY  current|original|main|secondary
   -d, --screen-transition-delay MS
 EOF
@@ -151,6 +153,14 @@ validate_options() {
     ;;
   esac
 
+  case "$MAIN_WINDOW" in
+  left | current | right)
+    ;;
+  *)
+    die "--main-window must be one of: left, current, right"
+    ;;
+  esac
+
   [[ "$SCREEN_TRANSITION_DELAY_MS" =~ ^[0-9]+$ ]] ||
     die "--screen-transition-delay must be a non-negative integer"
 }
@@ -176,6 +186,36 @@ resolve_widths() {
 
     MAIN_WIDTH="${main_value}%"
   fi
+}
+
+resolve_main_window() {
+  local strategy="$1"
+  local focused_id="$2"
+  local id
+
+  local -a window_ids
+
+  shift 2
+  window_ids=("$@")
+
+  case "$strategy" in
+  left)
+    printf '%s\n' "${window_ids[0]}"
+    ;;
+  right)
+    printf '%s\n' "${window_ids[${#window_ids[@]} - 1]}"
+    ;;
+  current)
+    for id in "${window_ids[@]}"; do
+      if [[ "$id" == "$focused_id" ]]; then
+        printf '%s\n' "$id"
+        return 0
+      fi
+    done
+
+    printf '%s\n' "${window_ids[0]}"
+    ;;
+  esac
 }
 
 # ─────────────────────────────────────────────────────────────
@@ -479,11 +519,14 @@ stack_layout() {
   local state_file
   local windows
   local stack_anchor
+  local main_id
   local restore_widths
   local context
+  local id
   local i
 
   local -a ids
+  local -a ordered_ids
 
   context="$(get_focused_context)"
   IFS=$'\t' read -r workspace_id focused_id <<<"$context"
@@ -512,6 +555,19 @@ stack_layout() {
     die "at least two tiled windows are required"
   fi
 
+  main_id="$(
+    resolve_main_window \
+      "$MAIN_WINDOW" \
+      "$focused_id" \
+      "${ids[@]}"
+  )"
+
+  ordered_ids=("$main_id")
+  for id in "${ids[@]}"; do
+    [[ "$id" == "$main_id" ]] ||
+      ordered_ids+=("$id")
+  done
+
   restore_widths=false
 
   if [[ -n "$MAIN_WIDTH" || -n "$SECONDARY_WIDTH" ]]; then
@@ -522,8 +578,11 @@ stack_layout() {
   jq \
     --argjson ws "$workspace_id" \
     --argjson focused "$focused_id" \
+    --argjson main_id "$main_id" \
+    --argjson secondary_id "${ordered_ids[1]}" \
     --arg main_width "$MAIN_WIDTH" \
     --arg secondary_width "$SECONDARY_WIDTH" \
+    --arg main_window "$MAIN_WINDOW" \
     --arg restore_focus "$RESTORE_FOCUS" \
     --argjson restore_widths "$restore_widths" \
     '
@@ -535,14 +594,15 @@ stack_layout() {
             options: {
                 main_width: ($main_width | if . == "" then null else . end),
                 secondary_width: ($secondary_width | if . == "" then null else . end),
+                main_window: $main_window,
                 restore_widths: $restore_widths,
                 restore_focus: $restore_focus
             },
 
             focus: {
                 original_id: $focused,
-                main_id: .[0].id,
-                secondary_id: .[1].id
+                main_id: $main_id,
+                secondary_id: $secondary_id
             },
 
             windows: [
@@ -569,15 +629,14 @@ stack_layout() {
   flatten_workspace "$workspace_id"
 
   # Restore the exact flattened left-to-right order.
-  order_columns "${ids[@]}"
+  order_columns "${ordered_ids[@]}"
 
-  # The first window remains the main window.
-  #
-  # The second window is the anchor of the secondary stack.
+  # The selected main window is the first column.
+  # The next window is the anchor of the secondary stack.
   # All following windows are consumed into that column.
-  stack_anchor="${ids[1]}"
+  stack_anchor="${ordered_ids[1]}"
 
-  for ((i = 2; i < ${#ids[@]}; i++)); do
+  for ((i = 2; i < ${#ordered_ids[@]}; i++)); do
     focus_window_sync "$stack_anchor"
 
     niri_act \
@@ -587,7 +646,7 @@ stack_layout() {
   # Apply the configured column widths.
   if [[ -n "$MAIN_WIDTH" ]]; then
     set_column_width \
-      "${ids[0]}" \
+      "$main_id" \
       "$MAIN_WIDTH"
   fi
 
@@ -866,6 +925,13 @@ while (($# > 0)); do
     (($# >= 2)) ||
       die "missing value for $1"
     SECONDARY_WIDTH="$2"
+    shift
+    ;;
+
+  --main-window | -w)
+    (($# >= 2)) ||
+      die "missing value for $1"
+    MAIN_WINDOW="$2"
     shift
     ;;
 
