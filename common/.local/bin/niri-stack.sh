@@ -9,6 +9,8 @@ set -euo pipefail
 STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/niri-stack-${UID}"
 LOCK_FILE="$STATE_DIR/lock"
 
+PROG_NAME="$(basename "$0")"
+
 IPC_SETTLE_DELAY="0.02"
 IPC_WAIT_TIMEOUT_MS=750
 
@@ -18,32 +20,53 @@ MAIN_WIDTH=""
 SECONDARY_WIDTH=""
 RESTORE_FOCUS="current"
 
-mkdir -p "$STATE_DIR"
-chmod 700 "$STATE_DIR" 2>/dev/null || true
+FLATTEN_MAX_ITERATIONS=100
+
+ACTIVE_STATE_FILE=""
 
 # ─────────────────────────────────────────────────────────────
 # General helpers
 # ─────────────────────────────────────────────────────────────
 
 die() {
-  printf 'niri-stack: %s\n' "$*" >&2
+  printf '%s: %s\n' "$PROG_NAME" "$*" >&2
   exit 1
 }
+
+cleanup_state_on_exit() {
+  local exit_code="$?"
+
+  if ((exit_code != 0)) && [[ -n "$ACTIVE_STATE_FILE" ]]; then
+    rm -f "$ACTIVE_STATE_FILE" "${ACTIVE_STATE_FILE}.tmp"
+  fi
+}
+
+trap cleanup_state_on_exit EXIT
 
 print_usage() {
   cat <<EOF
 Usage:
-  $(basename "$0") toggle [OPTIONS]
-  $(basename "$0") stack [OPTIONS]
-  $(basename "$0") restore
-  $(basename "$0") status
+  $PROG_NAME toggle [OPTIONS]   Toggle stack mode
+  $PROG_NAME stack [OPTIONS]    Activate stack mode
+  $PROG_NAME restore             Restore the saved layout
+  $PROG_NAME status              Show the current layout status
 
 Options:
-  -m, --main-width PERCENT
-  -s, --secondary-width PERCENT
-  -f, --restore-focus STRATEGY
+  -m, --main-width PERCENT      The other width uses the remaining space
+  -s, --secondary-width PERCENT The other width uses the remaining space
+  -f, --restore-focus STRATEGY  current|original|main|secondary
 EOF
 }
+
+for dependency in niri jq flock; do
+  command -v "$dependency" >/dev/null 2>&1 ||
+    die "required command not found: $dependency"
+done
+
+mkdir -p "$STATE_DIR"
+# Runtime directories are normally private already; keep working if their
+# permissions cannot be changed in a managed environment.
+chmod 700 "$STATE_DIR" 2>/dev/null || true
 
 ipc_settle() {
   sleep "$IPC_SETTLE_DELAY"
@@ -67,6 +90,11 @@ get_focused_id() {
     jq -r '.id // empty'
 }
 
+get_focused_context() {
+  get_focused_window |
+    jq -r '[.workspace_id // empty, .id // empty] | @tsv'
+}
+
 state_file_for_workspace() {
   local workspace_id="$1"
 
@@ -81,6 +109,11 @@ start_screen_transition() {
     --delay-ms "$SCREEN_TRANSITION_DELAY_MS" \
     >/dev/null 2>&1 ||
     true
+}
+
+niri_act() {
+  niri msg action "$@" >/dev/null
+  ipc_settle
 }
 
 validate_percent() {
@@ -116,6 +149,29 @@ validate_options() {
     die "--restore-focus must be one of: current, original, main, secondary"
     ;;
   esac
+}
+
+resolve_widths() {
+  local main_value
+  local secondary_value
+
+  if [[ -n "$MAIN_WIDTH" && -z "$SECONDARY_WIDTH" ]]; then
+    main_value="${MAIN_WIDTH%%%}"
+    secondary_value=$((100 - main_value))
+
+    ((secondary_value > 0)) ||
+      die "--main-width leaves no space for the secondary column"
+
+    SECONDARY_WIDTH="${secondary_value}%"
+  elif [[ -z "$MAIN_WIDTH" && -n "$SECONDARY_WIDTH" ]]; then
+    secondary_value="${SECONDARY_WIDTH%%%}"
+    main_value=$((100 - secondary_value))
+
+    ((main_value > 0)) ||
+      die "--secondary-width leaves no space for the main column"
+
+    MAIN_WIDTH="${main_value}%"
+  fi
 }
 
 # ─────────────────────────────────────────────────────────────
@@ -193,12 +249,9 @@ set_column_width() {
 
   focus_window_sync "$id"
 
-  niri msg action \
+  niri_act \
     set-column-width \
-    "$width" \
-    >/dev/null
-
-  ipc_settle
+    "$width"
 }
 
 restore_column_widths() {
@@ -260,12 +313,9 @@ flatten_workspace() {
     [[ -n "$id" ]] ||
       continue
 
-    niri msg action \
+    niri_act \
       consume-or-expel-window-right \
-      --id "$id" \
-      >/dev/null
-
-    ipc_settle
+      --id "$id"
 
   done < <(
     jq -r '
@@ -302,11 +352,8 @@ order_columns() {
   for id in "$@"; do
     focus_window_sync "$id"
 
-    niri msg action \
-      move-column-to-last \
-      >/dev/null
-
-    ipc_settle
+    niri_act \
+      move-column-to-last
   done
 }
 
@@ -336,12 +383,15 @@ validate_restore_state() {
 
   # The saved windows must all still be present, but windows opened after
   # entering stack mode are deliberately not part of this comparison.
-  if [[ -n "$(comm -23 \
-    <(printf '%s\n' "$saved") \
-    <(printf '%s\n' "$current")
+  if [[ -n "$(
+    comm -23 \
+      <(printf '%s\n' "$saved") \
+      <(printf '%s\n' "$current")
   )" ]]; then
     return 1
   fi
+
+  return 0
 }
 
 validate_state_file() {
@@ -366,8 +416,10 @@ validate_state_file() {
 discard_restore_state() {
   local state_file="$1"
 
-  rm -f "$state_file"
-  printf 'niri-stack: saved layout is no longer restorable; state discarded\n' >&2
+  rm -f "$state_file" "${state_file}.tmp"
+  ACTIVE_STATE_FILE=""
+  printf '%s: saved layout is no longer restorable; state discarded\n' \
+    "$PROG_NAME" >&2
 }
 
 # Make only saved windows singleton columns. This is intentionally different
@@ -379,10 +431,9 @@ flatten_saved_workspace() {
   local windows
   local id
   local iterations=0
-  local max_iterations=100
 
   while :; do
-    ((iterations++ < max_iterations)) ||
+    ((iterations++ < FLATTEN_MAX_ITERATIONS)) ||
       die "timed out while separating saved windows"
 
     windows="$(get_workspace_windows "$workspace_id")"
@@ -408,12 +459,9 @@ flatten_saved_workspace() {
     [[ -n "$id" ]] ||
       break
 
-    niri msg action \
+    niri_act \
       consume-or-expel-window-right \
-      --id "$id" \
-      >/dev/null
-
-    ipc_settle
+      --id "$id"
   done
 }
 
@@ -428,12 +476,13 @@ stack_layout() {
   local windows
   local stack_anchor
   local restore_widths
+  local context
   local i
 
   local -a ids
 
-  workspace_id="$(get_workspace_id)"
-  focused_id="$(get_focused_id)"
+  context="$(get_focused_context)"
+  IFS=$'\t' read -r workspace_id focused_id <<<"$context"
 
   [[ -n "$workspace_id" ]] ||
     die "no focused workspace"
@@ -446,6 +495,8 @@ stack_layout() {
   if [[ -e "$state_file" ]]; then
     die "stack mode is already active on this workspace"
   fi
+
+  ACTIVE_STATE_FILE="$state_file"
 
   windows="$(get_workspace_windows "$workspace_id")"
 
@@ -525,11 +576,8 @@ stack_layout() {
   for ((i = 2; i < ${#ids[@]}; i++)); do
     focus_window_sync "$stack_anchor"
 
-    niri msg action \
-      consume-window-into-column \
-      >/dev/null
-
-    ipc_settle
+    niri_act \
+      consume-window-into-column
   done
 
   # Apply the configured column widths.
@@ -554,10 +602,12 @@ stack_layout() {
 # ─────────────────────────────────────────────────────────────
 
 restore_layout() {
-  local workspace_id
-  local restore_focus_id
+  local workspace_id="${1:-}"
+  local restore_focus_id="${2:-}"
   local state_file
   local restore_widths
+  local context
+  local focus_strategy
 
   local column_json
   local anchor
@@ -567,12 +617,10 @@ restore_layout() {
   local -a all_ids
   local -a focus_candidates
 
-  workspace_id="$(get_workspace_id)"
-
-  # Preserve whichever window is currently selected inside the
-  # stack and return focus to it after the original layout has
-  # been reconstructed.
-  restore_focus_id="$(get_focused_id)"
+  if [[ -z "$workspace_id" || -z "$restore_focus_id" ]]; then
+    context="$(get_focused_context)"
+    IFS=$'\t' read -r workspace_id restore_focus_id <<<"$context"
+  fi
 
   [[ -n "$workspace_id" ]] ||
     die "no focused workspace"
@@ -584,6 +632,8 @@ restore_layout() {
 
   [[ -f "$state_file" ]] ||
     die "no saved layout for this workspace"
+
+  ACTIVE_STATE_FILE="$state_file"
 
   if ! validate_state_file "$state_file"; then
     discard_restore_state "$state_file"
@@ -646,11 +696,8 @@ restore_layout() {
     for ((i = 1; i < count; i++)); do
       focus_window_sync "$anchor"
 
-      niri msg action \
-        consume-window-into-column \
-        >/dev/null
-
-      ipc_settle
+      niri_act \
+        consume-window-into-column
     done
 
   done < <(
@@ -667,27 +714,35 @@ restore_layout() {
     restore_column_widths "$state_file"
   fi
 
-  # Restore focus according to the strategy saved when stack mode was enabled.
-  mapfile -t focus_candidates < <(
-    case "$(jq -r '.options.restore_focus // "current"' "$state_file")" in
-    current)
-      printf '%s\n' "$restore_focus_id"
-      ;;
-    original)
-      jq -r '.focus.original_id // empty' "$state_file"
-      ;;
-    main)
-      jq -r '.focus.main_id // empty' "$state_file"
-      ;;
-    secondary)
-      jq -r '.focus.secondary_id // empty' "$state_file"
-      ;;
-    esac
+  focus_strategy="$(jq -r '.options.restore_focus // "current"' "$state_file")"
 
-    printf '%s\n' "$restore_focus_id"
-    jq -r '.focus.main_id // empty' "$state_file"
-    jq -r '.windows | sort_by(.column, .row) | .[].id' "$state_file"
+  case "$focus_strategy" in
+  current)
+    focus_candidates=("$restore_focus_id")
+    ;;
+  original)
+    focus_candidates=(
+      "$(jq -r '.focus.original_id // empty' "$state_file")"
+    )
+    ;;
+  main)
+    focus_candidates=(
+      "$(jq -r '.focus.main_id // empty' "$state_file")"
+    )
+    ;;
+  secondary)
+    focus_candidates=(
+      "$(jq -r '.focus.secondary_id // empty' "$state_file")"
+    )
+    ;;
+  esac
+
+  # Fall back to the current focus, then main, then the first saved window.
+  focus_candidates+=(
+    "$restore_focus_id"
+    "$(jq -r '.focus.main_id // empty' "$state_file")"
   )
+  focus_candidates+=("${all_ids[@]}")
 
   for restore_focus_id in "${focus_candidates[@]}"; do
     [[ -n "$restore_focus_id" ]] ||
@@ -700,7 +755,8 @@ restore_layout() {
     fi
   done
 
-  rm -f "$state_file"
+  rm -f "$state_file" "${state_file}.tmp"
+  ACTIVE_STATE_FILE=""
 }
 
 # ─────────────────────────────────────────────────────────────
@@ -756,9 +812,12 @@ status_layout() {
 
 toggle_layout() {
   local workspace_id
+  local focused_id
+  local context
   local state_file
 
-  workspace_id="$(get_workspace_id)"
+  context="$(get_focused_context)"
+  IFS=$'\t' read -r workspace_id focused_id <<<"$context"
 
   [[ -n "$workspace_id" ]] ||
     die "no focused workspace"
@@ -770,7 +829,7 @@ toggle_layout() {
   start_screen_transition
 
   if [[ -f "$state_file" ]]; then
-    restore_layout
+    restore_layout "$workspace_id" "$focused_id"
   else
     stack_layout
   fi
@@ -833,6 +892,7 @@ while (($# > 0)); do
 done
 
 validate_options
+resolve_widths
 
 exec 9>"$LOCK_FILE"
 flock -n 9 ||
