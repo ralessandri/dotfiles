@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+umask 077
+
 # ─────────────────────────────────────────────────────────────
 # Configuration
 # ─────────────────────────────────────────────────────────────
@@ -79,6 +81,15 @@ chmod 700 "$STATE_DIR" 2>/dev/null || true
 
 ipc_settle() {
   sleep "$IPC_SETTLE_DELAY"
+}
+
+write_state_file() {
+  local state_file="$1"
+  local temporary_file="${state_file}.tmp"
+
+  cat >"$temporary_file"
+  chmod 600 "$temporary_file"
+  mv "$temporary_file" "$state_file"
 }
 
 get_focused_window() {
@@ -402,10 +413,7 @@ save_stack_state() {
         }
         ' \
     <<<"$windows" \
-    >"${state_file}.tmp"
-
-  chmod 600 "${state_file}.tmp"
-  mv "${state_file}.tmp" "$state_file"
+    | write_state_file "$state_file"
 }
 
 build_stack_from_singleton_columns() {
@@ -668,10 +676,7 @@ update_active_stack_roles() {
     '.focus.main_id = $main_id
      | .focus.secondary_id = $secondary_id' \
     "$state_file" \
-    >"${state_file}.tmp"
-
-  chmod 600 "${state_file}.tmp"
-  mv "${state_file}.tmp" "$state_file"
+    | write_state_file "$state_file"
 }
 
 validate_state_file() {
@@ -1054,6 +1059,12 @@ status_layout() {
   state_file="$(state_file_for_workspace "$workspace_id")"
 
   if [[ ! -f "$state_file" ]]; then
+    printf 'normal\n'
+    return
+  fi
+
+  # Keep status side-effect free when the saved state is invalid.
+  if ! validate_state_file "$state_file" 2>/dev/null; then
     printf 'normal\n'
     return
   fi
