@@ -11,15 +11,15 @@ error = "{{colors.error.default.hex}}"
 [username]
 show_always = true
 format = "[$user]($style)"
-style_user = "secondary"
+style_user = "primary"
 
 [hostname]
 ssh_only = false
 format = "[@$hostname]($style)"
-style = "secondary"
+style = "primary"
 
 [directory]
-style = "primary"
+style = "secondary"
 
 [character]
 success_symbol = "[❯](tertiary)"
