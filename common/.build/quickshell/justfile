@@ -1,9 +1,0 @@
-[private]
-default:
-  @just -l
-
-build:
-  HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose run --rm quickshell-build
-
-install:
-  sudo dnf reinstall ./quickshell-0.3.1-*.fc44.x86_64.rpm

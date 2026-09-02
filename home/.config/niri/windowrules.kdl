@@ -8,3 +8,8 @@ window-rule {
   opacity 0.95
 }
 
+window-rule {
+  // match app-id="calibre-ebook-edit"
+  // open-floating true
+}
+

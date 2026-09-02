@@ -22,11 +22,10 @@ textbox {
     text-color: @foreground;
 }
 listview {
-  dynamic:      true;
+    dynamic:      true;
     fixed-height: false;
-    border: 0;
+    border:       0;
     scrollbar:    false;
-    margin:      2px 0px 0px;
     lines:        10;
 }
 element {
@@ -91,6 +90,7 @@ inputbar {
     children:   [ prompt, textbox-prompt-colon, entry, case-indicator ];
     text-color: @normal-foreground;
     padding:    16px 10px;
+    margin: 0 0 2px;
 }
 prompt, entry, case-indicator, button {
     text-color: @normal-foreground;

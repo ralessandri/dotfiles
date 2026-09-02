@@ -15,10 +15,13 @@ binds {
     Mod+Ctrl+Right { move-column-right-or-to-monitor-right; }
     Mod+Left { focus-column-or-monitor-left; }
     Mod+Right { focus-column-or-monitor-right; }
+    Mod+S { spawn "niri-window-stack.sh" "toggle" "-m" "70%" "-f" "main-at-stack" "-w" "current"; }
     Mod+Shift+Left { consume-or-expel-window-left; }
     Mod+Shift+Right { consume-or-expel-window-right; }
-    Mod+Return hotkey-overlay-title="Open a Terminal: wezterm" { spawn "wezterm"; }
+    Mod+Shift+S { spawn "niri-window-stack.sh" "promote"; }
+    Mod+Shift+Tab { spawn "sh" "-c" "niri msg action focus-column-right; niri msg action move-column-to-last; niri msg action focus-window-previous"; }
+    Mod+L { spawn "wezterm" "-e" "nvim"; }
+    Mod+Return { spawn "wezterm"; }
     Mod+Shift+B { spawn "rofi-browser.sh"; }
-    Mod+T hotkey-overlay-title="Open a Terminal: wezterm" { spawn "wezterm"; }
     Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
 }

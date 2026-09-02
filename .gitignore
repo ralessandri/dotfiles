@@ -6,11 +6,11 @@
 /.history
 /icons
 
-common/.config/niri/dms/*
-!common/.config/niri/dms/binds.kdl
-!common/.config/niri/dms/windowrules.kdl
-common/.config/niri/config.kdl.*
+home/.config/niri/dms/*
+!home/.config/niri/dms/binds.kdl
+!home/.config/niri/dms/windowrules.kdl
+home/.config/niri/config.kdl.*
 
-common/.config/alacritty/dank-theme.toml
-common/.config/wofi/style.css
-common/.config/ghostty/themes
+home/.config/alacritty/dank-theme.toml
+home/.config/wofi/style.css
+home/.config/ghostty/themes
