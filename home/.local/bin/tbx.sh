@@ -2,8 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/common/.local/lib/bash/core/init.sh"
-source "$HOME/.dotfiles/common/.local/lib/bash/tbx/gui/gum.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/tbx/gui/gum.sh"
 
 print_section ":: Welcome to MyLinux Toolbox!"
 

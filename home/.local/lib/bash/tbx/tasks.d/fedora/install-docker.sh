@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/common/.local/lib/bash/core/init.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 # Ensure dnf-plugins-core is installed (needed for config-manager)
 if ! rpm -q dnf-plugins-core &>/dev/null; then

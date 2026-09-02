@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/common/.local/lib/bash/core/init.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 if [ ! -e /etc/yum.repos.d/rpmfusion-free.repo ] || [ ! -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
   print_section "Installing RPM Fusion..."

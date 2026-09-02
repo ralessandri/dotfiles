@@ -1,21 +1,21 @@
 [config]
 
 [templates.starship]
-input_path = "~/.dotfiles/common/.config/matugen/templates/starship.toml"
+input_path = "~/.dotfiles/home/.config/matugen/templates/starship.toml"
 output_path = "~/.config/starship/starship.toml"
 
 [templates.niri]
-input_path = "~/.dotfiles/common/.config/matugen/templates/niri.kdl"
+input_path = "~/.dotfiles/home/.config/matugen/templates/niri.kdl"
 output_path = "~/.config/niri/colors.kdl"
 
 [templates.rofi]
-input_path = "~/.dotfiles/common/.config/matugen/templates/rofi.rasi"
+input_path = "~/.dotfiles/home/.config/matugen/templates/rofi.rasi"
 output_path = "~/.config/rofi/colors.rasi"
 
 [templates.wofi]
-input_path = "~/.dotfiles/common/.config/matugen/templates/wofi.css"
+input_path = "~/.dotfiles/home/.config/matugen/templates/wofi.css"
 output_path = "~/.config/wofi/style.css"
 
 [templates.spotifyplayer]
-input_path = "~/.dotfiles/common/.config/matugen/templates/spotify_player.toml"
+input_path = "~/.dotfiles/home/.config/matugen/templates/spotify_player.toml"
 output_path = "~/.config/spotify-player/theme.toml"

@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-source "$HOME/.dotfiles/common/.local/lib/bash/core/init.sh"
+source "$HOME/.dotfiles/home/.local/lib/bash/core/init.sh"
 
 if [ -e /etc/yum.repos.d/rpmfusion-free.repo ] && [ -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
   print_section "Installing Multimedia Codecs"
@@ -10,7 +10,7 @@ if [ -e /etc/yum.repos.d/rpmfusion-free.repo ] && [ -e /etc/yum.repos.d/rpmfusio
   # Swap ffmpeg-free for proprietary ffmpeg (allows proprietary codecs)
   sudo dnf swap ffmpeg-free ffmpeg --allowerasing -y
 
-  # Install GStreamer plugins and other common multimedia codecs
+  # Install GStreamer plugins and other home multimedia codecs
   sudo dnf install -y \
     gstreamer1-plugins-{base,good,bad-free,bad-free-extras,ugly} \
     gstreamer1-plugin-openh264 \
