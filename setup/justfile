@@ -1,0 +1,5 @@
+mod fedora "just/fedora.just"
+
+[private]
+default:
+    @just -l --list-submodules

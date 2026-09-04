@@ -37,11 +37,13 @@ alias du='du -h --max-depth=1'
 # Short directory listing
 alias l='ls -CF'
 
+alias l1='eza -1a --group-directories-first'
+
 # List all files except . and ..
 alias la='ls -A'
 
 # Detailed directory listing
-alias ll='ls -alF'
+alias ll='eza -al  --group-directories-first'
 
 # Detailed directory listing with human-readable file sizes
 alias llh='ls -alFh'
@@ -239,6 +241,10 @@ alias controller-on='sudo bash -c "echo Y > /sys/module/bluetooth/parameters/dis
 
 # Re-enable ERTM
 alias controller-off='sudo bash -c "echo N > /sys/module/bluetooth/parameters/disable_ertm" && echo ERTM activated'
+
+alias must='just --justfile ~/.dotfiles/setup/justfile'
+
+alias gust='just -g'
 
 ###############################################################################
 # Custom Scripts
