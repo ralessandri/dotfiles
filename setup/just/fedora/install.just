@@ -33,12 +33,17 @@ php:
 # Install Niri and Dank Material Shell and integrate them.
 [group('desktop')]
 niri-with-dms:
-    ../../tasks/fedora-install-niri-dms.sh
+    ../../tasks/fedora-niridms-install.sh
 
 # Install multimedia codecs from RPM Fusion.
 [group('media')]
 codecs: rpmfusion
     ../../tasks/fedora-multimediacodecs-install.sh
+
+# Refresh firmware metadata and show available firmware updates.
+[group('hardware')]
+firmware:
+    ../../tasks/fedora-firmware-update.sh
 
 # Install the NVIDIA 580xx driver stack.
 [group('hardware')]
