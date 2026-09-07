@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Youtube
+Comment=Youtube
+Exec=flatpak run org.chromium.Chromium "--app=https://www.youtube.com" "--profile-directory=Default"
+Terminal=false
+Type=Application
+Icon=/home/rene/.local/share/applications/icons/Youtube.png
+StartupNotify=true
