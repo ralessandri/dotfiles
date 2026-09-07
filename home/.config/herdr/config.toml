@@ -14,6 +14,9 @@ split_horizontal = ["prefix+v", "ctrl+shift+down"]
 close_pane = ["prefix+x", "ctrl+shift+left"]
 
 new_tab = "prefix+c"
+rename_tab = "prefix+,"
+rename_workspace = "prefix+$"
+rename_pane = "prefix+."
 
 focus_pane_left  = "alt+left"
 focus_pane_right = "alt+right"
@@ -28,5 +31,5 @@ key = "prefix+t"
 type = "popup"
 command = "exec \"${SHELL:-sh}\""
 description = "open scratch terminal"
-width = "80%"
-height = "80%"
+width = "40%"
+height = "50%"
