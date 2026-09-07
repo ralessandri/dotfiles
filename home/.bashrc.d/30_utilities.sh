@@ -51,7 +51,7 @@ cdf() {
   local dir
 
   dir=$(fd . -H --exclude .git --type d |
-    fzf --preview='tree -aC {}')
+    fzf --preview='eza -la --tree --level=2 --color=always {}')
 
   [[ -n "$dir" ]] && cd "$dir"
 }
@@ -60,11 +60,93 @@ cdf() {
 cdh() {
   local dir
 
-  dir=$(zoxide query -ls |
-    fzf |
-    awk '{print $2}')
+  dir=$(zoxide query -l |
+    fzf --preview='eza -la --color=always {}')
 
   [[ -n "$dir" ]] && cd "$dir"
+}
+
+# Open a frequently used directory selected with zoxide and fzf in LazyVim
+zvim() {
+  local selection
+  local dir
+
+  selection=$(zoxide query -ls |
+    fzf --no-sort --preview='eza -la --color=always {2..}')
+
+  [[ -z "$selection" ]] && return
+
+  dir=$(sed -E 's/^[[:space:]]*[^[:space:]]+[[:space:]]+//' <<<"$selection")
+  (cd -- "$dir" && nvim .)
+}
+
+# Open a file selected with fd and fzf
+fe() {
+  local file
+
+  file=$(fd . -H --exclude .git --type f |
+    fzf --preview='bat --color=always --style=numbers {}')
+
+  [[ -n "$file" ]] && "${EDITOR:-vim}" "$file"
+}
+
+# Switch local Git branch selected with fzf
+gb() {
+  local branch
+  local local_branch
+
+  branch=$(git branch --all --format='%(refname:short)' |
+    grep -v 'origin/HEAD' |
+    fzf --preview='git log --oneline --decorate --color=always {} -20')
+
+  [[ -z "$branch" ]] && return
+
+  if [[ "$branch" == origin/* ]]; then
+    local_branch="${branch#origin/}"
+
+    if git show-ref --verify --quiet "refs/heads/$local_branch"; then
+      git switch "$local_branch"
+    else
+      git switch --track "$branch"
+    fi
+  else
+    git switch "$branch"
+  fi
+}
+
+# Show a Git commit selected with fzf
+glog() {
+  local commit
+
+  commit=$(git log \
+    --color=always \
+    --format='%C(auto)%h%d %s %C(black)%C(bold)%cr' |
+    fzf \
+      --ansi \
+      --no-sort \
+      --preview='git show --color=always {1}' |
+    awk '{print $1}')
+
+  [[ -n "$commit" ]] && git show "$commit"
+}
+
+# Select and kill a process with fzf
+fkill() {
+  local pid
+  dnf repoquery --userinstalled
+  pid=$(ps -ef |
+    sed 1d |
+    fzf -m |
+    awk '{print $2}')
+
+  [[ -n "$pid" ]] && kill "$pid"
+}
+
+# Select an environment variable with fzf
+fenv() {
+  env |
+    sort |
+    fzf
 }
 
 # Starts an SSH agent if none is reachable.

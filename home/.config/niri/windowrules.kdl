@@ -13,3 +13,26 @@ window-rule {
   // open-floating true
 }
 
+// Keep the interactive DNF package installer above tiled windows.
+window-rule {
+  match app-id="^dnf-package-install$"
+  open-floating true
+  default-column-width { proportion 0.3; }
+  default-window-height { proportion 0.6; }
+}
+
+// Keep the interactive DNF package remover above tiled windows.
+window-rule {
+  match app-id="^dnf-package-remove$"
+  open-floating true
+  default-column-width { proportion 0.3; }
+  default-window-height { proportion 0.6; }
+}
+
+// Keep the interactive Wi-Fi manager above tiled windows.
+window-rule {
+  match app-id="^wifi-manager$"
+  open-floating true
+  default-column-width { fixed 650; }
+  default-window-height { fixed 400; }
+}

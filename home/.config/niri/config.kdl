@@ -327,7 +327,7 @@ window-rule {
     // since this is the default config, and we want no false positives.
     // You can get away with just app-id="wezterm" if you want.
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    default-column-width { proportion 0.25; }
+    default-column-width { proportion 0.5; }
 
     background-effect {
       blur true
@@ -338,7 +338,7 @@ window-rule {
 
     match app-id="^Alacritty$"
 
-    default-column-width { proportion 0.25; }
+    default-column-width { proportion 0.5; }
     background-effect {
         blur true
     }
@@ -576,7 +576,7 @@ binds {
     // Expel the bottom window from the focused column to the right.
     Mod+Period { expel-window-from-column; }
 
-    // Cycle through widths set in preset-column-widths.
+
     Mod+R { switch-preset-column-width; }
     // Cycling through the presets in reverse order is also possible.
     Mod+Shift+R { switch-preset-column-width-back; }
@@ -669,3 +669,4 @@ include optional=true "colors.kdl"
 include optional=true "output.kdl"
 include optional=true "windowrules.kdl"
 include optional=true "actions.kdl"
+include optional=true "dms/input.kdl"

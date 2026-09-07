@@ -43,13 +43,15 @@ alias l1='eza -1a --group-directories-first'
 alias la='ls -A'
 
 # Detailed directory listing
-alias ll='eza -al  --group-directories-first'
+alias ll='eza -al --icons --group-directories-first'
+
+alias lt='eza -al --tree -L 2 --icons'
 
 # Detailed directory listing with human-readable file sizes
 alias llh='ls -alFh'
 
 # Enable colored output for ls
-alias ls='ls --color=auto'
+alias ls='eza'
 
 # Display PATH entries line by line
 alias path='echo -e ${PATH//:/\\n}'

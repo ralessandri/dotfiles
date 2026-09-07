@@ -3,6 +3,7 @@ local act = wezterm.action
 local config = {}
 
 local mod = "ALT"
+local mod_shift = mod .. "|SHIFT"
 
 config.color_scheme = "Catppuccin Macchiato"
 config.font = wezterm.font("JetBrainsMono Nerd Font")
@@ -74,7 +75,23 @@ config.keys = {
 
   { key = "DownArrow", mods = mod, action = act.ActivatePaneDirection("Down") },
 
+  -------------------------------------------------------------------
+  -- Resize pane
+  -------------------------------------------------------------------
+
+  { key = "LeftArrow", mods = mod_shift, action = act.AdjustPaneSize({ "Left", 5 }) },
+
+  { key = "RightArrow", mods = mod_shift, action = act.AdjustPaneSize({ "Right", 5 }) },
+
+  { key = "UpArrow", mods = mod_shift, action = act.AdjustPaneSize({ "Up", 5 }) },
+
+  { key = "DownArrow", mods = mod_shift, action = act.AdjustPaneSize({ "Down", 5 }) },
+
   { key = "d", mods = mod, action = act.PaneSelect },
+
+  { key = "z", mods = mod, action = act.TogglePaneZoomState },
+
+  { key = "x", mods = mod, action = act.CloseCurrentPane({ confirm = true }) },
 
   { key = "w", mods = mod, action = wezterm.action.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }) },
 
