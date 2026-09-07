@@ -172,9 +172,14 @@ select_network() {
   local fzf_color="$1"
   local selected_line
   local reload_command
-  local header=$'* connected | Up/Down: select | Esc: close\nc: connect | d: disconnect | f: forget | i: QR code | r: rescan'
   local status_text='Scanning...'
   local ready_text='Ready'
+  local header_hint='c: connect | d: disconnect | f: forget | i: QR code | r: rescan'
+  local header
+  local header_ready
+
+  header="* connected | Up/Down: select | Esc: close | Status: ${status_text}"$'\n'"${header_hint}"
+  header_ready="* connected | Up/Down: select | Esc: close | Status: ${ready_text}"$'\n'"${header_hint}"
 
   printf -v reload_command '%q ' "$SCRIPT_PATH" --list yes --color "$fzf_color" --terminal "$terminal"
   reload_command="${reload_command% }"
@@ -196,11 +201,9 @@ select_network() {
         --color="$fzf_color" \
         --delimiter=$'\t' \
         --header="$header" \
-        --footer="$status_text" \
-        --footer-border=top \
+        --bind="load:change-header($header_ready)" \
+        --bind="r:change-header($header)+reload($reload_command)" \
         --bind='enter:ignore,double-click:ignore' \
-        --bind="load:change-footer($ready_text)" \
-        --bind="r:change-footer($status_text)+reload($reload_command)" \
         --with-shell='bash -c' \
         --layout=reverse \
         --preview='nmcli --colors no --fields SSID,BSSID,SIGNAL,RATE,SECURITY,CHAN device wifi list bssid {7} --rescan no' \
