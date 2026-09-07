@@ -11,6 +11,36 @@ readonly COLOR_GREEN='\e[32m'
 readonly COLOR_YELLOW='\e[33m'
 readonly COLOR_RESET='\e[0m'
 
+APP_NAME=""
+APP_URL=""
+ICON_REF=""
+CUSTOM_EXEC=""
+MIME_TYPES=""
+PROFILE=""
+INTERACTIVE_MODE=false
+
+usage() {
+  cat <<'EOF'
+Usage:
+  webapp-install.sh
+  webapp-install.sh --name NAME --url URL [--icon ICON] [--exec CMD] [--mime-types TYPES] [--profile PROFILE]
+
+Options:
+  -n, --name NAME         Web app name. Required in non-interactive mode.
+  -u, --url URL           Web app URL. Required in non-interactive mode.
+  -i, --icon ICON         Icon reference. Omit to download a favicon automatically.
+                          Use a URL to download a PNG or a filename inside ~/.local/share/applications/icons.
+  -e, --exec CMD          Custom Exec command for the launcher.
+  -m, --mime-types TYPES  Optional MimeType list, separated by semicolons.
+  -p, --profile PROFILE   Chromium profile directory to use.
+  -h, --help              Show this help text.
+
+Examples:
+  webapp-install.sh --name Claude --url https://claude.ai
+  webapp-install.sh --name Discord --url https://discord.com/channels/@me --icon discord.png
+EOF
+}
+
 # Abort with an error message on stderr.
 die() {
   echo "Error: $*" >&2
@@ -63,6 +93,17 @@ favicon_url_for() {
   printf 'https://www.google.com/s2/favicons?domain=%s&sz=128' "$1"
 }
 
+# Extract the hostname from a URL for favicon downloads.
+favicon_domain_for() {
+  local url=$1
+
+  if [[ $url =~ ^[a-zA-Z][a-zA-Z0-9+.-]*://([^/?#]+) ]]; then
+    printf '%s' "${BASH_REMATCH[1]}"
+  else
+    printf '%s' "$url"
+  fi
+}
+
 # Download an icon from a URL into the target path.
 # Returns non-zero if the download failed or produced an empty file.
 download_icon() {
@@ -81,7 +122,7 @@ prompt_for_app_details() {
 
   mkdir -p "$ICON_DIR"
   local icon_path="$ICON_DIR/$APP_NAME.png"
-  if download_icon "$(favicon_url_for "$APP_URL")" "$icon_path"; then
+  if download_icon "$(favicon_url_for "$(favicon_domain_for "$APP_URL")")" "$icon_path"; then
     ICON_REF="$APP_NAME.png"
   else
     ICON_REF=$(gum input \
@@ -113,14 +154,53 @@ prompt_for_profile() {
   fi
 }
 
-# Parse the positional-argument (non-interactive) call form.
-parse_positional_args() {
-  APP_NAME="$1"
-  APP_URL=$(normalize_url "$2")
-  ICON_REF="$3"
-  CUSTOM_EXEC="${4:-}"
-  MIME_TYPES="${5:-}"
-  PROFILE="${6:-}"
+# Parse named command-line arguments for non-interactive use.
+parse_named_args() {
+  while (($#)); do
+    case $1 in
+    -n | --name)
+      [[ $# -ge 2 ]] || die "missing value for $1"
+      APP_NAME=$2
+      shift 2
+      ;;
+    -u | --url)
+      [[ $# -ge 2 ]] || die "missing value for $1"
+      APP_URL=$(normalize_url "$2")
+      shift 2
+      ;;
+    -i | --icon)
+      [[ $# -ge 2 ]] || die "missing value for $1"
+      ICON_REF=$2
+      shift 2
+      ;;
+    -e | --exec)
+      [[ $# -ge 2 ]] || die "missing value for $1"
+      CUSTOM_EXEC=$2
+      shift 2
+      ;;
+    -m | --mime-types)
+      [[ $# -ge 2 ]] || die "missing value for $1"
+      MIME_TYPES=$2
+      shift 2
+      ;;
+    -p | --profile)
+      [[ $# -ge 2 ]] || die "missing value for $1"
+      PROFILE=$2
+      shift 2
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      die "unknown argument: $1"
+      ;;
+    esac
+  done
 }
 
 # Resolve ICON_REF (a URL or a filename already inside ICON_DIR) into a
@@ -129,7 +209,7 @@ resolve_icon_path() {
   mkdir -p "$ICON_DIR"
 
   local reference=$ICON_REF
-  [[ -n $reference ]] || reference=$(favicon_url_for "$APP_URL")
+  [[ -n $reference ]] || reference=$(favicon_url_for "$(favicon_domain_for "$APP_URL")")
 
   if [[ $reference =~ ^https?:// ]]; then
     local target="$ICON_DIR/$APP_NAME.png"
@@ -209,21 +289,21 @@ print_summary() {
 main() {
   if (($# == 0)); then
     INTERACTIVE_MODE=true
-  elif (($# >= 3)); then
-    INTERACTIVE_MODE=false
   else
-    die "expected 0 arguments (interactive mode) or at least 3 (name, url, icon)"
+    INTERACTIVE_MODE=false
+    parse_named_args "$@"
   fi
 
   check_dependencies
 
   if [[ $INTERACTIVE_MODE == true ]]; then
     prompt_for_app_details
-  else
-    parse_positional_args "$@"
   fi
 
-  [[ -n $APP_NAME && -n $APP_URL ]] || die "app name and app URL are required"
+  [[ -n ${APP_NAME:-} && -n ${APP_URL:-} ]] || {
+    usage
+    die "name and url are required in non-interactive mode"
+  }
   [[ $APP_NAME != */* ]] || die "app name must not contain slashes"
 
   local icon_path
