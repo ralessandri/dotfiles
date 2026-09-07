@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=ChatGPT
+Comment=ChatGPT
+Exec=flatpak run org.chromium.Chromium "--app=https://chatgpt.com" "--profile-directory=Default"
+Terminal=false
+Type=Application
+Icon=/home/rene/.local/share/applications/icons/ChatGPT.png
+StartupNotify=true

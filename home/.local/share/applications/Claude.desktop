@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Claude
+Comment=Claude
+Exec=flatpak run org.chromium.Chromium "--app=https://claude.ai" "--profile-directory=Default"
+Terminal=false
+Type=Application
+Icon=/home/rene/.local/share/applications/icons/Claude.png
+StartupNotify=true
