@@ -35,6 +35,11 @@ php:
 niri-with-dms:
     ../../tasks/fedora-niridms-install.sh
 
+# Install the default web apps.
+[group('desktop')]
+webapps:
+    ../../tasks/fedora-webapps-default-install.sh
+
 # Install multimedia codecs from RPM Fusion.
 [group('media')]
 codecs: rpmfusion
