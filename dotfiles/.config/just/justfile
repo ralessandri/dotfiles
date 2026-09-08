@@ -361,7 +361,7 @@ dms-logs:
 # ---------------------------------------------------------------------------
 # dotfiles
 
-dotfiles := "~/.dotfiles"
+dotfiles := "$STASH_ROOT_DIR"
 
 # Show git status of the dotfiles repository
 [group('dotfiles')]
