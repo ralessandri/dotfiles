@@ -1,0 +1,394 @@
+# ~/.config/just/justfile
+# Global entry point, usage e.g.: alias j='just --justfile ~/.config/just/justfile --working-directory .'
+# or: just -g --choose
+
+set shell := ["bash", "-uc"]
+
+# List all available recipes
+default:
+    @just --justfile {{justfile()}} --list --unsorted
+
+# ---------------------------------------------------------------------------
+# system
+
+
+
+
+# ---------------------------------------------------------------------------
+# system
+
+# Upgrade all dnf packages, Flatpaks, and device firmware
+[group('system')]
+[no-cd]
+update:
+    sudo dnf upgrade --refresh -y
+    flatpak update -y
+    fwupdmgr refresh --force
+    fwupdmgr update -y
+
+# Remove orphaned packages, unused Flatpak runtimes, and old journal entries
+[group('system')]
+[confirm("Remove old kernels/packages now?")]
+cleanup:
+    sudo dnf autoremove -y
+    flatpak uninstall --unused -y
+    sudo journalctl --vacuum-time=2weeks
+    sudo dnf clean packages
+
+# List installed packages that are no longer available in any repository
+[group('system')]
+orphans:
+    dnf repoquery --extras
+
+# Show CPU architecture and topology details
+[group('system')]
+cpu:
+    lscpu
+
+# Show disk usage per filesystem, including filesystem type
+[group('system')]
+dfh:
+    df -hT
+
+# Show inode usage per filesystem
+[group('system')]
+dfi:
+    df -i
+
+# List block devices with filesystem information
+[group('system')]
+disks:
+    lsblk -f
+
+# List systemd units that are currently in a failed state
+[group('system')]
+failed:
+    systemctl --failed
+
+# Show hostname, OS, and kernel identification
+[group('system')]
+hn:
+    hostnamectl
+
+# Show memory usage in human-readable form
+[group('system')]
+mem:
+    free -h
+
+# Show all currently mounted filesystems as a tree
+[group('system')]
+mounts:
+    findmnt
+
+# Show OS release information
+[group('system')]
+os:
+    cat /etc/os-release
+
+# List processes sorted by CPU usage
+[group('system')]
+pscpu:
+    ps aux --sort=-%cpu
+
+# List processes sorted by memory usage
+[group('system')]
+psmem:
+    ps aux --sort=-%mem
+
+# Show the process tree
+[group('system')]
+pst:
+    ps -ef --forest
+
+# List currently running systemd services
+[group('system')]
+running:
+    systemctl list-units --type=service --state=running
+
+# Show the status of a given systemd unit
+[group('system')]
+sc unit:
+    systemctl status {{unit}}
+
+# Show system uptime and load averages
+[group('system')]
+up:
+    uptime
+
+# ---------------------------------------------------------------------------
+# kernel
+
+# Show the currently installed kernel package version
+[group('kernel')]
+ka:
+    rpm -q kernel
+
+# Show the machine's hardware architecture
+[group('kernel')]
+karch:
+    uname -m
+
+# List kernel versions available in the configured dnf repositories
+[group('kernel')]
+kav:
+    dnf list --available kernel
+
+# Show the currently running kernel release
+[group('kernel')]
+kc:
+    uname -r
+
+# Show the kernel command line parameters used at boot
+[group('kernel')]
+kcmd:
+    cat /proc/cmdline
+
+# Show the kernel grubby will boot by default
+[group('kernel')]
+kd:
+    grubby --default-kernel
+
+# Show kernel ring buffer messages with human-readable timestamps
+[group('kernel')]
+kdmesg:
+    dmesg -T | less
+
+# Show grubby's info for every boot entry
+[group('kernel')]
+kg:
+    grubby --info=ALL
+
+# List all GRUB boot menu entries
+[group('kernel')]
+kgrub:
+    grep "^menuentry" /boot/grub2/grub.cfg
+
+# List installed kernel packages with their install date
+[group('kernel')]
+kinst:
+    rpm -qa --last | grep "^kernel"
+
+# List all installed kernel packages, sorted
+[group('kernel')]
+kli:
+    rpm -qa | grep "^kernel" | sort
+
+# Show kernel log messages for the current boot
+[group('kernel')]
+klog:
+    journalctl -k -b
+
+# Show kernel log messages for the previous boot
+[group('kernel')]
+klogprev:
+    journalctl -k -b -1
+
+# Show currently loaded kernel modules
+[group('kernel')]
+klsmod:
+    lsmod | less
+
+# List files under the module directory of the running kernel
+[group('kernel')]
+kmods:
+    find /lib/modules/$(uname -r) -maxdepth 1
+
+# Check whether a reboot is required for the running kernel
+[group('kernel')]
+kreboot:
+    needs-restarting -r
+
+# Show full kernel and system information
+[group('kernel')]
+ku:
+    uname -a
+
+# ---------------------------------------------------------------------------
+# network
+
+# Show the current default route
+[group('network')]
+defroute:
+    ip route show default
+
+# Show DNS resolver status per interface
+[group('network')]
+dns:
+    resolvectl status
+
+# List all active firewalld rules for the default zone
+[group('network')]
+fw:
+    firewall-cmd --list-all
+
+# Show IP addresses of all interfaces in brief form
+[group('network')]
+ipa:
+    ip -brief address
+
+# Show status of all NetworkManager devices
+[group('network')]
+nmdev:
+    nmcli device status
+
+# Send 4 ICMP echo requests to a host
+[group('network')]
+pingg host:
+    ping -c 4 {{host}}
+
+# List listening TCP/UDP ports with owning process info
+[group('network')]
+ports:
+    ss -tulpen
+
+# Show the route that would be used to reach 8.8.8.8
+[group('network')]
+route8:
+    ip route get 8.8.8.8
+
+# Show the full kernel routing table
+[group('network')]
+routes:
+    ip route
+
+# List Wi-Fi networks visible to the default device
+[group('network')]
+wifi-list:
+    nmcli dev wifi list
+
+# Show details of the currently connected Wi-Fi network
+[group('network')]
+wifi-show:
+    nmcli dev wifi show
+
+# ---------------------------------------------------------------------------
+# docker
+
+# Stop and remove containers defined in the local compose file
+[group('docker')]
+dcd:
+    docker compose down
+
+# Start containers defined in the local compose file, detached
+[group('docker')]
+dcu:
+    docker compose up -d
+
+# List locally available Docker images
+[group('docker')]
+dim:
+    docker images
+
+# List running containers
+[group('docker')]
+dps:
+    docker ps
+
+# List all containers, including stopped ones
+[group('docker')]
+dpsa:
+    docker ps -a
+
+# Remove all unused Docker data, including unused images
+[group('docker')]
+[confirm("Remove ALL unused Docker data, including images?")]
+dsp:
+    docker system prune --all
+
+# ---------------------------------------------------------------------------
+# selinux
+
+# Search the audit log for recent AVC denials
+[group('selinux')]
+seavc:
+    ausearch -m avc -ts recent
+
+# List all SELinux booleans and their current state
+[group('selinux')]
+sebool:
+    getsebool -a
+
+# Show the current SELinux mode and loaded policy
+[group('selinux')]
+sest:
+    sestatus
+
+# ---------------------------------------------------------------------------
+# bluetooth
+
+# Write N to disable_ertm, keeping Bluetooth ERTM enabled
+[group('bluetooth')]
+controller-off:
+    sudo bash -c "echo N > /sys/module/bluetooth/parameters/disable_ertm"
+
+# Write Y to disable_ertm, disabling Bluetooth ERTM
+[group('bluetooth')]
+controller-on:
+    sudo bash -c "echo Y > /sys/module/bluetooth/parameters/disable_ertm"
+
+# ---------------------------------------------------------------------------
+# niri
+
+# Check the Niri configuration file for syntax errors
+[group('niri')]
+niri-check:
+    niri validate
+
+# Reload the Niri configuration file
+[group('niri')]
+niri-reload:
+    niri msg action load-config-file
+
+# List all windows and their workspace assignment
+[group('niri')]
+niri-windows:
+    niri msg windows
+
+# ---------------------------------------------------------------------------
+# dms
+
+# Kill and respawn the Quickshell process running DankMaterialShell
+[group('dms')]
+dms-restart:
+    pkill -f quickshell || true
+    dms run &
+
+# Stream Quickshell/DMS log output, filtered to relevant lines
+[group('dms')]
+dms-logs:
+    journalctl --user -f -o cat | grep -i quickshell
+
+# ---------------------------------------------------------------------------
+# dotfiles
+
+dotfiles := "~/.dotfiles"
+
+# Show git status of the dotfiles repository
+[group('dotfiles')]
+[no-cd]
+dot-status:
+    git -C {{dotfiles}} status -s
+
+# Commit and push all changes in the dotfiles repository
+[group('dotfiles')]
+[no-cd]
+dot-sync msg="update":
+    git -C {{dotfiles}} add -A
+    git -C {{dotfiles}} commit -m "{{msg}}"
+    git -C {{dotfiles}} push
+
+# ---------------------------------------------------------------------------
+# git
+
+# Fetch all remotes and pruned refs, then fast-forward the current branch
+[group('git')]
+[no-cd]
+git-sync:
+    git fetch --all --prune
+    git pull --ff-only
+
+# Undo the last commit, keeping the changes staged
+[group('git')]
+[no-cd]
+undo:
+    git reset --soft HEAD~1

@@ -244,7 +244,7 @@ alias controller-on='sudo bash -c "echo Y > /sys/module/bluetooth/parameters/dis
 # Re-enable ERTM
 alias controller-off='sudo bash -c "echo N > /sys/module/bluetooth/parameters/disable_ertm" && echo ERTM activated'
 
-alias must='just --justfile ~/.dotfiles/setup/justfile'
+alias must='just --justfile "$STASH_ROOT_DIR/setup/justfile"'
 
 alias gust='just -g'
 

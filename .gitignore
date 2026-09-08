@@ -1,16 +1,15 @@
 .idea
 .vscode
 
-/backgrounds
-/_old
 /.history
-/icons
+/theme/backgrounds
+/theme/icons
 
-home/.config/niri/dms/*
-!home/.config/niri/dms/binds.kdl
-!home/.config/niri/dms/windowrules.kdl
-home/.config/niri/config.kdl.*
+dotfiles/.config/niri/dms/*
+!dotfiles/.config/niri/dms/binds.kdl
+!dotfiles/.config/niri/dms/windowrules.kdl
+dotfiles/.config/niri/config.kdl.*
 
-home/.config/alacritty/dank-theme.toml
-home/.config/wofi/style.css
-home/.config/ghostty/themes
+dotfiles/.config/alacritty/dank-theme.toml
+dotfiles/.config/wofi/style.css
+dotfiles/.config/ghostty/themes
