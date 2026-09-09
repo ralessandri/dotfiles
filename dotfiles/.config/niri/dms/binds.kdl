@@ -21,14 +21,16 @@ binds {
     Mod+Shift+S { spawn "niri-window-stack.sh" "promote"; }
     Mod+Shift+T { switch-focus-between-floating-and-tiling; }
     Mod+Shift+Tab { spawn "sh" "-c" "niri msg action focus-column-right; niri msg action move-column-to-last; niri msg action focus-window-previous"; }
-    Ctrl+H { spawn "alacritty" "--class" "alacritty-herdr" "-e" "herdr"; }
-    Ctrl+Shift+H { spawn "rofi" "-show" "ssh" "-ssh-command" "alacritty -e herdr --remote {host}"; }
+    Mod+T hotkey-overlay-title="Toggle Floating" { toggle-window-floating; }
+    Mod+Shift+H { spawn "rofi" "-show" "ssh" "-ssh-command" "alacritty -e herdr --remote {host}"; }
     Mod+A hotkey-overlay-title="ChatGPT" { spawn "sh" "-c" "niri-cycle.sh chrome-chatgpt.com__-Default gtk-launch ChatGPT"; }
     Mod+Ctrl+Print { spawn "capture-text.sh"; }
+    Mod+H { spawn "niri-cycle.sh" "alacritty-herdr" "alacritty" "--class" "alacritty-herdr" "-e" "herdr"; }
     Mod+L { spawn "wezterm" "-e" "nvim"; }
     Mod+Return { spawn "wezterm"; }
     Mod+Shift+B { spawn "rofi-browser.sh"; }
-    Mod+Shift+Return hotkey-overlay-title="Open Firefox" { spawn "niri-cycle.sh" "org.mozilla.firefox" "firefox"; }
+    Mod+Shift+Return { spawn "niri-cycle.sh" "org.mozilla.firefox" "firefox"; }
     Mod+Y { spawn "gtk-launch" "Youtube"; }
     Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
+Mod+F1 { show-hotkey-overlay; }
 }
