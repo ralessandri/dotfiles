@@ -4,11 +4,13 @@ IFS=$'\n\t'
 
 readonly SCRIPT_NAME="$(basename "$0")"
 
-have_command() {
+# Command helpers
+
+_has_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
-show_help() {
+_show_help() {
   cat <<EOF
 Usage: $SCRIPT_NAME [OPTIONS]
 
@@ -31,11 +33,11 @@ Notes:
 EOF
 }
 
-print_header() {
-  printf '\n:: %s\n\n' "$1"
+_print_section_header() {
+  printf ':: %s\n\n' "$1"
 }
 
-run_step() {
+_run_reported_step() {
   local success_message="$1"
   local error_message="$2"
   shift 2
@@ -48,47 +50,60 @@ run_step() {
   fi
 }
 
-update_apt() {
-  print_header "APT Update"
+# Package-manager workflows
 
-  run_step "APT update completed." "Error during APT update." sudo apt update -qq
-  run_step "APT upgrade completed." "Error during APT upgrade." sudo apt upgrade -y
-  run_step "Unused APT packages removed." "Error during APT autoremove." sudo apt autoremove -y
+_update_apt() {
+  _print_section_header "APT Update"
+
+  _run_reported_step "APT update completed." "Error during APT update." sudo apt update -qq
+  _run_reported_step "APT upgrade completed." "Error during APT upgrade." sudo apt upgrade -y
+  _run_reported_step "Unused APT packages removed." "Error during APT autoremove." sudo apt autoremove -y
 }
 
-update_dnf() {
-  print_header "DNF Update"
+_update_dnf() {
+  _print_section_header "DNF Update"
 
-  run_step "DNF upgrade completed." "Error during DNF upgrade." sudo dnf upgrade --refresh -y
-  run_step "Unused DNF packages removed." "Error during DNF autoremove." sudo dnf autoremove -y
+  _run_reported_step "DNF upgrade completed." "Error during DNF upgrade." sudo dnf upgrade --refresh -y
+  _run_reported_step "Unused DNF packages removed." "Error during DNF autoremove." sudo dnf autoremove -y
 }
 
-update_flatpak() {
-  print_header "Flatpak Update"
+_update_flatpak() {
+  _print_section_header "Flatpak Update"
 
-  run_step "Flatpak update completed." "Error during Flatpak update." sudo flatpak update -y
-  run_step "Unused Flatpak packages removed." "Error during Flatpak cleanup." sudo flatpak uninstall --unused
+  _run_reported_step "Flatpak update completed." "Error during Flatpak update." sudo flatpak update -y
+  _run_reported_step "Unused Flatpak packages removed." "Error during Flatpak cleanup." sudo flatpak uninstall --unused
 }
 
-update_brew() {
-  print_header "Homebrew Update"
+_update_brew() {
+  local outdated_packages
 
-  run_step "Homebrew update completed." "Error during Homebrew update." brew update
+  _print_section_header "Homebrew Update"
 
-  if brew outdated | grep -q .; then
-    run_step "Homebrew packages upgraded." "Error during Homebrew upgrade." brew upgrade
-    run_step "Homebrew cleanup completed." "Error during Homebrew cleanup." brew cleanup --prune=all
-    run_step "Unused Homebrew packages removed." "Error during Homebrew autoremove." brew autoremove
+  _run_reported_step "Homebrew update completed." "Error during Homebrew update." brew update
+
+  if ! outdated_packages="$(brew outdated)"; then
+    printf 'Error checking outdated Homebrew packages.\n' >&2
+    return 1
+  fi
+
+  if [[ -n "$outdated_packages" ]]; then
+    _run_reported_step "Homebrew packages upgraded." "Error during Homebrew upgrade." brew upgrade
+    _run_reported_step "Homebrew cleanup completed." "Error during Homebrew cleanup." brew cleanup --prune=all
+    _run_reported_step "Unused Homebrew packages removed." "Error during Homebrew autoremove." brew autoremove
   else
     printf 'All Homebrew packages are up to date. 🎉\n'
   fi
 }
 
+# CLI
+
 main() {
+  local package_manager_found=false
+
   while (($# > 0)); do
     case "$1" in
     -h | --help)
-      show_help
+      _show_help
       return 0
       ;;
     *)
@@ -99,10 +114,30 @@ main() {
     esac
   done
 
-  have_command apt && update_apt
-  have_command dnf && update_dnf
-  have_command flatpak && update_flatpak
-  have_command brew && update_brew
+  if _has_command apt; then
+    _update_apt
+    package_manager_found=true
+  fi
+
+  if _has_command dnf; then
+    _update_dnf
+    package_manager_found=true
+  fi
+
+  if _has_command flatpak; then
+    _update_flatpak
+    package_manager_found=true
+  fi
+
+  if _has_command brew; then
+    _update_brew
+    package_manager_found=true
+  fi
+
+  if [[ "$package_manager_found" == false ]]; then
+    printf 'No supported package manager found.\n' >&2
+    return 1
+  fi
 }
 
 main "$@"
