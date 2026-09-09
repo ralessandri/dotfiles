@@ -11,7 +11,7 @@ config.font_size = 11
 config.hide_tab_bar_if_only_one_tab = true
 
 config.colors = {
-  background = "#282c34",
+  background = "#242426",
 }
 config.inactive_pane_hsb = {
   brightness = 0.5,
