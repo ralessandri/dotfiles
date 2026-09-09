@@ -34,7 +34,7 @@ EOF
 }
 
 _print_section_header() {
-  printf ':: %s\n\n' "$1"
+  printf '\n:: %s\n\n' "$1"
 }
 
 _run_reported_step() {
