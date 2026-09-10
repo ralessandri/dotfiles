@@ -1,5 +1,8 @@
 onboarding = false
 
+[theme]
+name= "terminal"
+
 [ui]
 sidebar_start_collapsed = false
 sidebar_collapsed_mode = "compact"

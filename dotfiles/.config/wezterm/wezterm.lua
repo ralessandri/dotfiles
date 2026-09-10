@@ -5,14 +5,11 @@ local config = {}
 local mod = "ALT"
 local mod_shift = mod .. "|SHIFT"
 
-config.color_scheme = "Catppuccin Macchiato"
+config.color_scheme = "dank-theme"
 config.font = wezterm.font("JetBrainsMono Nerd Font")
 config.font_size = 11
 config.hide_tab_bar_if_only_one_tab = true
 
-config.colors = {
-  background = "#242426",
-}
 config.inactive_pane_hsb = {
   brightness = 0.5,
   saturation = 0.1,
