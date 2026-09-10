@@ -9,6 +9,13 @@ window-rule {
 }
 
 window-rule {
+  match app-id="^alacritty-herdr$"
+  background-effect {
+    blur true
+  }
+}
+
+window-rule {
   // match app-id="calibre-ebook-edit"
   // open-floating true
 }
