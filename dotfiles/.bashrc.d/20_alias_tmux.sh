@@ -1,14 +1,21 @@
+# Open the tmux session manager
 alias tm='tm.sh'
 
-# --- Shortcuts (frequently used, kept short) ---
+# Attach to an existing tmux session or create one
 tma() { tmsa "$@"; }
+
+# Create a new tmux session
 tmn() { tmsn "$@"; }
 
+# List tmux sessions
 alias tml='tmux list-sessions'
 
 # alias tmks='tmux kill-session -t'
+
+# Kill all tmux sessions except the current one
 alias tmksall='tmux kill-session -a'
 
+# Attach to a selected tmux session or create one
 tmsa() {
   if ! command -v gum &>/dev/null; then
     echo "Error: gum is not installed. See https://github.com/charmbracelet/gum" >&2
@@ -42,6 +49,7 @@ tmsa() {
   fi
 }
 
+# Create or attach to a named tmux session
 tmsn() {
   if ! command -v gum &>/dev/null; then
     echo "Error: gum is not installed. See https://github.com/charmbracelet/gum" >&2
@@ -66,6 +74,7 @@ tmsn() {
   tmux new-session ${session_name:+-s "$session_name"}
 }
 
+# Select and kill one or more tmux sessions
 tmsk() {
   if ! command -v gum &>/dev/null; then
     echo "Error: gum is not installed. See https://github.com/charmbracelet/gum" >&2

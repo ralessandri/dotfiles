@@ -31,12 +31,16 @@ alias ....='cd ../../..'
 # Use bat as a replacement for cat
 alias cat='bat'
 
+# Restow managed dotfiles
+alias restow='(cd -- "$HOME/.stash" && stow -R dotfiles)'
+
 # Show directory sizes (current level only)
 alias du='du -h --max-depth=1'
 
 # Short directory listing
 alias l='ls -CF'
 
+# List all entries in a single column with directories first
 alias l1='eza -1a --group-directories-first'
 
 # List all files except . and ..
@@ -45,6 +49,7 @@ alias la='ls -A'
 # Detailed directory listing
 alias ll='eza -al --icons --group-directories-first'
 
+# Display a two-level directory tree with icons
 alias lt='eza -al --tree -L 2 --icons'
 
 # Detailed directory listing with human-readable file sizes
@@ -232,6 +237,7 @@ alias sest='sestatus'
 # Export the current DDEV database with a timestamp
 alias ddev-dump='ddev export-db > $(basename $(pwd))-$(date +%Y%m%d-%H%M%S).sql.gz'
 
+# Open Neovim
 alias n='nvim'
 
 ###############################################################################
@@ -244,8 +250,10 @@ alias controller-on='sudo bash -c "echo Y > /sys/module/bluetooth/parameters/dis
 # Re-enable ERTM
 alias controller-off='sudo bash -c "echo N > /sys/module/bluetooth/parameters/disable_ertm" && echo ERTM activated'
 
+# Run setup Just recipes
 alias must='just --justfile "$STASH_ROOT_DIR/setup/justfile"'
 
+# Run global Just recipes
 alias gust='just -g'
 
 ###############################################################################
@@ -254,6 +262,9 @@ alias gust='just -g'
 
 # Basic ai connector
 alias ai="ai.sh"
+
+# Browse documented Bash aliases and functions
+alias bash-help='bash-help.sh'
 
 # Generate an AI-assisted Git commit message
 alias ai-commit='ai-commit.sh'

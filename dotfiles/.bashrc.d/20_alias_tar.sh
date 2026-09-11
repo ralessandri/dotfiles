@@ -1,4 +1,7 @@
+# Extract a tar archive verbosely
 alias untar="tar xfv"
+
+# List tar archive contents
 alias tarl="tar tf"
 
 # Function to list the first N levels of a tar archive
@@ -26,6 +29,7 @@ tarln() {
     }' | sort -u
 }
 
+# Extract a tar archive or one of its directories into a target directory
 untarto() {
     # Usage check
     if [ -z "$1" ] || [ -z "$2" ]; then

@@ -93,3 +93,8 @@ export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:-} \
   --color=separator:#${FZF_PRIMARY} \
   --color=spinner:#${FZF_PRIMARY} \
 "
+
+# Load fzf key bindings and fuzzy completion for Bash.
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --bash)
+fi

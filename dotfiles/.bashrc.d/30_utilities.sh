@@ -29,17 +29,39 @@ open() {
 # Search
 ###############################################################################
 
-# Search for files using fd and preview them with bat
+# Search file contents with ripgrep and open a selected match in the editor
 #
 # Usage:
-#   ff
-#   ff nginx
-#   ff Dockerfile
+#   fif nginx
+#   fif Dockerfile
 fif() {
-  fd . -H --exclude .git --type f |
+  local query
+  local selection
+  local file
+  local line
+
+  query="${1:-}"
+  if [[ -z "$query" ]]; then
+    printf '%s\n' "Usage: fif <search-term>" >&2
+    return 2
+  fi
+
+  selection=$(rg \
+    --line-number \
+    --no-heading \
+    --smart-case \
+    --hidden \
+    --glob '!.git' \
+    -- "$query" |
     fzf \
-      --query="$*" \
-      --preview='bat --style=numbers --color=always --line-range=:100 {}'
+      --delimiter ':' \
+      --nth '3..' \
+      --preview='bat --color=always --style=numbers --highlight-line {2} {1}')
+
+  [[ -z "$selection" ]] && return
+
+  IFS=: read -r file line _ <<<"$selection"
+  "${EDITOR:-vim}" "+${line}" "$file"
 }
 
 ###############################################################################
@@ -130,16 +152,36 @@ glog() {
   [[ -n "$commit" ]] && git show "$commit"
 }
 
+# Change to a Git worktree selected with fzf
+gwt() {
+  local worktree
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    printf '%s\n' "gwt: not inside a Git worktree" >&2
+    return 1
+  fi
+
+  worktree=$(git worktree list --porcelain |
+    sed -n 's/^worktree //p' |
+    fzf --preview='git -C {} status --short --branch')
+
+  [[ -n "$worktree" ]] && cd -- "$worktree"
+}
+
 # Select and kill a process with fzf
 fkill() {
-  local pid
-  dnf repoquery --userinstalled
-  pid=$(ps -ef |
-    sed 1d |
-    fzf -m |
-    awk '{print $2}')
+  local selection
+  local -a pids
 
-  [[ -n "$pid" ]] && kill "$pid"
+  selection=$(ps -eo pid=,user=,stat=,args= |
+    fzf --multi)
+
+  [[ -z "$selection" ]] && return
+
+  mapfile -t pids < <(awk '{print $1}' <<<"$selection")
+  gum confirm "Terminate ${#pids[@]} selected process(es)?" || return
+
+  kill "${pids[@]}"
 }
 
 # Select an environment variable with fzf
@@ -179,4 +221,16 @@ ssh-up() {
 # Terminates the SSH agent running for the current shell session, if any.
 ssh-down() {
   [ -n "$SSH_AGENT_PID" ] && eval "$(ssh-agent -k)"
+}
+
+# Open Yazi and change to the directory selected when it exits.
+function yy() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+  local cwd
+
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
 }
