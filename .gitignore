@@ -5,11 +5,16 @@
 /theme/backgrounds
 /theme/icons
 
-dotfiles/.config/niri/dms/*
-!dotfiles/.config/niri/dms/binds.kdl
-!dotfiles/.config/niri/dms/windowrules.kdl
-dotfiles/.config/niri/config.kdl.*
+/dotfiles/.config/niri/dms/*
+!/dotfiles/.config/niri/dms/binds.kdl
+!/dotfiles/.config/niri/dms/windowrules.kdl
+/dotfiles/.config/niri/config.kdl.*
 
-dotfiles/.config/alacritty/dank-theme.toml
-dotfiles/.config/wofi/style.css
-dotfiles/.config/ghostty/themes
+/dotfiles/.config/alacritty/dank-theme.toml
+/dotfiles/.config/wofi/style.css
+/dotfiles/.config/ghostty/themes
+
+/dotfiles/.config/yazi/flavors
+/dotfiles/.config/yazi/plugins
+
+/issues
