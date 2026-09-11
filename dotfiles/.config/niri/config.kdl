@@ -309,9 +309,10 @@ animations {
 }
 
 layer-rule {
-  match namespace="^wofi$"
+  match namespace="^rofi$"
   background-effect {
-    // blur true
+    blur true
+    xray false
   }
 
 }
