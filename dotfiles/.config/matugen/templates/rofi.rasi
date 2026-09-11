@@ -5,8 +5,8 @@
     normal-background:            transparent;
     normal-foreground:            @foreground;
 
-    window-background:            {{colors.background.default.rgba}};
-    window-bordercolor:            {{colors.primary.default.hex}};
+    window-background:            {{colors.background.default.hex}};
+    window-bordercolor:           {{colors.primary.default.hex}};
 
     lightbg:                      {{colors.surface_container.default.hex}};
     lightfg:                      {{colors.on_surface_variant.default.hex}};
