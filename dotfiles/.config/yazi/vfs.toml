@@ -1,0 +1,9 @@
+[sftp.aspire]
+host = "aspire.local"
+user = "rene"
+port = 22
+
+[sftp.macbook]
+host = "macbook.local"
+user = "rene"
+port = 22

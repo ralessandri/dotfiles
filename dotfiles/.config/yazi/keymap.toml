@@ -1,4 +1,8 @@
 [mgr]
 prepend_keymap = [
+    { on = "<Enter>", run = "plugin smart-enter", desc = "Enter directory or open file" },
+    { on = "l", run = "plugin smart-enter", desc = "Enter directory or open file" },
     { on = "M", run = "plugin mount", desc = "Mount manager" },
+    { on = [ "g", "m" ], run = "cd sftp://macbook", desc = "Go to MacBook" },
+    { on = [ "g", "a" ], run = "cd sftp://aspire", desc = "Go to Aspire" },
 ]
