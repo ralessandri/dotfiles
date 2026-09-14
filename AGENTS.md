@@ -32,7 +32,7 @@
 - Keep functions focused. Add English comments only when names do not make purpose, inputs, side effects, or failure behavior clear. Prefer self-explanatory code and avoid obvious what-comments. Preserve and add why-comments for workarounds, Fedora/package constraints, and ordering dependencies; do not remove them as boilerplate unless requested. Do not add file-header blocks; convey purpose through the file name, structure, and `--help`.
 - Follow `.editorconfig`; use 2-space indentation and no tabs. Quote expansions as `"${variable}"`; use `$(...)`, `[[ ... ]]`, and arrays for argument lists.
 - Use `lower_snake_case` for functions and locals; reserve uppercase for constants. Prefix internal helpers with `_`. For an existing helper, call out the required rename and get approval; then apply it consistently within the approved scope. Exclude executable entry points, tool/Just entry points, aliases, and interactive shell functions. `_` documents intent only; Bash has no true visibility.
-- Use `printf` for user messages; send errors to stderr and exit non-zero. Terminal section headers use `:: ` followed by a blank line, for example `printf ':: %s\n\n' "Heading"`; do not use this for status or error messages.
+- Use `printf` for user messages; send errors to stderr and exit non-zero. Terminal section headers use `:: ` with a blank line before and after, for example `printf '\n:: %s\n\n' "Heading"`; do not use this for status or error messages.
 - Validate genuinely variable prerequisites before changes, make reruns safe where practical, avoid `eval`, and avoid prompts unless a user choice is required.
 
 ## Interactive UI (gum / fzf)
@@ -40,6 +40,12 @@
 - Prefer `gum` and `fzf` over raw `read` or `select` when they improve prompts, lists, or confirmations. They are guaranteed available: add no checks or fallbacks.
 - Do not hardcode colors, styles, hex codes, or ANSI values. Reference global Matugen theme values; if their script-facing source is unknown, report it as an open item rather than guess.
 - Keep UI direct for this fixed personal setup: no TTY or portability overhead. Other Bash rules, including variable-prerequisite validation and `_` naming, still apply. These rules concern terminal UX, not agent approval.
+
+## Issue Specifications
+
+- Store concrete, AI-executable task specifications in `issues/`; keep this directory free of templates, indexes, logs, and other agent metadata.
+- Name files `<source>-<issue-id>-<short-kebab-case-description>.md`; use `manual` as the source when no external issue exists.
+- Use `.ai/templates/task-spec.md` as the template. Record unresolved decisions explicitly rather than inferring them.
 
 ## Validation
 
