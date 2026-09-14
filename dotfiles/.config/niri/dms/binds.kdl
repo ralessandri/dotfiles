@@ -4,9 +4,12 @@ binds {
     Mod+Ctrl+L hotkey-overlay-title="Lock Screen" { spawn "dms" "ipc" "call" "lock" "lock"; }
     Mod+Ctrl+P hotkey-overlay-title="Toggle Power Profile" { spawn "dms" "ipc" "powerprofile" "toggle"; }
     Mod+Ctrl+T hotkey-overlay-title="Toggle System Monitor" { spawn "dms" "ipc" "call" "processlist" "focusOrToggle"; }
+    Mod+N hotkey-overlay-title="Notepad: Toggle" { spawn "dms" "ipc" "call" "notepad" "toggle"; }
     Mod+Shift+Alt+Comma hotkey-overlay-title="Toggle Notification Center" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
+    Mod+Shift+W hotkey-overlay-title="Wallpaper Carousel" { spawn "dms" "ipc" "wallpaperCarousel" "toggle"; }
     Mod+V hotkey-overlay-title="Clipboard: Toggle" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
     Mod+X hotkey-overlay-title="Toggle Power Menu" { spawn "dms" "ipc" "powermenu" "toggle"; }
+    Mod+Shift+Space hotkey-overlay-title="Theme Switcher" { spawn "dms-theme-switcher.sh"; }
     Mod+space hotkey-overlay-title="Spotlight Bar: Toggle" { spawn "dms" "ipc" "call" "spotlight-bar" "toggle"; }
     Mod+Ctrl+Down hotkey-overlay-title="Move Window Down" { move-window-down-or-to-workspace-down; }
     Mod+Ctrl+Up hotkey-overlay-title="Move Window Up" { move-window-up-or-to-workspace-up; }
