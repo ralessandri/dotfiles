@@ -54,3 +54,8 @@ firmware:
 [group('hardware')]
 nvidia580:
     ../../tasks/fedora-nvidia580-install.sh
+
+# Install Wi-Fi support for the Intel Dual Band Wireless-AC 3168NGW.
+[group('hardware')]
+wifi-firmware:
+    ../../tasks/fedora-wifi-firmware-install.sh

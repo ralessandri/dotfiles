@@ -21,6 +21,11 @@ sudo dnf install -y \
   dms \
   matugen
 
+if gum confirm 'Install dms-greeter?'; then
+  printf 'Installing dms-greeter...\n'
+  sudo dnf install -y dms-greeter
+fi
+
 printf 'Integrating DMS with Niri...\n'
 
 systemctl --user add-wants niri.service dms
