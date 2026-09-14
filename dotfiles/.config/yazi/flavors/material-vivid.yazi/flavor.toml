@@ -1,128 +1,130 @@
 [mgr]
-cwd = { fg = "#2196f3" }
-find_keyword = { fg = "#2196f3", bold = true }
-find_position = { fg = "#676c71", bold = true }
-symlink_target = { fg = "#676c71", italic = true }
-marker_copied = { fg = "#2196f3", bg = "#2196f3" }
-marker_cut = { fg = "#f44336", bg = "#f44336" }
-marker_marked = { fg = "#80868b", bg = "#80868b" }
-marker_selected = { fg = "#2196f3", bg = "#2196f3" }
-count_copied = { fg = "#202124", bg = "#2196f3" }
-count_cut = { fg = "#202124", bg = "#f44336" }
-count_selected = { fg = "#202124", bg = "#2196f3" }
-border_style = { fg = "#44464d" }
+cwd = { fg = "lightblue" }
+find_keyword = { fg = "lightblue", bold = true }
+find_position = { fg = "gray", bold = true }
+symlink_target = { fg = "gray", italic = true }
+marker_copied = { fg = "lightblue", bg = "lightblue" }
+marker_cut = { fg = "lightred", bg = "lightred" }
+marker_marked = { fg = "gray", bg = "gray" }
+marker_selected = { fg = "lightblue", bg = "lightblue" }
+count_copied = { fg = "black", bg = "lightblue" }
+count_cut = { fg = "black", bg = "lightred" }
+count_selected = { fg = "black", bg = "lightblue" }
+border_style = { fg = "darkgray" }
 
 [tabs]
-active = { fg = "#2196f3", bg = "#27292c", bold = true }
-inactive = { fg = "#676c71", bg = "#202124" }
+active = { fg = "lightblue", bg = "darkgray", bold = true }
+inactive = { fg = "gray", bg = "black" }
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
 
 [mode]
-normal_main = { fg = "#202124", bg = "#2196f3", bold = true }
-normal_alt = { fg = "#2196f3", bg = "#323639" }
-select_main = { fg = "#202124", bg = "#80868b", bold = true }
-select_alt = { fg = "#80868b", bg = "#323639" }
-unset_main = { fg = "#202124", bg = "#f44336", bold = true }
-unset_alt = { fg = "#f44336", bg = "#323639" }
+normal_main = { fg = "black", bg = "lightblue", bold = true }
+normal_alt = { fg = "lightblue", bg = "darkgray" }
+select_main = { fg = "black", bg = "gray", bold = true }
+select_alt = { fg = "gray", bg = "darkgray" }
+unset_main = { fg = "black", bg = "lightred", bold = true }
+unset_alt = { fg = "lightred", bg = "darkgray" }
 
 [indicator]
-parent = { fg = "#676c71", bg = "#27292c" }
-current = { fg = "#2196f3", bg = "#323639" }
-preview = { fg = "#2196f3" }
+parent = { fg = "gray", bg = "black" }
+current = { fg = "lightblue", bg = "darkgray" }
+preview = { fg = "lightblue" }
 
 [status]
-overall = { fg = "#676c71", bg = "#27292c" }
-perm_sep = { fg = "#44464d" }
-perm_type = { fg = "#2196f3" }
-perm_read = { fg = "#80868b" }
-perm_write = { fg = "#f44336" }
-perm_exec = { fg = "#2196f3" }
-progress_normal = { fg = "#2196f3", bg = "#323639" }
-progress_error = { fg = "#f44336", bg = "#323639" }
+overall = { fg = "gray", bg = "black" }
+perm_sep = { fg = "darkgray" }
+perm_type = { fg = "lightblue" }
+perm_read = { fg = "gray" }
+perm_write = { fg = "lightred" }
+perm_exec = { fg = "lightblue" }
+progress_normal = { fg = "lightblue", bg = "darkgray" }
+progress_error = { fg = "lightred", bg = "darkgray" }
 
 [which]
-mask = { bg = "#202124" }
-cand = { fg = "#2196f3" }
-rest = { fg = "#676c71" }
-desc = { fg = "#80868b" }
-separator_style = { fg = "#44464d" }
+mask = { bg = "black" }
+cand = { fg = "lightblue" }
+rest = { fg = "gray" }
+desc = { fg = "gray" }
+separator_style = { fg = "darkgray" }
 
 [confirm]
-border = { fg = "#2196f3" }
-title = { fg = "#2196f3" }
-btn_yes = { fg = "#202124", bg = "#2196f3" }
-btn_no = { fg = "#80868b", bg = "#323639" }
+border = { fg = "lightblue" }
+title = { fg = "lightblue" }
+btn_yes = { fg = "black", bg = "lightblue" }
+btn_no = { fg = "gray", bg = "darkgray" }
 
 [spot]
-border = { fg = "#2196f3" }
-title = { fg = "#2196f3" }
-tbl_col = { fg = "#2196f3" }
-tbl_cell = { fg = "#80868b", bg = "#323639" }
+border = { fg = "lightblue" }
+title = { fg = "lightblue" }
+tbl_col = { fg = "lightblue" }
+tbl_cell = { fg = "gray", bg = "darkgray" }
 
 [notify]
-title_info = { fg = "#2196f3" }
-title_warn = { fg = "#80868b" }
-title_error = { fg = "#f44336" }
+title_info = { fg = "lightblue" }
+title_warn = { fg = "gray" }
+title_error = { fg = "lightred" }
 
 [pick]
-border = { fg = "#2196f3" }
-active = { fg = "#2196f3", bold = true }
+border = { fg = "lightblue" }
+active = { fg = "lightblue", bold = true }
 
 [input]
-border = { fg = "#2196f3" }
-selected = { fg = "#202124", bg = "#323639" }
+border = { fg = "lightblue" }
+selected = { fg = "black", bg = "darkgray" }
 
 [cmp]
-border = { fg = "#2196f3" }
-active = { fg = "#80868b", bg = "#323639" }
+border = { fg = "lightblue" }
+active = { fg = "gray", bg = "darkgray" }
 
 [tasks]
-border = { fg = "#2196f3" }
-hovered = { fg = "#2196f3", bold = true }
+border = { fg = "lightblue" }
+hovered = { fg = "lightblue", bold = true }
 
 [help]
-on = { fg = "#2196f3" }
-run = { fg = "#80868b" }
-desc = { fg = "#676c71" }
-hovered = { fg = "#80868b", bg = "#323639", bold = true }
-footer = { fg = "#676c71", bg = "#27292c" }
+on = { fg = "lightblue" }
+run = { fg = "gray" }
+desc = { fg = "gray" }
+hovered = { fg = "gray", bg = "darkgray", bold = true }
+footer = { fg = "gray", bg = "black" }
 
 [filetype]
 rules = [
-  { mime = "image/*", fg = "#80868b" },
-  { mime = "{audio,video}/*", fg = "#80868b" },
-  { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "#80868b" },
-  { mime = "application/{pdf,doc,rtf}", fg = "#80868b" },
-  { mime = "vfs/{absent,stale}", fg = "#676c71" },
-  { url = "*", is = "orphan", fg = "#f44336" },
-  { url = "*", is = "exec", fg = "#80868b" },
-  { url = "*", is = "dummy", fg = "#f44336" },
-  { url = "*/", is = "dummy", fg = "#f44336" },
-  { url = "*/", fg = "#80868b" },
-  { url = "*", fg = "#80868b" },
+  { mime = "image/*", fg = "gray" },
+  { mime = "{audio,video}/*", fg = "gray" },
+  { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "gray" },
+  { mime = "application/{pdf,doc,rtf}", fg = "gray" },
+  { mime = "vfs/{absent,stale}", fg = "gray" },
+  { url = "*", is = "orphan", fg = "lightred" },
+  { url = "*", is = "exec", fg = "gray" },
+  { url = "*", is = "dummy", fg = "lightred" },
+  { url = "*/", is = "dummy", fg = "lightred" },
+  { url = "*/", fg = "gray" },
+  { url = "*", fg = "gray" },
 ]
 
 [icon]
 files = []
 exts = []
 dirs = [
-  { name = ".config", text = "", fg = "#2196f3" },
-  { name = ".git", text = "", fg = "#2196f3" },
-  { name = ".github", text = "", fg = "#2196f3" },
-  { name = ".local", text = "", fg = "#2196f3" },
-  { name = ".ssh", text = "󰣀", fg = "#2196f3" },
-  { name = "Desktop", text = "", fg = "#2196f3" },
-  { name = "Documents", text = "", fg = "#2196f3" },
-  { name = "Downloads", text = "", fg = "#2196f3" },
-  { name = "Music", text = "", fg = "#2196f3" },
-  { name = "Pictures", text = "", fg = "#2196f3" },
-  { name = "Public", text = "", fg = "#2196f3" },
-  { name = "Videos", text = "", fg = "#2196f3" },
+  { name = ".config", text = "", fg = "lightblue" },
+  { name = ".git", text = "", fg = "lightblue" },
+  { name = ".github", text = "", fg = "lightblue" },
+  { name = ".local", text = "", fg = "lightblue" },
+  { name = ".ssh", text = "󰣀", fg = "lightblue" },
+  { name = "Desktop", text = "", fg = "lightblue" },
+  { name = "Documents", text = "", fg = "lightblue" },
+  { name = "Downloads", text = "", fg = "lightblue" },
+  { name = "Music", text = "", fg = "lightblue" },
+  { name = "Pictures", text = "", fg = "lightblue" },
+  { name = "Public", text = "", fg = "lightblue" },
+  { name = "Videos", text = "", fg = "lightblue" },
 ]
 conds = [
-  { if = "orphan", text = "", fg = "#f44336" },
-  { if = "link", text = "", fg = "#2196f3" },
-  { if = "dir & hovered", text = "", fg = "#2196f3" },
-  { if = "dir", text = "", fg = "#2196f3" },
-  { if = "exec", text = "", fg = "#2196f3" },
-  { if = "!dir", text = "", fg = "#2196f3" },
+  { if = "orphan", text = "", fg = "lightred" },
+  { if = "link", text = "", fg = "lightblue" },
+  { if = "dir & hovered", text = "", fg = "lightblue" },
+  { if = "dir", text = "", fg = "lightblue" },
+  { if = "exec", text = "", fg = "lightblue" },
+  { if = "!dir", text = "", fg = "lightblue" },
 ]
