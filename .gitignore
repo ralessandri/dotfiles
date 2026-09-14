@@ -14,7 +14,11 @@
 /dotfiles/.config/wofi/style.css
 /dotfiles/.config/ghostty/themes
 
-/dotfiles/.config/yazi/flavors
+/dotfiles/.config/yazi/flavors/*
+!/dotfiles/.config/yazi/flavors/material-vivid.yazi/
+/dotfiles/.config/yazi/flavors/material-vivid.yazi/*
+!/dotfiles/.config/yazi/flavors/material-vivid.yazi/flavor.toml
+!/dotfiles/.config/yazi/flavors/material-vivid.yazi/tmtheme.xml
 /dotfiles/.config/yazi/plugins
 
 /issues
