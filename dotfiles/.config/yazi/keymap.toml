@@ -3,6 +3,11 @@ prepend_keymap = [
     { on = "<Enter>", run = "plugin smart-enter", desc = "Enter directory or open file" },
     { on = "l", run = "plugin smart-enter", desc = "Enter directory or open file" },
     { on = "M", run = "plugin mount", desc = "Mount manager" },
+    { on = "!", run = 'shell "$SHELL" --block', desc = "Open shell here" },
+    { on = [ "g", "g" ], run = "shell --block -- lazygit", desc = "Open Lazygit here" },
     { on = [ "g", "m" ], run = "cd sftp://macbook", desc = "Go to MacBook" },
     { on = [ "g", "a" ], run = "cd sftp://aspire", desc = "Go to Aspire" },
+    { on = [ "g", "t" ], run = 'shell --orphan alacritty --working-directory "$PWD"', desc = "Open terminal here" },
+    { on = "q", run = "plugin confirm-quit", desc = "Quit with confirmation for multiple tabs" },
+    { on = [ "t", "t" ], run = "plugin smart-tab", desc = "Create tab in hovered directory" },
 ]
