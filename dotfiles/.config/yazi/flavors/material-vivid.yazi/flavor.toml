@@ -112,12 +112,14 @@ dirs = [
   { name = ".github", text = "", fg = "lightblue" },
   { name = ".local", text = "", fg = "lightblue" },
   { name = ".ssh", text = "󰣀", fg = "lightblue" },
+  { name = "Code", text = "󰆍", fg = "lightblue" },
   { name = "Desktop", text = "", fg = "lightblue" },
   { name = "Documents", text = "", fg = "lightblue" },
   { name = "Downloads", text = "", fg = "lightblue" },
   { name = "Music", text = "", fg = "lightblue" },
   { name = "Pictures", text = "", fg = "lightblue" },
   { name = "Public", text = "", fg = "lightblue" },
+  { name = "Templates", text = "󰉕", fg = "lightblue" },
   { name = "Videos", text = "", fg = "lightblue" },
 ]
 conds = [
