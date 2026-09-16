@@ -35,7 +35,7 @@ binds {
     Mod+Return hotkey-overlay-title="Open Terminal" { spawn "alacritty"; }
     Mod+Shift+B hotkey-overlay-title="Open Browser Selector" { spawn "rofi-browser.sh"; }
     Mod+Shift+H hotkey-overlay-title="Open SSH Connections" { spawn "rofi" "-show" "ssh" "-ssh-command" "alacritty -e herdr --remote {host}"; }
-    Mod+Shift+Return hotkey-overlay-title="Focus Firefox" { spawn "niri-cycle.sh" "org.mozilla.firefox" "firefox"; }
+    Mod+Shift+Return hotkey-overlay-title="Focus Firefox" { spawn "niri-cycle.sh" "org.mozilla.firefox" "flatpak" "run" "org.mozilla.firefox"; }
     Mod+T hotkey-overlay-title="Toggle Floating" { spawn "niri-toggle-floating.sh"; }
     Mod+Y hotkey-overlay-title="Open YouTube" { spawn "gtk-launch" "Youtube"; }
     Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
