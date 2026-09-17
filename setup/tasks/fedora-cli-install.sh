@@ -19,12 +19,20 @@ sudo dnf install -y \
   gum \
   just \
   lazygit \
+  libnotify \
   neovim \
+  nss-mdns \
   jq \
   rofi \
   ripgrep \
   shfmt \
   stow \
+  tar \
+  tree \
+  tuned \
+  tuned-ppd \
+  udisks2 \
+  xdg-user-dirs \
   zoxide
 
 printf 'Installing Herdr...\n'
@@ -40,8 +48,8 @@ sudo flatpak install -y flathub org.mozilla.firefox
 printf 'Installing JetBrainsMono Nerd Font...\n'
 font_dir="${HOME}/.local/share/fonts/JetBrainsMono"
 mkdir -p "${font_dir}"
-curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz \
-  | tar -xJf - -C "${font_dir}"
+curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz |
+  tar -xJf - -C "${font_dir}"
 fc-cache -f "${font_dir}"
 
 printf '\nCLI tools setup complete.\n'

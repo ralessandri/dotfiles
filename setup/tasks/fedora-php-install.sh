@@ -17,11 +17,12 @@ sudo dnf install -y \
   php-pecl-apcu \
   php-pecl-igbinary \
   php-pecl-imagick \
-  php-pecl-memcache \
-  php-pecl-memcached \
   php-pecl-msgpack \
-  php-pecl-redis6 \
-  php-pecl-xmlrpc \
   php-pecl-zip
+
+if gum confirm 'Install Composer?'; then
+  printf 'Installing Composer...\n'
+  sudo dnf install -y composer
+fi
 
 printf '\nPHP setup complete.\n'
