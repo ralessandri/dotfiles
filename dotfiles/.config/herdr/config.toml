@@ -12,22 +12,36 @@ show_agent_labels_on_pane_borders = true
 agent_panel_sort = "priority"
 [keys]
 prefix = "ctrl+a"
-split_vertical   = ["prefix+h", "ctrl+shift+right"]
-split_horizontal = ["prefix+v", "ctrl+shift+down"]
+goto = ["prefix+g", "alt+shift+p"]
+toggle_sidebar = ["prefix+b", "alt+shift+b"]
+new_workspace = ["prefix+shift+n", "alt+shift+n"]
+
+new_worktree = ["prefix+shift+g", "alt+shift+g"]
+open_worktree = ["prefix+shift+o", "alt+shift+o"]
+remove_worktree = "prefix+alt+d"
+
+split_vertical = ["prefix+v", "ctrl+shift+right", "alt+shift+h"]
+split_horizontal = ["prefix+minus", "ctrl+shift+down", "alt+shift+v"]
 close_pane = ["prefix+x", "ctrl+shift+left"]
 
-new_tab = "prefix+c"
-rename_tab = "prefix+,"
+new_tab = ["prefix+c", "alt+shift+c"]
+rename_tab = ["prefix+,", "alt+shift+t"]
+previous_tab = ["prefix+p", "alt+shift+u"]
+next_tab = ["prefix+n", "alt+shift+i"]
 rename_workspace = "prefix+$"
 rename_pane = "prefix+."
 
-open_worktree   = "prefix+shift+o"
-remove_worktree = "prefix+alt+d"
+focus_pane_left = ["prefix+h", "alt+left"]
+focus_pane_right = ["prefix+l", "alt+right"]
+focus_pane_up = ["prefix+k", "alt+up"]
+focus_pane_down = ["prefix+j", "alt+down"]
 
-focus_pane_left  = "alt+left"
-focus_pane_right = "alt+right"
-focus_pane_up    = "alt+up"
-focus_pane_down  = "alt+down"
+resize_mode = "prefix+r"
+resize_pane_left = "alt+shift+left"
+resize_pane_right = "alt+shift+right"
+resize_pane_up = "alt+shift+up"
+resize_pane_down = "alt+shift+down"
+zoom = ["prefix+z", "alt+shift+z"]
 
 [remote]
 manage_ssh_config = false
