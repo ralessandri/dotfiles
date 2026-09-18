@@ -22,8 +22,6 @@
 	amend = commit --amend --no-edit
 	history = log --oneline --graph --decorate --all
 	last = log -1 --stat
-[url "git@github.com:"]
-	insteadOf = https://github.com/
 [push]
 	autoSetupRemote = true
 	followTags = true

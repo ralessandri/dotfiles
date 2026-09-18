@@ -1,11 +1,14 @@
-# Search for files and directories with fd
-alias f='fd'
-
-# Search for files only with fd
-alias ff='fd -tf'
-
 # Search including hidden and ignored paths with fd
-alias fa='fd -u'
+alias fda='fd --hidden --no-ignore'
 
 # Search including hidden paths with fd
-alias fh='fd -H'
+alias fdh='fd --hidden'
+
+# Search for directories with fd
+alias fdd='fd --type directory'
+
+# Search for files with fd
+alias fdf='fd --type file'
+
+# Search for symbolic links with fd
+alias fdl='fd --type symlink'

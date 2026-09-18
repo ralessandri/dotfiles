@@ -79,6 +79,38 @@ fif() {
   "${EDITOR:-vim}" "+${line}" "$file"
 }
 
+# Rank files by ripgrep match count and open a selected file in the editor
+fifc() {
+  local query
+  local selection
+  local file
+
+  query="${1:-}"
+  if [[ -z "$query" ]]; then
+    printf '%s\n' "Usage: fifc <search-term>" >&2
+    return 2
+  fi
+
+  selection="$(
+    rg \
+      --count-matches \
+      --smart-case \
+      --hidden \
+      --glob '!.git' \
+      -- "$query" |
+    sort -t: -k2,2nr |
+    fzf \
+      --delimiter ':' \
+      --nth '1' \
+      --preview='rg --color=always --line-number --smart-case -- {q} {1}'
+  )" || return
+
+  [[ -z "$selection" ]] && return
+
+  file="${selection%:*}"
+  "${EDITOR:-vim}" "$file"
+}
+
 ###############################################################################
 # Navigation
 ###############################################################################

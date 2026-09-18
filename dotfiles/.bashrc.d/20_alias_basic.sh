@@ -32,7 +32,7 @@ alias ....='cd ../../..'
 alias cat='bat'
 
 # Restow managed dotfiles
-alias restow='(cd -- "$HOME/.stash" && stow -R dotfiles)'
+alias restow='(cd -- "$HOME/.stash" && stow -R --no-folding dotfiles)'
 
 # Show directory sizes (current level only)
 alias du='du -h --max-depth=1'
