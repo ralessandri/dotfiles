@@ -18,11 +18,6 @@ export STASH_ROOT_DIR
 # Bash history
 export HISTCONTROL=ignorespace:erasedups
 
-if [[ $- == *i* ]]; then
-  mkdir -p -- "${XDG_STATE_HOME}/bash"
-  HISTFILE="${XDG_STATE_HOME}/bash/history"
-fi
-
 # Tool configuration
 export EDITOR=nvim
 # export DOCKER_CONFIG="${XDG_CONFIG_HOME}/docker"
