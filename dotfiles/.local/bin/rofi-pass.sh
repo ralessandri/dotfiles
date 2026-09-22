@@ -34,7 +34,7 @@ _copy_temporary() {
 
   [[ -n "$value" ]] || return 1
 
-  printf '%s' "$value" | wl-copy
+  printf '%s' "$value" | wl-copy --sensitive
 
   (
     sleep "$CLIP_TIME"
@@ -81,7 +81,8 @@ entry="$(
 
 # Copy the password on Enter
 if [[ $status -eq 0 ]]; then
-  pass -c "$entry"
+  password="$(pass show "$entry" | head -n 1)"
+  _copy_temporary "$password"
   exit $?
 fi
 

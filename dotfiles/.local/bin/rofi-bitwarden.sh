@@ -8,6 +8,7 @@ readonly FLATPAK_APP_ID='com.bitwarden.desktop'
 
 declare -a BW_COMMAND=()
 unlocked_by_script=false
+loading_pid=''
 
 # Helpers
 show_help() {
@@ -51,6 +52,22 @@ _rofi_menu() {
   rofi -dmenu -i -p "$prompt" "$@"
 }
 
+_show_loading() {
+  rofi \
+    -e 'Loading Bitwarden vault…' \
+    -window-title 'Bitwarden' \
+    >/dev/null 2>&1 &
+  loading_pid="$!"
+}
+
+_dismiss_loading() {
+  [[ -n "$loading_pid" ]] || return 0
+
+  kill "$loading_pid" >/dev/null 2>&1 || true
+  wait "$loading_pid" 2>/dev/null || true
+  loading_pid=''
+}
+
 set_bw_command() {
   local native_bw
 
@@ -84,6 +101,8 @@ _bw() {
 
 # Clipboard handling
 cleanup() {
+  _dismiss_loading
+
   if [[ "$unlocked_by_script" == true ]]; then
     _bw lock >/dev/null 2>&1 ||
       printf 'rofi-bitwarden: could not lock the vault\n' >&2
@@ -129,6 +148,7 @@ unlock_vault() {
       continue
     fi
 
+    _show_loading
     BW_PASSWORD="$master_password"
     export BW_PASSWORD
     unset master_password
@@ -147,6 +167,7 @@ unlock_vault() {
       unset BW_PASSWORD
     fi
 
+    _dismiss_loading
     message='Password was not accepted. Try again, or press Esc to cancel.'
   done
 }
@@ -303,6 +324,7 @@ edit_entry() {
     break
   done
 
+  # Re-fetch immediately before editing to avoid overwriting concurrent changes.
   if ! _bw get item "$item_id" |
     jq --arg value "$value" "$update_filter" |
     _bw encode |
@@ -331,18 +353,24 @@ for command in jq rofi wl-copy wl-paste xdg-open; do
   require_command "$command"
 done
 
-set_bw_command
 trap cleanup EXIT
+_show_loading
+set_bw_command
 
 status="$(_bw status | jq -er '.status')" || die 'could not determine vault status'
 
 case "$status" in
 unlocked) ;;
-locked) unlock_vault ;;
+locked)
+  _dismiss_loading
+  unlock_vault
+  ;;
 unauthenticated)
+  _dismiss_loading
   die 'log into Bitwarden before using this script'
   ;;
 *)
+  _dismiss_loading
   die "unexpected vault status: $status"
   ;;
 esac
@@ -376,6 +404,7 @@ mapfile -t labels < <(jq -r '
 ' <<<"$items_json")
 mapfile -t item_ids < <(jq -r '.[].id' <<<"$items_json")
 
+_dismiss_loading
 ((${#labels[@]} > 0)) || exit 0
 
 selection_status=0

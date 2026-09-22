@@ -5,7 +5,8 @@ binds {
     Mod+Ctrl+P hotkey-overlay-title="Toggle Power Profile" { spawn "dms" "ipc" "powerprofile" "toggle"; }
     Mod+Ctrl+T hotkey-overlay-title="Toggle System Monitor" { spawn "dms" "ipc" "call" "processlist" "focusOrToggle"; }
     Mod+N hotkey-overlay-title="Notepad: Toggle" { spawn "dms" "ipc" "call" "notepad" "toggle"; }
-    Mod+P hotkey-overlay-title="Pass" { spawn "rofi-pass.sh"; }
+    Mod+P hotkey-overlay-title="Rofi Pass" { spawn "rofi-pass.sh"; }
+    Mod+Shift+P hotkey-overlay-title="Rofi Bitwarden" { spawn "rofi-bitwarden.sh"; }
     Mod+Shift+Alt+Comma hotkey-overlay-title="Toggle Notification Center" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
     Mod+Shift+W hotkey-overlay-title="Wallpaper Carousel" { spawn "dms" "ipc" "wallpaperCarousel" "toggle"; }
     Mod+V hotkey-overlay-title="Clipboard: Toggle" { spawn "dms" "ipc" "call" "clipboard" "toggle"; }
