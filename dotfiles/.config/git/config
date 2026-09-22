@@ -27,3 +27,5 @@
 	followTags = true
 [core]
 	editor = nvim
+[include]
+  path = ~/.config/git/config.local
