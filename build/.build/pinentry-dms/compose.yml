@@ -1,0 +1,29 @@
+services:
+  pinentry-dms-build:
+    image: golang:1.27.1-alpine3.24
+    working_dir: /build
+    environment:
+      HOST_UID: "${HOST_UID:-1000}"
+      HOST_GID: "${HOST_GID:-1000}"
+    volumes:
+      - .:/out:Z
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eux
+
+        apk add --no-cache git
+
+        git clone https://github.com/Pacman99/DankPinentry.git DankPinentry
+        cd DankPinentry
+        git checkout --detach 2a403dd67be8d346687af119cbd5314fe789bc94
+
+        CGO_ENABLED=0 go build \
+          -trimpath \
+          -buildvcs=true \
+          -ldflags='-s -w' \
+          -o /out/pinentry-dms \
+          ./cmd/pinentry-dms/
+
+        chown "$$HOST_UID:$$HOST_GID" /out/pinentry-dms

@@ -1,0 +1,9 @@
+[private]
+default:
+  @just -l
+
+build:
+  HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose run --rm pinentry-dms-build
+
+install:
+  install -Dm755 pinentry-dms "$HOME/.local/bin/pinentry-dms"
