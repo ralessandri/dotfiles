@@ -1,50 +1,79 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ ! -f /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:dejan:lazygit.repo ]]; then
+# COPR repositories
+enabled_repos="$(dnf repo list --enabled)"
+
+if ! awk -v repo_id='copr:copr.fedorainfracloud.org:dejan:lazygit' '$1 == repo_id { found = 1 } END { exit !found }' <<<"${enabled_repos}"; then
   printf 'Enabling lazygit COPR repository...\n'
   sudo dnf copr enable -y dejan/lazygit
 fi
 
-printf 'Installing CLI tools...\n'
+if ! awk -v repo_id='copr:copr.fedorainfracloud.org:mineiro:satty' '$1 == repo_id { found = 1 } END { exit !found }' <<<"${enabled_repos}"; then
+  printf 'Enabling satty COPR repository...\n'
+  sudo dnf copr enable -y mineiro/satty
+fi
 
-sudo dnf install -y \
-  bat \
-  eza \
-  fd-find \
-  flatpak \
-  fontconfig \
-  fzf \
-  git \
-  gum \
-  just \
-  lazygit \
-  libnotify \
-  neovim \
-  nss-mdns \
-  jq \
-  rofi \
-  ripgrep \
-  shfmt \
-  stow \
-  tar \
-  tree \
-  tuned \
-  tuned-ppd \
-  udisks2 \
-  xdg-user-dirs \
+# RPM packages
+packages=(
+  bat
+  curl
+  eza
+  fd-find
+  flatpak
+  fontconfig
+  fzf
+  git
+  gum
+  jq
+  just
+  lazygit
+  libnotify
+  neovim
+  nss-mdns
+  ripgrep
+  rofi
+  satty
+  shfmt
+  stow
+  tar
+  tesseract
+  tesseract-langpack-deu
+  tesseract-langpack-eng
+  tree
+  tuned
+  tuned-ppd
+  udisks2
+  xdg-user-dirs
+  xz
   zoxide
+)
 
-printf 'Installing Herdr...\n'
-curl -fsSL https://herdr.dev/install.sh | sh
+printf 'Installing CLI tools...\n'
+sudo dnf --refresh install -y "${packages[@]}"
 
+printf 'Updating CLI tools...\n'
+sudo dnf upgrade -y "${packages[@]}"
+
+# Herdr
+printf 'Installing or updating Herdr...\n'
+herdr_bin="${HOME}/.local/bin/herdr"
+if [[ -x "${herdr_bin}" ]]; then
+  "${herdr_bin}" update
+else
+  curl -fsSL https://herdr.dev/install.sh | sh
+fi
+
+# Flatpak
 printf 'Configuring Flathub...\n'
-sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+sudo flatpak remote-modify --enable flathub
 
-printf 'Installing Flatpak applications...\n'
-sudo flatpak install -y flathub org.chromium.Chromium
-sudo flatpak install -y flathub org.mozilla.firefox
+printf 'Installing or updating Flatpak applications...\n'
+sudo flatpak install -y --or-update flathub org.chromium.Chromium
+sudo flatpak install -y --or-update flathub org.mozilla.firefox
 
+# Nerd Font
 printf 'Installing JetBrainsMono Nerd Font...\n'
 font_dir="${HOME}/.local/share/fonts/JetBrainsMono"
 mkdir -p "${font_dir}"
