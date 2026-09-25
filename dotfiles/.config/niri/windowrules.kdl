@@ -37,3 +37,8 @@ window-rule {
   default-column-width { fixed 650; }
   default-window-height { fixed 400; }
 }
+
+window-rule {
+  match app-id="com.gabm.satty"
+  open-floating true
+}

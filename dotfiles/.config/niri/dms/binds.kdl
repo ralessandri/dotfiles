@@ -30,7 +30,7 @@ binds {
     Mod+Shift+T hotkey-overlay-title="Switch Tiling and Floating Focus" { switch-focus-between-floating-and-tiling; }
     Mod+Shift+Tab hotkey-overlay-title="Cycle Column Focus" { spawn-sh "niri msg action focus-column-right; niri msg action move-column-to-last; niri msg action focus-window-previous"; }
     Mod+A hotkey-overlay-title="ChatGPT" { spawn "niri-cycle.sh" "chrome-chatgpt.com__-Default" "gtk-launch" "ChatGPT"; }
-    Mod+Ctrl+Print hotkey-overlay-title="Extract Text From Screen" { spawn "capture-text.sh"; }
+    Mod+Ctrl+Print hotkey-overlay-title="Extract Text From Screen" { spawn "dms-screenshot-ocr.sh" "--notify"; }
     Mod+E hotkey-overlay-title="Open Yazi" { spawn "alacritty" "-e" "yazi"; }
     Mod+H hotkey-overlay-title="Focus Herdr" { spawn "niri-cycle.sh" "alacritty-herdr" "alacritty" "--class" "alacritty-herdr" "-e" "herdr"; }
     Mod+L hotkey-overlay-title="Open Neovim" { spawn "alacritty" "-e" "nvim"; }
@@ -42,4 +42,8 @@ binds {
     Mod+Y hotkey-overlay-title="Open YouTube" { spawn "gtk-launch" "Youtube"; }
     Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
     Mod+F1 hotkey-overlay-title="Show Keybindings" { show-hotkey-overlay; }
+
+    Print { spawn-sh "dms screenshot --stdout --no-file --no-clipboard | satty --filename -"; }
+    Ctrl+Print { spawn-sh "dms screenshot full --stdout --no-file --no-clipboard | satty --filename -"; }
+    Alt+Print { spawn-sh "dms screenshot window --stdout --no-file --no-clipboard | satty --filename -"; }
 }
