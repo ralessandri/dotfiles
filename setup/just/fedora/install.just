@@ -15,6 +15,11 @@ rpmfusion:
 cli:
     ../../tasks/fedora-cli-install.sh
 
+# Install LazyVim and optional editor tools.
+[group('development')]
+lazyvim:
+    ../../tasks/fedora-lazyvim-install.sh
+
 # Install Docker and configure it as a socket-activated service.
 [group('development')]
 docker:
