@@ -31,12 +31,12 @@ binds {
     Mod+Shift+Tab hotkey-overlay-title="Cycle Column Focus" { spawn-sh "niri msg action focus-column-right; niri msg action move-column-to-last; niri msg action focus-window-previous"; }
     Mod+A hotkey-overlay-title="ChatGPT" { spawn "niri-cycle.sh" "chrome-chatgpt.com__-Default" "gtk-launch" "ChatGPT"; }
     Mod+Ctrl+Print hotkey-overlay-title="Extract Text From Screen" { spawn "dms-screenshot-ocr.sh" "--notify"; }
-    Mod+E hotkey-overlay-title="Open Yazi" { spawn "alacritty" "-e" "yazi"; }
-    Mod+H hotkey-overlay-title="Focus Herdr" { spawn "niri-cycle.sh" "alacritty-herdr" "alacritty" "--class" "alacritty-herdr" "-e" "herdr"; }
-    Mod+L hotkey-overlay-title="Open Neovim" { spawn "alacritty" "-e" "nvim"; }
-    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "alacritty"; }
+    Mod+E hotkey-overlay-title="Open Yazi" { spawn "foot" "-e" "yazi"; }
+    Mod+H hotkey-overlay-title="Focus Herdr" { spawn "niri-cycle.sh" "foot-herdr" "foot" "--app-id" "foot-herdr" "-e" "herdr"; }
+    Mod+L hotkey-overlay-title="Open Neovim" { spawn "foot" "-e" "nvim"; }
+    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "foot"; }
     Mod+Shift+B hotkey-overlay-title="Open Browser Selector" { spawn "rofi-browser.sh"; }
-    Mod+Shift+H hotkey-overlay-title="Open SSH Connections" { spawn "rofi" "-show" "ssh" "-ssh-command" "alacritty -e herdr --remote {host}"; }
+    Mod+Shift+H hotkey-overlay-title="Open SSH Connections" { spawn "rofi" "-show" "ssh" "-ssh-command" "foot -e herdr --remote {host}"; }
     Mod+Shift+Return hotkey-overlay-title="Focus Firefox" { spawn "niri-cycle.sh" "org.mozilla.firefox" "flatpak" "run" "org.mozilla.firefox"; }
     Mod+T hotkey-overlay-title="Toggle Floating" { spawn "niri-toggle-floating.sh"; }
     Mod+Y hotkey-overlay-title="Open YouTube" { spawn "gtk-launch" "Youtube"; }
