@@ -68,20 +68,16 @@ _validate_settings() {
 }
 
 _validate_bar() {
-  local bar_id="${1}"
+  local _bar_id="${1}"
   local bar_count
 
-  bar_count="$(jq -r --arg bar "${bar_id}" "${jq_bar_filter} [.barConfigs[] | bar_entry(\$bar)] | length" "${dms_settings_file}")" ||
+  bar_count="$(jq -r --arg bar "${_bar_id}" "${jq_bar_filter} [.barConfigs[] | bar_entry(\$bar)] | length" "${dms_settings_file}")" ||
     _fail "Unable to read DMS bar configurations."
   case "${bar_count}" in
-  0) _fail "DMS bar ID does not exist: ${bar_id}" ;;
+  0) _fail "DMS bar ID does not exist: ${_bar_id}" ;;
   1) ;;
-  *) _fail "DMS bar ID is not unique: ${bar_id}" ;;
+  *) _fail "DMS bar ID is not unique: ${_bar_id}" ;;
   esac
-}
-
-_validate_property() {
-  _validate_properties "${1}" "${2}"
 }
 
 _validate_properties() {
@@ -107,13 +103,13 @@ _reload_dms_settings() {
 # Domain workflows
 
 _list_properties() {
-  local bar_id="${1}"
-  local json_output="${2}"
+  local _bar_id="${1}"
+  local _json_output="${2}"
 
-  if [[ "${json_output}" == true ]]; then
-    jq --arg bar "${bar_id}" "${jq_bar_filter} .barConfigs[] | bar_entry(\$bar)" "${dms_settings_file}"
+  if [[ "${_json_output}" == true ]]; then
+    jq --arg bar "${_bar_id}" "${jq_bar_filter} .barConfigs[] | bar_entry(\$bar)" "${dms_settings_file}"
   else
-    jq -r --arg bar "${bar_id}" \
+    jq -r --arg bar "${_bar_id}" \
       "${jq_bar_filter} .barConfigs[] | bar_entry(\$bar) | to_entries[] | \"\(.key): \(.value | tojson)\"" \
       "${dms_settings_file}"
   fi
@@ -123,7 +119,7 @@ _get_property() {
   local bar_id="${1}"
   local property_key="${2}"
 
-  _validate_property "${bar_id}" "${property_key}"
+  _validate_properties "${bar_id}" "${property_key}"
   jq -r --arg bar "${bar_id}" --arg key "${property_key}" \
     "${jq_bar_filter} .barConfigs[] | bar_entry(\$bar) | .[\$key] | if type == \"string\" then . else tojson end" \
     "${dms_settings_file}"
@@ -146,8 +142,9 @@ _add_update() {
 }
 
 _set_properties() {
-  local bar_id="${1}"
+  local _bar_id="${1}"
   local assignment
+  local jq_program
   local property_key
   local property_value
   local settings_dir
@@ -172,7 +169,7 @@ _set_properties() {
     update_keys+=("${1}")
     update_pairs+=("${1}" "${2}")
   fi
-  _validate_properties "${bar_id}" "${update_keys[@]}"
+  _validate_properties "${_bar_id}" "${update_keys[@]}"
   updates_json="$(_add_update "${update_pairs[@]}")" || _fail "Unable to prepare DMS bar update."
 
   [[ ! -L "${dms_settings_file}" ]] || _fail "DMS settings file must not be a symbolic link: ${dms_settings_file}"
@@ -180,20 +177,21 @@ _set_properties() {
   [[ -w "${settings_dir}" ]] || _fail "DMS settings directory is not writable: ${settings_dir}"
   temporary_file="$(mktemp "${settings_dir}/.settings.json.XXXXXX")" ||
     _fail "Unable to create temporary DMS settings file in: ${settings_dir}"
-  chown --reference="${dms_settings_file}" "${temporary_file}" ||
-    _fail "Unable to preserve DMS settings ownership."
-  chmod --reference="${dms_settings_file}" "${temporary_file}" ||
-    _fail "Unable to preserve DMS settings permissions."
 
-  jq --arg bar "${bar_id}" --argjson updates "${updates_json}" "${jq_bar_filter}
-    if ([.barConfigs[] | bar_entry(\$bar)] | length) != 1 then
-      error(\"bar ID changed during update\")
-    elif (.barConfigs[] | bar_entry(\$bar) | ([\$updates | keys[]] - (keys))) != [] then
-      error(\"bar properties changed during update\")
-    else
-      .barConfigs |= map(if ([bar_entry(\$bar)] | length) == 1 then . + \$updates else . end)
-    end
-  " "${dms_settings_file}" >"${temporary_file}" 2>/dev/null ||
+  jq_program="$(
+    cat <<'EOF'
+# DMS may change the settings file between validation and this update (TOCTOU).
+if ([.barConfigs[] | bar_entry($bar)] | length) != 1 then
+  error("bar ID changed during update")
+elif (.barConfigs[] | bar_entry($bar) | ([$updates | keys[]] - (keys))) != [] then
+  error("bar properties changed during update")
+else
+  .barConfigs |= map(if ([bar_entry($bar)] | length) == 1 then . + $updates else . end)
+end
+EOF
+  )"
+  jq --arg bar "${_bar_id}" --argjson updates "${updates_json}" "${jq_bar_filter}
+${jq_program}" "${dms_settings_file}" >"${temporary_file}" 2>/dev/null ||
     _fail "Unable to build updated DMS settings."
   jq -e -s 'length == 1 and (.[0] | type == "object")' "${temporary_file}" >/dev/null 2>&1 ||
     _fail "Updated DMS settings are not valid JSON."
@@ -236,12 +234,7 @@ _main() {
     _print_help
     return
   fi
-  # Accept --json before or after list so both option orders work.
   if [[ "${command_name}" == list ]]; then
-    if [[ "$#" -eq 1 && "${1}" == --json ]]; then
-      json_output=true
-      shift
-    fi
     [[ "$#" -eq 0 ]] || _fail_usage "Unexpected list arguments"
   else
     [[ "${json_output}" == false ]] || _fail "--json is only available with list."
