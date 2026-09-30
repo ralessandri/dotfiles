@@ -1,3 +1,11 @@
 [mgr]
-show_hidden = true
+# show_hidden = true
 ratio = [2, 3, 3]
+
+[[plugin.prepend_previewers]]
+mime = "{audio,video,image}/*"
+run  = "center-media"
+
+[[plugin.prepend_preloaders]]
+mime = "{audio,video,image}/*"
+run  = "center-media"

@@ -23,6 +23,7 @@ packages=(
   flatpak
   fontconfig
   fzf
+  gh
   git
   gum
   jq
@@ -44,6 +45,7 @@ packages=(
   tuned
   tuned-ppd
   udisks2
+  wl-clipboard
   xdg-user-dirs
   xz
   zoxide

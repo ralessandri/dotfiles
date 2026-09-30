@@ -10,10 +10,15 @@ default:
 rpmfusion:
     ../../tasks/fedora-rpmfusion-install.sh
 
-# Install common command-line development tools.
-[group('development')]
-cli:
-    ../../tasks/fedora-cli-install.sh
+# Install NetworkManager and its Wi-Fi and desktop connection tools.
+[group('system')]
+network-manager:
+    ../../tasks/fedora-network-manager-install.sh
+
+# Install workstation basics: CLI tools, browsers, and a font.
+[group('system')]
+workstation-basics:
+    ../../tasks/fedora-workstation-basics--install.sh
 
 # Install LazyVim and optional editor tools.
 [group('development')]
@@ -37,7 +42,7 @@ php:
 
 # Install Niri and Dank Material Shell and integrate them.
 [group('desktop')]
-niri-with-dms:
+niri-dms:
     ../../tasks/fedora-niridms-install.sh
 
 # Install the default web apps.
@@ -52,12 +57,12 @@ codecs: rpmfusion
 
 # Refresh firmware metadata and show available firmware updates.
 [group('hardware')]
-firmware:
+firmware-check:
     ../../tasks/fedora-firmware-update.sh
 
 # Install the NVIDIA 580xx driver stack.
 [group('hardware')]
-nvidia580:
+nvidia580: rpmfusion
     ../../tasks/fedora-nvidia580-install.sh
 
 # Install Wi-Fi support for the Intel Dual Band Wireless-AC 3168NGW.
