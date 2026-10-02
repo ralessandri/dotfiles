@@ -32,7 +32,7 @@ alias ....='cd ../../..'
 alias cat='bat'
 
 # Restow managed dotfiles
-alias restow='(cd -- "$HOME/.stash" && stow -R --no-folding dotfiles)'
+alias restow='(cd -- "$HOME/.dotfiles" && stow -R --no-folding dots)'
 
 # Short directory listing
 alias l='eza --classify=always'
