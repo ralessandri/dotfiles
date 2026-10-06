@@ -15,7 +15,7 @@ alias n='nvim'
 ###############################################################################
 
 # Run setup Just recipes
-alias must='just --justfile "$STASH_ROOT_DIR/setup/justfile"'
+alias must='just --justfile "$DOTFILES_ROOT_DIR/setup/justfile"'
 
 # Run global Just recipes
 alias gust='just -g'

@@ -3,17 +3,17 @@ export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
-if ! declare -p STASH_DOTFILES_DIR &>/dev/null; then
-  STASH_DOTFILES_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+if ! declare -p DOTFILES_DIR &>/dev/null; then
+  DOTFILES_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 fi
-readonly STASH_DOTFILES_DIR
-export STASH_DOTFILES_DIR
+readonly DOTFILES_DIR
+export DOTFILES_DIR
 
-if ! declare -p STASH_ROOT_DIR &>/dev/null; then
-  STASH_ROOT_DIR="$(dirname "$STASH_DOTFILES_DIR")"
+if ! declare -p DOTFILES_ROOT_DIR &>/dev/null; then
+  DOTFILES_ROOT_DIR="$(dirname "$DOTFILES_DIR")"
 fi
-readonly STASH_ROOT_DIR
-export STASH_ROOT_DIR
+readonly DOTFILES_ROOT_DIR
+export DOTFILES_ROOT_DIR
 
 # Bash history
 export HISTCONTROL=ignorespace:erasedups
