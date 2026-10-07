@@ -4,6 +4,10 @@
 input_path = "~/.dotfiles/dots/.config/matugen/templates/starship.toml"
 output_path = "~/.config/starship/starship.toml"
 
+[templates.strata]
+input_path = "~/.dotfiles/dots/.config/matugen/templates/strata.toml"
+output_path = "~/.config/strata/themes/matugen.toml"
+
 [templates.niri]
 input_path = "~/.dotfiles/dots/.config/matugen/templates/niri.kdl"
 output_path = "~/.config/niri/colors.kdl"
