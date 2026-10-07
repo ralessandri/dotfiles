@@ -18,3 +18,11 @@ vim.opt.listchars = {
 --   local path = LazyVim.root.bufpath(buf) or vim.uv.cwd()
 --   return vim.fs.root(path, ".git") or LazyVim.root.get()
 -- end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { link = "Normal" })
+    vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { link = "Comment" })
+    vim.api.nvim_set_hl(0, "SnacksPickerDir", { link = "Directory" })
+  end,
+})
