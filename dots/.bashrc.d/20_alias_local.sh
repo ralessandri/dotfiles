@@ -48,8 +48,5 @@ alias phpstorm='phpstorm.sh'
 # Rename dump files
 alias renadump='renamdump.sh'
 
-# Launch Toolbox helper
-alias tbx='tbx.sh'
-
 # Run the system update script
 alias update='update.sh'
