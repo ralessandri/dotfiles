@@ -9,3 +9,10 @@ vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result (centered)" })
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Prev search result (centered)" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
+
+-- Resolve LazyGit from the buffer path so nested extension repositories remain distinct.
+vim.keymap.set("n", "<leader>gg", function()
+  local git_root = require("config.project").git_root(0)
+  Snacks.lazygit({ cwd = git_root or vim.fn.getcwd() })
+end, { desc = "Lazygit (Git Root)" })
+
