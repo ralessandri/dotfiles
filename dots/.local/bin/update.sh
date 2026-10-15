@@ -17,6 +17,7 @@ REBOOT_CHECK=false
 # Temporary files and running background process (for cleanup)
 TMP_FILES=()
 CHECK_PID=""
+SUDO_KEEPALIVE_PID=""
 
 # Colors (only in a terminal and when NO_COLOR is not set)
 
@@ -46,21 +47,53 @@ _sudo() {
   sudo -n "$@"
 }
 
-_request_sudo_access() {
+_start_sudo_keepalive() {
+  if [[ -n "$SUDO_KEEPALIVE_PID" ]] && kill -0 "$SUDO_KEEPALIVE_PID" 2>/dev/null; then
+    return 0
+  fi
+
+  (
+    local sleep_pid=""
+
+    trap 'exit 0' TERM
+    trap 'if [[ -n "$sleep_pid" ]]; then kill "$sleep_pid" 2>/dev/null || true; wait "$sleep_pid" 2>/dev/null || true; fi' EXIT
+
+    while kill -0 "$$" 2>/dev/null; do
+      sudo -n -v >/dev/null 2>&1 || exit 0
+      sleep 30 &
+      sleep_pid=$!
+      wait "$sleep_pid" || true
+      sleep_pid=""
+    done
+  ) &
+  SUDO_KEEPALIVE_PID=$!
+}
+
+_ensure_sudo() {
+  local reason="${1:-Administrator privileges are required.}"
+
   if sudo -n -v >/dev/null 2>&1; then
+    _start_sudo_keepalive
     return 0
   fi
 
-  _info "Administrator access is required. Enter your sudo password at the prompt; input is not displayed."
-  if sudo -v -p "update.sh: sudo password (input is not displayed): "; then
-    return 0
+  _info "$reason"
+  if ! sudo -v -p '[sudo] password for %p: '; then
+    _err "Sudo authentication failed."
+    return 1
   fi
 
-  _err "Sudo authentication failed."
-  return 1
+  if ! sudo -n -v >/dev/null 2>&1; then
+    _err "Sudo credentials were not cached; check sudoers timestamp_timeout."
+    return 1
+  fi
+
+  _start_sudo_keepalive
 }
 
 _cleanup() {
+  [[ -n "$SUDO_KEEPALIVE_PID" ]] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+  [[ -n "$SUDO_KEEPALIVE_PID" ]] && wait "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
   [[ -n "$CHECK_PID" ]] && kill "$CHECK_PID" 2>/dev/null || true
   ((${#TMP_FILES[@]} > 0)) && rm -f "${TMP_FILES[@]}" || true
 }
@@ -133,21 +166,24 @@ EOF
 # Run a step and report its result consistently
 _run_step() {
   local label="$1"
-  local succeeded=false
+  local output_file="" rc=0
   shift
 
   if [[ "$VERBOSE" == true ]]; then
-    if "$@"; then
-      succeeded=true
-    fi
-  elif "$@" >/dev/null 2>&1; then
-    succeeded=true
+    "$@" || rc=$?
+  else
+    output_file="$(mktemp)"
+    TMP_FILES+=("$output_file")
+    "$@" >"$output_file" 2>&1 || rc=$?
   fi
 
-  if [[ "$succeeded" == true ]]; then
+  if ((rc == 0)); then
     _ok "${label} completed."
   else
     _err "${label} failed."
+    if [[ -n "$output_file" && -s "$output_file" ]]; then
+      _indent <"$output_file" >&2
+    fi
     return 1
   fi
 }
@@ -272,7 +308,7 @@ _update_dnf() {
 _update_flatpak() {
   _header "Upgrading flatpak"
   _run_step "flatpak update" _flatpak_priv update -y
-  _run_step "flatpak cleanup" _flatpak_priv uninstall --unused
+  _run_step "flatpak cleanup" _flatpak_priv uninstall --unused -y
 }
 
 _update_brew() {
@@ -350,22 +386,15 @@ main() {
     shift
   done
 
-  # Request the sudo password in advance so the prompt does not
-  # conflict with the spinner (apt update requires sudo)
-  if _has_command apt; then
-    if ! _request_sudo_access; then
-      return 1
-    fi
-  fi
-
   # Phase 1: find updates
   _header "Checking for updates"
-  _has_command apt && {
+  if _has_command apt; then
+    _ensure_sudo "apt needs administrator privileges to refresh the package lists." || return 1
     if ! _collect apt _check_apt; then
       check_failed=true
     fi
     found=true
-  }
+  fi
   _has_command dnf && {
     if ! _collect dnf _check_dnf; then
       check_failed=true
@@ -419,14 +448,14 @@ main() {
   if [[ "$assume_yes" == false ]]; then
     printf '\n%s::%s Proceed with upgrade? [y/N] ' "${C_BLUE}${C_BOLD}" "$C_RESET"
     read -r answer || answer=n
-    if [[ ! "$answer" =~ ^[yYjJ]$ ]]; then
+    if [[ ! "$answer" =~ ^[yY]$ ]]; then
       _info "Aborted."
       return 0
     fi
   fi
 
-  if _needs_sudo_for_updates && ! _request_sudo_access; then
-    return 1
+  if _needs_sudo_for_updates; then
+    _ensure_sudo "Upgrading requires administrator privileges." || return 1
   fi
 
   # Phase 2: upgrade
