@@ -82,8 +82,8 @@ Options:
   -y, --yes           Do not ask for confirmation before upgrading.
   -r, --reboot-check  Report whether a reboot or service restarts are needed
                       (uses needs-restarting).
-  -v, --verbose       Show progress messages of the package managers while
-                      checking for updates. Disables the spinner.
+  -v, --verbose       Show package manager output while checking and upgrading.
+                      Disables the spinner.
   -h, --help          Show this help message and exit.
 
 Supported package managers:
@@ -93,7 +93,6 @@ Notes:
   - Only package managers available on the current system are used.
   - Commands that require elevated privileges may prompt for sudo access.
   - If gum is installed, a spinner is shown while checking for updates.
-  - The output of the upgrade phase is always shown in full.
   - Set NO_COLOR to disable colored output.
 EOF
 }
@@ -101,9 +100,18 @@ EOF
 # Run a step and report its result consistently
 _run_step() {
   local label="$1"
+  local succeeded=false
   shift
 
-  if "$@"; then
+  if [[ "$VERBOSE" == true ]]; then
+    if "$@"; then
+      succeeded=true
+    fi
+  elif "$@" >/dev/null 2>&1; then
+    succeeded=true
+  fi
+
+  if [[ "$succeeded" == true ]]; then
     _ok "${label} completed."
   else
     _err "${label} failed."
