@@ -42,6 +42,10 @@ _has_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
+_sudo() {
+  sudo -p "update.sh: enter your sudo password (input is not displayed): " "$@"
+}
+
 _cleanup() {
   [[ -n "$CHECK_PID" ]] && kill "$CHECK_PID" 2>/dev/null || true
   ((${#TMP_FILES[@]} > 0)) && rm -f "${TMP_FILES[@]}" || true
@@ -64,7 +68,7 @@ _is_remote_session() {
 
 _flatpak_priv() {
   if _is_remote_session; then
-    sudo flatpak "$@"
+    _sudo flatpak "$@"
   else
     flatpak "$@"
   fi
@@ -91,7 +95,8 @@ Supported package managers:
 
 Notes:
   - Only package managers available on the current system are used.
-  - Commands that require elevated privileges may prompt for sudo access.
+  - Commands that require elevated privileges may prompt for your sudo password.
+    Password input is handled by sudo and is not displayed.
   - If gum is installed, a spinner is shown while checking for updates.
   - Set NO_COLOR to disable colored output.
 EOF
@@ -126,7 +131,7 @@ _check_apt() {
   local -a quiet=(-qq)
   [[ "$VERBOSE" == true ]] && quiet=()
 
-  sudo apt update "${quiet[@]}" >&2
+  _sudo apt update "${quiet[@]}" >&2
   apt list --upgradable 2>/dev/null | tail -n +2
 }
 
@@ -226,14 +231,14 @@ _show_pending() {
 
 _update_apt() {
   _header "Upgrading apt"
-  _run_step "apt upgrade" sudo apt upgrade -y
-  _run_step "apt autoremove" sudo apt autoremove -y
+  _run_step "apt upgrade" _sudo apt upgrade -y
+  _run_step "apt autoremove" _sudo apt autoremove -y
 }
 
 _update_dnf() {
   _header "Upgrading dnf"
-  _run_step "dnf upgrade" sudo dnf upgrade --refresh -y
-  _run_step "dnf autoremove" sudo dnf autoremove -y
+  _run_step "dnf upgrade" _sudo dnf upgrade --refresh -y
+  _run_step "dnf autoremove" _sudo dnf autoremove -y
 }
 
 _update_flatpak() {
@@ -320,7 +325,11 @@ main() {
   # Request the sudo password in advance so the prompt does not
   # conflict with the spinner (apt update requires sudo)
   if _has_command apt; then
-    sudo -v
+    _info "APT needs administrator access to refresh package lists. Enter your sudo password if prompted; input is not displayed."
+    if ! _sudo -v; then
+      _err "Sudo authentication failed."
+      return 1
+    fi
   fi
 
   # Phase 1: find updates
