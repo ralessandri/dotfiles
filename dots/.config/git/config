@@ -20,7 +20,6 @@
 	unstage = reset HEAD --
 	undo = reset --soft HEAD~1
 	amend = commit --amend --no-edit
-	history = log --oneline --graph --decorate --all
 	last = log -1 --stat
 [push]
 	autoSetupRemote = true
