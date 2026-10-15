@@ -43,7 +43,21 @@ _has_command() {
 }
 
 _sudo() {
-  sudo -p "update.sh: enter your sudo password (input is not displayed): " "$@"
+  sudo -n "$@"
+}
+
+_request_sudo_access() {
+  if sudo -n -v >/dev/null 2>&1; then
+    return 0
+  fi
+
+  _info "Administrator access is required. Enter your sudo password at the prompt; input is not displayed."
+  if sudo -v -p "update.sh: sudo password (input is not displayed): "; then
+    return 0
+  fi
+
+  _err "Sudo authentication failed."
+  return 1
 }
 
 _cleanup() {
@@ -72,6 +86,20 @@ _flatpak_priv() {
   else
     flatpak "$@"
   fi
+}
+
+_needs_sudo_for_updates() {
+  local name
+
+  for name in "${PENDING[@]}"; do
+    case "$name" in
+    apt | dnf) return 0 ;;
+    flatpak)
+      _is_remote_session && return 0
+      ;;
+    esac
+  done
+  return 1
 }
 
 _show_help() {
@@ -325,9 +353,7 @@ main() {
   # Request the sudo password in advance so the prompt does not
   # conflict with the spinner (apt update requires sudo)
   if _has_command apt; then
-    _info "APT needs administrator access to refresh package lists. Enter your sudo password if prompted; input is not displayed."
-    if ! _sudo -v; then
-      _err "Sudo authentication failed."
+    if ! _request_sudo_access; then
       return 1
     fi
   fi
@@ -397,6 +423,10 @@ main() {
       _info "Aborted."
       return 0
     fi
+  fi
+
+  if _needs_sudo_for_updates && ! _request_sudo_access; then
+    return 1
   fi
 
   # Phase 2: upgrade
