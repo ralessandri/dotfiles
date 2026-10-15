@@ -1,4 +1,7 @@
 gui:
+  expandFocusedSidePanel: true
+  expandedSidePanelWeight: 4
+  sidePanelWidth: 0.25
   nerdFontsVersion: "3"
   theme:
     activeBorderColor:

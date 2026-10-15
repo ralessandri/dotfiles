@@ -1,4 +1,4 @@
-# Switch local Git branch selected with fzf
+# Switch to a local or remote Git branch
 gb() {
   local branch
   local local_branch
@@ -22,7 +22,7 @@ gb() {
   fi
 }
 
-# Show a Git commit selected with fzf
+# Show a selected Git commit
 glog() {
   local commit
 
@@ -38,7 +38,50 @@ glog() {
   [[ -n "$commit" ]] && git show "$commit"
 }
 
-# Change to a Git worktree selected with fzf
+# Apply a selected Git stash and remove it on success
+gstash() {
+  local stash
+
+  stash=$(git stash list --format='%gd%x09%gs' |
+    fzf \
+      --delimiter=$'\t' \
+      --with-nth='2..' \
+      --preview='git stash show --color=always --patch {1}')
+
+  [[ -z "$stash" ]] && return
+
+  git stash pop "${stash%%$'\t'*}"
+}
+
+# Apply a selected Git stash without removing it
+gsstash() {
+  local stash
+
+  stash=$(git stash list --format='%gd%x09%gs' |
+    fzf \
+      --delimiter=$'\t' \
+      --with-nth='2..' \
+      --preview='git stash show --color=always --patch {1}')
+
+  [[ -z "$stash" ]] && return
+
+  git stash apply "${stash%%$'\t'*}"
+}
+
+# Show changes introduced by a branch since it diverged from the current branch
+gdiff() {
+  local current_branch
+  local branch
+
+  current_branch=$(git branch --show-current)
+  branch=$(git branch --all --format='%(refname:short)' |
+    awk -v current_branch="$current_branch" '$0 != "origin/HEAD" && $0 != current_branch' |
+    fzf --preview='git diff --color=always HEAD...{}')
+
+  [[ -n "$branch" ]] && git diff --color=always "HEAD...$branch"
+}
+
+# Change to a Git worktree
 gwt() {
   local worktree
 
