@@ -5,22 +5,59 @@
 [pull]
 	rebase = true
 [alias]
+	# Working tree and branch navigation.
+	# Show working tree status.
 	st = status
+	# Check out a branch or commit.
 	co = checkout
+	# List or manage branches.
 	br = branch
-	cm = commit
-	cam = "commit -am"
+	# Switch to the branch checked out before the current one.
+	back = switch -
+	# Switch to the branch named by the first argument.
+	go = switch
+	# Create and switch to the branch named by the first argument.
+	new = switch -c
+	# Create a local branch tracking origin/<name> and switch to it.
+	track = "!f() { git switch --track -c \"$1\" \"origin/$1\"; }; f"
+
+	# Inspect changes and commit history.
+	# Show changes in the working tree.
 	df = diff
+	# Show a compact graph of all commits and references.
 	lg = log --oneline --graph --decorate --all
-	sw = switch
-	swc = switch -c
-	swct = "!f() { git switch -c $1 --track origin/$1; }; f"
-	stageall = add .
-	stagepatch = add -p
-	unstage = reset HEAD --
-	undo = reset --soft HEAD~1
-	amend = commit --amend --no-edit
+	# Show the latest commit and its changed files.
 	last = log -1 --stat
+
+	# Stage and unstage changes.
+	# Stage all changes, including untracked files.
+	stage = add .
+	# Interactively select changes to stage.
+	stagep = add -p
+	# Unstage changes while keeping them in the working tree.
+	unstage = reset HEAD --
+
+	# Create and update commits.
+	# Create a commit.
+	cm = commit
+	# Commit tracked changes with a message.
+	cam = "commit -am"
+	# Amend the previous commit without changing its message.
+	amend = commit --amend --no-edit
+	# Create a fixup commit for a target commit.
+	fixup = commit --fixup
+
+	# Undo recent commits.
+	# Move HEAD back one commit and keep changes staged.
+	undo = reset --soft HEAD~1
+	# Move HEAD back one commit and keep changes unstaged.
+	undom = reset --mixed HEAD~1
+	# Move HEAD back one commit and discard its changes.
+	undoh = reset --hard HEAD~1
+
+	# Synchronize with remote branches.
+	# Pull and rebase, stashing and restoring local changes automatically.
+	pulls = pull --rebase --autostash
 [push]
 	autoSetupRemote = true
 	followTags = true
