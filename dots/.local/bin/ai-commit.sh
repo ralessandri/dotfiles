@@ -179,12 +179,12 @@ generate_ai_message() {
   local user_prompt="$2"
   local message
 
-  message="$(gum spin --spinner dot --title "Generating commit message via AI..." \
+  message="$(gum spin --spinner minidot --title "Generating commit message..." \
     --show-output -- ai.sh --system "${system_instruction}" "${user_prompt}")" ||
-    die "AI command failed to generate a commit message."
+    die "Command failed to generate a commit message."
 
   if [[ -z "${message//[[:space:]]/}" ]]; then
-    die "AI returned an empty commit message."
+    die "Empty commit message returned."
   fi
 
   printf '%s' "${message}"
