@@ -180,7 +180,7 @@ generate_ai_message() {
   local message
 
   message="$(gum spin --spinner dot --title "Generating commit message via AI..." \
-    --show-output -- ai.sh -c --system "${system_instruction}" "${user_prompt}")" ||
+    --show-output -- ai.sh --system "${system_instruction}" "${user_prompt}")" ||
     die "AI command failed to generate a commit message."
 
   if [[ -z "${message//[[:space:]]/}" ]]; then

@@ -4,9 +4,11 @@ set -euo pipefail
 # ----------------------------
 # Config
 # ----------------------------
-MODEL_GEMINI="gemini-3.1-flash-lite"
+MODEL_GEMINI="gemini-flash-lite-latest"
 MODEL_GROQ="llama-3.1-70b-versatile"
 MODEL_OPENAI="gpt-4o-mini"
+ENABLE_GROQ=false
+ENABLE_OPENAI=false
 
 GEMINI_API_KEY=$(secret-tool lookup service gemini)
 
@@ -120,26 +122,34 @@ ask_openai() {
 # ----------------------------
 run_chain() {
   echo "[→] Gemini..." >&2
-  if OUT=$(ask_gemini 2>/dev/null); then
+  if OUT=$(ask_gemini); then
     echo "$OUT"
     return 0
   fi
 
-  fail "Gemini failed → switching to Groq"
-  echo "[→] Groq..." >&2
-  if OUT=$(ask_groq 2>/dev/null); then
-    echo "$OUT"
-    return 0
+  if [[ "${ENABLE_GROQ}" == true ]]; then
+    fail "Gemini failed → switching to Groq"
+    echo "[→] Groq..." >&2
+    if OUT=$(ask_groq); then
+      echo "$OUT"
+      return 0
+    fi
   fi
 
-  fail "Groq failed → switching to OpenAI"
-  echo "[→] OpenAI..." >&2
-  if OUT=$(ask_openai 2>/dev/null); then
-    echo "$OUT"
-    return 0
+  if [[ "${ENABLE_OPENAI}" == true ]]; then
+    if [[ "${ENABLE_GROQ}" == true ]]; then
+      fail "Groq failed → switching to OpenAI"
+    else
+      fail "Gemini failed → switching to OpenAI"
+    fi
+    echo "[→] OpenAI..." >&2
+    if OUT=$(ask_openai); then
+      echo "$OUT"
+      return 0
+    fi
   fi
 
-  fail "All providers failed"
+  fail "Gemini failed; fallback providers are disabled"
   return 1
 }
 
