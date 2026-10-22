@@ -65,3 +65,6 @@
 	editor = nvim
 [include]
   path = ~/.config/git/config.local
+[color "diff"]
+  old = "#ff6b6b"
+  new = "#7fe08a"
