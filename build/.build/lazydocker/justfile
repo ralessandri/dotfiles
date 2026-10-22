@@ -1,0 +1,7 @@
+
+[private]
+default:
+  @just -l
+
+build:
+  ./build.sh

@@ -1,0 +1,15 @@
+services:
+  lazydocker-build:
+    image: golang:latest
+    working_dir: /app
+    user: 1000:1000
+    environment:
+      - GOCACHE=/app/.cache
+    volumes:
+      - ./lazydocker/:/app
+    command: >
+      sh -c "
+        mkdir -p /app/.cache &&
+        go mod tidy &&
+        go build -o lazydocker .
+      "
