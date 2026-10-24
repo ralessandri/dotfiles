@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DANKLINUX_REPO='/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:avengemedia:danklinux.repo'
-DMS_REPO='/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:avengemedia:dms.repo'
+DUX_REPO='/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:duxlabs:dux.repo'
+DMS_REPO='/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:duxlabs:dms.repo'
 
-if [[ ! -f "${DANKLINUX_REPO}" ]]; then
-  printf 'Enabling DankLinux COPR repository...\n'
-  sudo dnf copr enable -y avengemedia/danklinux
+if [[ ! -f "${DUX_REPO}" ]]; then
+  printf 'Enabling Dux Core COPR repository...\n'
+  sudo dnf copr enable -y duxlabs/dux
 fi
 
-if [[ ! -f "$DMS_REPO" ]]; then
-  printf 'Enabling DMS COPR repository...\n'
-  sudo dnf copr enable -y avengemedia/dms
+if [[ ! -f "${DMS_REPO}" ]]; then
+  printf 'Enabling Dux Shell COPR repository...\n'
+  sudo dnf copr enable -y duxlabs/dms
 fi
 
 printf 'Installing Niri and Dux Shell...\n'
@@ -21,15 +21,15 @@ sudo dnf install -y \
   dms \
   matugen
 
-printf 'Integrating DMS with Niri...\n'
+printf 'Integrating Dux Shell with Niri...\n'
 
-systemctl --user add-wants niri.service dms
+dms systemd enable --compositor niri
 
-if gum confirm 'Install and enable dms-greeter (may disable other display managers)?'; then
-  printf 'Installing dms-greeter...\n'
+if gum confirm 'Install and enable dms-greeter (replaces the current display manager)?'; then
+  printf 'Installing Dux Greeter...\n'
   sudo dnf install -y greetd dms-greeter
 
-  printf 'Configuring dms-greeter...\n'
+  printf 'Enabling Dux Greeter and syncing its theme...\n'
   dms-greeter enable --yes
   dms-greeter sync --yes
 fi
