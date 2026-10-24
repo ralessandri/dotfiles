@@ -40,7 +40,7 @@ ddev: docker
 php:
     ../../tasks/fedora-php-install.sh
 
-# Install Niri and Dank Material Shell and integrate them.
+# Install Niri and Dux Shell and integrate them.
 [group('desktop')]
 niri-dms:
     ../../tasks/fedora-niridms-install.sh

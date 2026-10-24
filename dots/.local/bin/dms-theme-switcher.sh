@@ -6,9 +6,9 @@ set -euo pipefail
 readonly script_path="$(readlink -f -- "${BASH_SOURCE[0]}")"
 readonly script_dir="$(cd -- "$(dirname -- "${script_path}")" && pwd)"
 readonly dotfiles_dir="$(cd -- "${script_dir}/../.." && pwd)"
-readonly installed_themes_dir="${HOME}/.config/DankMaterialShell/themes"
-readonly custom_themes_dir="${dotfiles_dir}/.config/DankMaterialShell/themes"
-readonly dms_settings_file="${HOME}/.config/DankMaterialShell/settings.json"
+readonly installed_themes_dir="${HOME}/.config/dms/themes"
+readonly custom_themes_dir="${dotfiles_dir}/.config/dms/themes"
+readonly dms_settings_file="${HOME}/.config/dms/settings.json"
 readonly usage_message="Usage: $(basename -- "$0") [--help|list|active|select]"
 
 # Helpers
@@ -19,7 +19,7 @@ _fail() {
 }
 
 _print_help() {
-  printf '%s\n' "Choose a DankMaterialShell theme."
+  printf '%s\n' "Choose a dms theme."
   printf '\nUsage:\n'
   printf '  %s\n' "$(basename -- "$0")"
   printf '  %s\n' "$(basename -- "$0") list"
@@ -33,8 +33,8 @@ _print_help() {
   printf '  %-16s %s\n' "select" "Choose and activate a theme with Gum."
   printf '\nAvailable themes:\n'
   printf '%s\n' "  Dynamic (Auto), installed DMS themes, and local theme.json files."
-  printf '%s\n' "  Installed themes are read from ~/.config/DankMaterialShell/themes."
-  printf '%s\n' "  Local themes are read from dotfiles/.config/DankMaterialShell/themes."
+  printf '%s\n' "  Installed themes are read from ~/.config/dms/themes."
+  printf '%s\n' "  Local themes are read from dotfiles/.config/dms/themes."
 }
 
 _require_command() {
@@ -153,11 +153,9 @@ _set_dms_setting() {
 }
 
 _reload_dms_settings() {
+  # Allow DMS's 50 ms settings-save debounce to finish before triggering a reload.
+  sleep 0.1
   touch "${dms_settings_file}" || _fail "Unable to prepare DMS settings reload: ${dms_settings_file}"
-
-  # DMS ignores its first external change after writing settings itself.
-  sleep 0.2
-  touch "${dms_settings_file}" || _fail "Unable to reload DMS settings: ${dms_settings_file}"
 }
 
 _apply_selection() {
@@ -172,7 +170,7 @@ _apply_selection() {
   installed | local)
     _set_dms_setting customThemeFile "${selection_value}"
     _set_dms_setting currentThemeName custom
-    _set_dms_setting currentThemeCategory custom
+    _set_dms_setting currentThemeCategory registry
     ;;
   *)
     _fail "Unknown theme selection type: ${selection_type}"

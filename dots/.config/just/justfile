@@ -347,7 +347,7 @@ niri-windows:
 # ---------------------------------------------------------------------------
 # dms
 
-# Kill and respawn the Quickshell process running DankMaterialShell
+# Kill and respawn the Quickshell process running Dux Shell
 [group('dms')]
 dms-restart:
     pkill -f quickshell || true

@@ -3,11 +3,9 @@ set -euo pipefail
 
 # Configuration
 
-readonly dms_settings_file="${DMS_SETTINGS_FILE:-${HOME}/.config/DankMaterialShell/settings.json}"
+readonly dms_settings_file="${DMS_SETTINGS_FILE:-${HOME}/.config/dms/settings.json}"
 readonly usage_message="Usage: $(basename -- "$0") [-b ID|--bar ID] [--json] {list|get KEY|set KEY VALUE|set KEY=VALUE [KEY=VALUE ...]}"
 readonly jq_bar_filter='def bar_entry($bar): select(type == "object" and .id == $bar);'
-# Match dms-theme-switcher.sh's 0.2-second workaround for DMS's ignored first change.
-readonly dms_reload_settle_seconds=0.2
 temporary_file=""
 bar_id=default
 json_output=false
@@ -24,7 +22,7 @@ _fail_usage() {
 }
 
 _print_help() {
-  printf '%s\n' "Read or change a DankMaterialShell bar configuration."
+  printf '%s\n' "Read or change a dms bar configuration."
   printf '\nUsage:\n  %s\n' "${usage_message}"
   printf '\nCommands:\n'
   printf '  %-25s %s\n' "list" "Show all properties of the selected bar."
@@ -93,10 +91,8 @@ _validate_properties() {
 }
 
 _reload_dms_settings() {
-  touch "${dms_settings_file}" || _fail "Unable to prepare DMS settings reload: ${dms_settings_file}"
-
-  # DMS ignores its first external change after writing settings itself.
-  sleep "${dms_reload_settle_seconds}"
+  # Allow DMS's 50 ms settings-save debounce to finish before triggering a reload.
+  sleep 0.1
   touch "${dms_settings_file}" || _fail "Unable to reload DMS settings: ${dms_settings_file}"
 }
 

@@ -14,7 +14,7 @@ if [[ ! -f "$DMS_REPO" ]]; then
   sudo dnf copr enable -y avengemedia/dms
 fi
 
-printf 'Installing Niri and Dank Material Shell...\n'
+printf 'Installing Niri and Dux Shell...\n'
 
 sudo dnf install -y \
   niri \
@@ -34,4 +34,4 @@ if gum confirm 'Install and enable dms-greeter (may disable other display manage
   dms-greeter sync --yes
 fi
 
-printf '\nNiri and Dank Material Shell setup complete.\n'
+printf '\nNiri and Dux Shell setup complete.\n'
