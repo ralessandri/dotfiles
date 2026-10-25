@@ -9,7 +9,7 @@ readonly dotfiles_dir="$(cd -- "${script_dir}/../.." && pwd)"
 readonly installed_themes_dir="${HOME}/.config/dms/themes"
 readonly custom_themes_dir="${dotfiles_dir}/.config/dms/themes"
 readonly dms_settings_file="${HOME}/.config/dms/settings.json"
-readonly usage_message="Usage: $(basename -- "$0") [--help|list|active|select]"
+readonly usage_message="Usage: $(basename -- "$0") [--help|list|active|select|activate THEME_ID]"
 
 # Helpers
 
@@ -25,12 +25,14 @@ _print_help() {
   printf '  %s\n' "$(basename -- "$0") list"
   printf '  %s\n' "$(basename -- "$0") active"
   printf '  %s\n' "$(basename -- "$0") select"
+  printf '  %s\n' "$(basename -- "$0") activate THEME_ID"
   printf '\nOptions:\n'
   printf '  %-16s %s\n' "-h, --help" "Show this help and exit."
   printf '\nCommands:\n'
-  printf '  %-16s %s\n' "list" "List all available themes."
+  printf '  %-16s %s\n' "list" "List available theme IDs and names in columns."
   printf '  %-16s %s\n' "active" "Print the currently active theme."
   printf '  %-16s %s\n' "select" "Choose and activate a theme with Gum."
+  printf '  %-16s %s\n' "activate ID" "Activate an available theme by its ID."
   printf '\nAvailable themes:\n'
   printf '%s\n' "  Dynamic (Auto), installed DMS themes, and local theme.json files."
   printf '%s\n' "  Installed themes are read from ~/.config/dms/themes."
@@ -111,9 +113,18 @@ _list_themes() {
   local selection_type
   local selection_value
   local selection_label
+  local theme_id
+
+  printf '%-18s | %s\n' "ID" "THEME"
+  printf '%-18s-+-%s\n' '------------------' '--------------------'
 
   while IFS=$'\t' read -r selection_type selection_value selection_label; do
-    printf '%s\n' "${selection_label}"
+    if [[ "${selection_type}" == dynamic ]]; then
+      theme_id=dynamic
+    else
+      theme_id="$(_theme_id_from_file "${selection_value}")"
+    fi
+    printf '%-18s | %s\n' "${theme_id}" "${selection_label}"
   done < <(_theme_entries)
 }
 
@@ -178,6 +189,30 @@ _apply_selection() {
   esac
 
   _reload_dms_settings
+}
+
+_activate_theme_id() {
+  local requested_id="$1"
+  local selection_type
+  local selection_value
+  local selection_label
+  local theme_id
+
+  while IFS=$'\t' read -r selection_type selection_value selection_label; do
+    if [[ "${selection_type}" == dynamic && "${requested_id}" == dynamic ]]; then
+      _apply_selection "${selection_type}" "${selection_value}"
+      return
+    fi
+    [[ "${selection_type}" == dynamic ]] && continue
+
+    theme_id="$(_theme_id_from_file "${selection_value}")"
+    if [[ "${theme_id}" == "${requested_id}" ]]; then
+      _apply_selection "${selection_type}" "${selection_value}"
+      return
+    fi
+  done < <(_theme_entries)
+
+  _fail "Theme is not available: ${requested_id}"
 }
 
 # Domain workflows
@@ -275,6 +310,13 @@ _main() {
     _require_command gum
     _validate_switch_prerequisites
     selector=gum
+    ;;
+  activate)
+    [[ "$#" -eq 2 ]] || _fail "${usage_message}"
+    _require_command dms
+    _validate_switch_prerequisites
+    _activate_theme_id "$2"
+    return
     ;;
   "")
     _require_command dms

@@ -1,0 +1,193 @@
+{
+  // dankMenu's default tree.
+  //
+  // Schema is omarchy's (basecamp/omarchy, default/omarchy/omarchy-menu.jsonc):
+  // object keys are dotted ids, hierarchy is implied by the dots, and the kind
+  // of a row is inferred from its fields -- `action` makes an action, `target`
+  // a link, `provider` a provider-backed submenu, anything else a submenu.
+  // Rows may also carry `aliases`, `title`, `iconFont`, and the `when` /
+  // `checked` / `disabled` shell conditions.
+  //
+  // Omarchy's own tree is Arch and Hyprland shaped: `install` and `remove`
+  // drive pacman, most of `setup` edits ~/.config/hypr/*.lua. This tree keeps
+  // their spine and replaces the mechanism, targeting DMS's IPC surface so it
+  // works on any compositor DMS supports. `install` and `remove` are absent on
+  // purpose: on a declarative system, adding a package means editing the
+  // config, which `setup.config` opens.
+  //
+  // A Nix-managed install overrides this whole file via the `menuPath`
+  // setting, so machine-specific paths belong there rather than here.
+
+  // Root
+  "apps": {"icon":"apps","label":"Apps","aliases":["app","applications"],"provider":"apps"},
+  "learn": {"icon":"school","label":"Learn","aliases":["help","docs","documentation","guides"]},
+  "trigger": {"icon":"bolt","label":"Trigger"},
+  "style": {"icon":"palette","label":"Style"},
+  "setup": {"icon":"settings","label":"Setup","aliases":["settings"]},
+  "install": {"icon":"download","label":"Install"},
+  "remove": {"icon":"delete","label":"Remove"},
+  "update": {"icon":"system_update_alt","label":"Update"},
+  "system": {"icon":"power_settings_new","label":"System","aliases":["power-menu"]},
+
+  // Learn
+  "learn.keybinds": {"icon":"keyboard","label":"Keybinds","aliases":["keys","bindings","shortcuts","niri keybindings"],"action":"dms ipc call keybinds open niri"},
+  "learn.niri": {"icon":"grid_view","label":"Niri","aliases":["window manager","compositor","niri docs"],"target":"https://niri-wm.github.io/niri/"},
+  "learn.niri.window-rules": {"icon":"window","label":"Niri Window Rules","aliases":["windowrules","niri rules"],"target":"https://niri-wm.github.io/niri/Configuration%3A-Window-Rules.html"},
+  "learn.dux-shell": {"icon":"terminal","label":"Dux Shell","aliases":["dms","dank material shell","dms docs"],"target":"https://duxlabs.dev/docs/dms/"},
+  "learn.flatpak": {"icon":"apps","label":"Flatpak","aliases":["flatpak docs","apps","remotes","runtimes"],"target":"https://docs.flatpak.org/en/latest/"},
+
+  // Trigger
+  "trigger.capture": {"icon":"photo_camera","label":"Capture","aliases":["capture","screenshot","screenrecord"]},
+  "trigger.capture.screenshot": {"icon":"screenshot_region","label":"Screenshot","aliases":["screenshot","area","region","selection"],"action":"dms screenshot --stdout --no-file --no-clipboard | satty --filename -"},
+  "trigger.capture.full-screen": {"icon":"screenshot_monitor","label":"Full Screen","aliases":["screenshot","fullscreen","full","screen"],"action":"dms screenshot full --stdout --no-file --no-clipboard | satty --filename -"},
+  "trigger.capture.window": {"icon":"window","label":"Window","aliases":["screenshot","active window","app window"],"action":"dms screenshot window --stdout --no-file --no-clipboard | satty --filename -"},
+  "trigger.capture.text": {"icon":"text_fields","label":"Extract Text From Screen","action":"dms-screenshot-ocr.sh --notify"},
+  "trigger.capture.color": {"icon":"colorize","label":"Color","aliases":["color picker","pick color"],"action":"dms color pick"},
+  "trigger.clipboard": {"icon":"content_paste","label":"Clipboard","aliases":["clip"],"action":"dms ipc call clipboard toggle"},
+  "trigger.notepad": {"icon":"edit_note","label":"Notepad","aliases":["notes"],"action":"dms ipc call notepad toggle"},
+  // "trigger.emoji": {"icon":"mood","label":"Emoji","aliases":["emoji","emojis"],"action":"dms ipc call spotlight toggleQuery ':e '"},
+  "trigger.toggle": {"icon":"toggle_on","label":"Toggle","aliases":["toggle","toggles"]},
+  "trigger.toggle.idle": {"icon":"coffee","label":"Stay Awake","aliases":["caffeine","inhibit"],"checked":"dms ipc call inhibit status | grep -q enabled","action":"dms ipc call inhibit toggle"},
+  "trigger.toggle.night": {"icon":"nightlight","label":"Night Mode","aliases":["nightlight"],"checked":"dms ipc call night status | grep -q enabled","action":"dms ipc call night toggle"},
+  "trigger.toggle.do-not-disturb": {"icon":"notifications_off","label":"Do Not Disturb","checked":"dms ipc call notifications getDoNotDisturb | grep -qi true","action":"dms ipc call notifications toggleDoNotDisturb"},
+  // Laptop-only: `when` hides this row entirely on a desktop.
+  "trigger.toggle.battery": {"icon":"battery_std","label":"Battery Widget","aliases":["battery","battery percentage"],"when":"test -d /sys/class/power_supply/BAT0","action":"dms ipc call widget toggle battery"},
+
+  // Style
+  "style.theme": {"icon":"colorize","label":"Theme","aliases":["theme","themes","colors"]},
+  "style.theme.dynamic": {"icon":"auto_mode","label":"Dynamic (Auto)","checked":"dms-theme-switcher.sh active | grep -Fxq 'Dynamic (Auto)'","action":"dms-theme-switcher.sh activate dynamic"},
+  "style.theme.anthrazit": {"icon":"palette","label":"Anthrazit","when":"test -f \"$HOME/.config/dms/themes/anthrazit/theme.json\"","checked":"dms-theme-switcher.sh active | grep -Fxq Anthrazit","action":"dms-theme-switcher.sh activate anthrazit"},
+  "style.theme.material-vivid": {"icon":"palette","label":"Material Vivid","when":"test -f \"$HOME/.config/dms/themes/material-vivid/theme.json\"","checked":"dms-theme-switcher.sh active | grep -Fxq 'Material Vivid'","action":"dms-theme-switcher.sh activate material-vivid"},
+  "style.wallpaper": {"icon":"wallpaper","label":"Wallpaper","aliases":["background","wall"],"action":"dms ipc call settings focusOrToggleWith wallpaper"},
+  "style.bar": {"icon":"width_normal","label":"Bar","aliases":["topbar"],"action":"dms ipc call settings focusOrToggleWith dankbar"},
+
+  // Setup
+  "setup.displays": {"icon":"monitor","label":"Displays","aliases":["monitors","screens"],"action":"dms ipc call settings focusOrToggleWith displays"},
+  "setup.network": {"icon":"wifi","label":"Network","aliases":["wifi","wlan"],"action":"dms ipc call settings focusOrToggleWith network"},
+  "setup.control-center": {"icon":"tune","label":"Control Center","aliases":["audio","bluetooth"],"action":"dms ipc call control-center toggle"},
+  "setup.settings": {"icon":"settings","label":"All Settings","action":"dms ipc call settings open"},
+  "setup.defaults": {"icon":"apps","label":"Defaults"},
+  "setup.defaults.xdg": {"icon":"tune","label":"XDG Defaults","action":"dms ipc call settings focusOrToggleWith default-apps"},
+  "setup.config": {"icon":"folder_open","label":"Config"},
+  "setup.config.niri": {"icon":"window","label":"Niri"},
+  "setup.config.niri.config": {"icon":"edit_document","label":"config.kdl","action":"foot --app-id=dotfiles.config-niri-config -e \"${EDITOR:-nvim}\" \"$HOME/.config/niri/config.kdl\""},
+  "setup.config.niri.binds": {"icon":"keyboard","label":"binds.kdl","action":"foot --app-id=dotfiles.config-niri-binds -e \"${EDITOR:-nvim}\" \"$HOME/.config/niri/dms/binds.kdl\""},
+  "setup.config.niri.windowrules": {"icon":"window","label":"windowrules.kdl","action":"foot --app-id=dotfiles.config-niri-windowrules -e \"${EDITOR:-nvim}\" \"$HOME/.config/niri/windowrules.kdl\""},
+  "setup.config.niri.output": {"icon":"monitor","label":"output.kdl","action":"foot --app-id=dotfiles.config-niri-output -e \"${EDITOR:-nvim}\" \"$HOME/.config/niri/output.kdl\""},
+  "setup.config.niri.animations": {"icon":"animation","label":"animations.kdl","action":"foot --app-id=dotfiles.config-niri-animations -e \"${EDITOR:-nvim}\" \"$HOME/.config/niri/animations.kdl\""},
+  "setup.config.dms": {"icon":"palette","label":"Dux Shell"},
+  "setup.config.dms.dankmenu": {"icon":"menu","label":"dankmenu.jsonc","action":"foot --app-id=dotfiles.config-dms-dankmenu -e \"${EDITOR:-nvim}\" \"$HOME/.config/dms/dankmenu.jsonc\""},
+
+  // Install
+  "install.webapp": {"icon":"web","label":"Web App","aliases":["webapp","website"],"action":"foot --app-id=dotfiles.webapp-install launch-floating-terminal-with-presentation.sh webapp-install.sh"},
+  "install.fedora": {"icon":"apps","label":"Fedora"},
+  "install.fedora.desktop": {"icon":"desktop_windows","label":"Desktop"},
+  "install.fedora.desktop.niri-dms": {"icon":"window","label":"Niri and Dux Shell","aliases":["niri","dms"],"checked":"rpm -q niri dms matugen >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-niri-dms launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::niri-dms"},
+  "install.fedora.desktop.webapps": {"icon":"web","label":"Default Web Apps","aliases":["webapps"],"checked":"test -f \"$HOME/.local/share/applications/ChatGPT.desktop\" && test -f \"$HOME/.local/share/applications/Claude.desktop\" && test -f \"$HOME/.local/share/applications/Discord.desktop\" && test -f \"$HOME/.local/share/applications/Github.desktop\" && test -f \"$HOME/.local/share/applications/Youtube.desktop\"","action":"foot --app-id=dotfiles.install-fedora-webapps launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::webapps"},
+  "install.fedora.development": {"icon":"code","label":"Development"},
+  "install.fedora.development.ddev": {"icon":"code","label":"DDEV","checked":"rpm -q ddev >/dev/null 2>&1 && mkcert -CAROOT >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-ddev launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::ddev"},
+  "install.fedora.development.docker": {"icon":"deployed_code","label":"Docker","checked":"rpm -q docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin >/dev/null 2>&1 && systemctl is-enabled --quiet docker.socket","action":"foot --app-id=dotfiles.install-fedora-docker launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::docker"},
+  "install.fedora.development.lazyvim": {"icon":"edit_note","label":"LazyVim","checked":"test -f \"${XDG_CONFIG_HOME:-$HOME/.config}/nvim/lua/config/lazy.lua\"","action":"foot --app-id=dotfiles.install-fedora-lazyvim launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::lazyvim"},
+  "install.fedora.development.php": {"icon":"code","label":"PHP","checked":"rpm -q php-cli php-fpm php-bcmath php-gd php-intl php-mbstring php-mysqlnd php-pdo php-process php-sodium php-pecl-apcu php-pecl-igbinary php-pecl-imagick php-pecl-msgpack php-pecl-zip >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-php launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::php"},
+  "install.fedora.hardware": {"icon":"memory","label":"Hardware"},
+  "install.fedora.hardware.firmware-check": {"icon":"memory","label":"Firmware Check","checked":"rpm -q fwupd >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-firmware-check launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::firmware-check"},
+  "install.fedora.hardware.nvidia580": {"icon":"memory","label":"NVIDIA 580 Driver","checked":"rpm -q akmod-nvidia-580xx xorg-x11-drv-nvidia-580xx xorg-x11-drv-nvidia-580xx-cuda xorg-x11-drv-nvidia-580xx-libs xorg-x11-drv-nvidia-580xx-cuda-libs nvidia-settings-580xx >/dev/null 2>&1 && systemctl is-enabled --quiet nvidia-hibernate.service && systemctl is-enabled --quiet nvidia-suspend.service && systemctl is-enabled --quiet nvidia-resume.service && systemctl is-enabled --quiet nvidia-powerd.service","action":"foot --app-id=dotfiles.install-fedora-nvidia580 launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::nvidia580"},
+  "install.fedora.hardware.wifi-firmware": {"icon":"wifi","label":"Wi-Fi Firmware","checked":"rpm -q iwlwifi-mvm-firmware NetworkManager-wifi >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-wifi-firmware launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::wifi-firmware"},
+  "install.fedora.media": {"icon":"movie","label":"Media"},
+  "install.fedora.media.codecs": {"icon":"graphic_eq","label":"Multimedia Codecs","checked":"! rpm -q ffmpeg-free >/dev/null 2>&1 && rpm -q ffmpeg gstreamer1-plugins-ugly x264 x265 >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-codecs launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::codecs"},
+  "install.fedora.package": {"icon":"package","label":"Package","aliases":["dnf","package"],"action":"dnf-package-install.sh"},
+  "install.fedora.repositories": {"icon":"dns","label":"Repositories"},
+  "install.fedora.repositories.rpmfusion": {"icon":"dns","label":"RPM Fusion","checked":"test -f /etc/yum.repos.d/rpmfusion-free.repo && test -f /etc/yum.repos.d/rpmfusion-nonfree.repo && test -f /etc/yum.repos.d/rpmfusion-free-tainted.repo && test -f /etc/yum.repos.d/rpmfusion-nonfree-tainted.repo","action":"foot --app-id=dotfiles.install-fedora-rpmfusion launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::rpmfusion"},
+  "install.fedora.system": {"icon":"settings","label":"System"},
+  "install.fedora.system.network-manager": {"icon":"wifi","label":"NetworkManager","checked":"rpm -q NetworkManager NetworkManager-wifi nm-connection-editor nm-connection-editor-desktop >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-network-manager launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::network-manager"},
+  "install.fedora.system.workstation-basics": {"icon":"terminal","label":"Workstation Basics","checked":"rpm -q flatpak gum neovim just fzf ripgrep >/dev/null 2>&1 && test -x \"$HOME/.local/bin/herdr\" && flatpak list --system --app --columns=application | grep -Fxq org.chromium.Chromium && flatpak list --system --app --columns=application | grep -Fxq org.mozilla.firefox","action":"foot --app-id=dotfiles.install-fedora-workstation-basics launch-floating-terminal-with-presentation.sh just --justfile \"$HOME/.dotfiles/setup/justfile\" fedora::install::workstation-basics"},
+  "install.fedora.utilities": {"icon":"build","label":"Utilities"},
+  "install.fedora.utilities.file-roller": {"icon":"archive","label":"File Roller","aliases":["archive manager"],"checked":"rpm -q file-roller >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-file-roller launch-floating-terminal-with-presentation.sh sudo dnf install file-roller"},
+  "install.fedora.utilities.seahorse": {"icon":"key","label":"Seahorse","aliases":["passwords and keys"],"checked":"rpm -q seahorse >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-fedora-seahorse launch-floating-terminal-with-presentation.sh sudo dnf install seahorse"},
+  "install.binary": {"icon":"terminal","label":"Binary","aliases":["standalone"]},
+  "install.binary.bitwarden-cli": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bitwarden cli"],"checked":"test -x \"$HOME/.local/bin/bw\" && \"$HOME/.local/bin/bw\" -v >/dev/null 2>&1","action":"foot --app-id=dotfiles.install-bw-cli launch-floating-terminal-with-presentation.sh bw-install.sh"},
+  "install.flatpak": {"icon":"apps","label":"Flatpak"},
+  "install.flatpak.remotes": {"icon":"dns","label":"Remotes"},
+  "install.flatpak.remotes.fedora": {"icon":"device_hub","label":"Fedora","aliases":["fedora flatpak remote"],"checked":"flatpak remotes --system --columns=name | grep -Fxq fedora","action":"foot --app-id=dotfiles.flatpak-remote-fedora launch-floating-terminal-with-presentation.sh sh -c 'sudo flatpak remote-add --system --if-not-exists fedora oci+https://registry.fedoraproject.org && sudo flatpak remote-modify --system --enable fedora'"},
+  "install.flatpak.remotes.flathub": {"icon":"public","label":"Flathub","aliases":["flathub remote"],"checked":"flatpak remotes --system --columns=name | grep -Fxq flathub","action":"foot --app-id=dotfiles.flatpak-remote-flathub launch-floating-terminal-with-presentation.sh sh -c 'sudo flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo && sudo flatpak remote-modify --system --enable flathub'"},
+  "install.flatpak.browser": {"icon":"web","label":"Browser"},
+  "install.flatpak.browser.chromium": {"icon":"language","label":"Chromium","aliases":["chromium","browser"],"checked":"flatpak list --app --columns=application | grep -Fxq org.chromium.Chromium","action":"foot --app-id=dotfiles.browser-chromium launch-floating-terminal-with-presentation.sh flatpak install flathub org.chromium.Chromium"},
+  "install.flatpak.browser.firefox": {"icon":"local_fire_department","label":"Firefox","aliases":["firefox","browser"],"checked":"flatpak list --app --columns=application | grep -Fxq org.mozilla.firefox","action":"foot --app-id=dotfiles.browser-firefox launch-floating-terminal-with-presentation.sh flatpak install flathub org.mozilla.firefox"},
+  "install.flatpak.browser.vivaldi": {"icon":"web","label":"Vivaldi","aliases":["vivaldi","browser"],"checked":"flatpak list --app --columns=application | grep -Fxq com.vivaldi.Vivaldi","action":"foot --app-id=dotfiles.browser-vivaldi launch-floating-terminal-with-presentation.sh flatpak install flathub com.vivaldi.Vivaldi"},
+  "install.flatpak.development": {"icon":"code","label":"Development"},
+  "install.flatpak.development.vscode": {"icon":"code","label":"Visual Studio Code","aliases":["vscode"],"checked":"flatpak list --app --columns=application | grep -Fxq com.visualstudio.code","action":"foot --app-id=dotfiles.flatpak-vscode launch-floating-terminal-with-presentation.sh flatpak install flathub com.visualstudio.code"},
+  "install.flatpak.gaming": {"icon":"sports_esports","label":"Gaming"},
+  "install.flatpak.gaming.battlenet": {"icon":"sports_esports","label":"Battle.net (Faugus)","aliases":["faugus"],"description":"Install Faugus Launcher to run Battle.net.","checked":"flatpak list --app --columns=application | grep -Fxq io.github.Faugus.faugus-launcher","action":"foot --app-id=dotfiles.flatpak-faugus launch-floating-terminal-with-presentation.sh flatpak install flathub io.github.Faugus.faugus-launcher"},
+  "install.flatpak.gaming.bottles": {"icon":"wine_bar","label":"Bottles","aliases":["windows apps"],"checked":"flatpak list --app --columns=application | grep -Fxq com.usebottles.bottles","action":"foot --app-id=dotfiles.flatpak-bottles launch-floating-terminal-with-presentation.sh flatpak install flathub com.usebottles.bottles"},
+  "install.flatpak.gaming.heroic": {"icon":"sports_esports","label":"Heroic Games Launcher","aliases":["heroic"],"checked":"flatpak list --app --columns=application | grep -Fxq com.heroicgameslauncher.hgl","action":"foot --app-id=dotfiles.flatpak-heroic launch-floating-terminal-with-presentation.sh flatpak install flathub com.heroicgameslauncher.hgl"},
+  "install.flatpak.gaming.steam": {"icon":"sports_esports","label":"Steam","aliases":["games"],"checked":"flatpak list --app --columns=application | grep -Fxq com.valvesoftware.Steam","action":"foot --app-id=dotfiles.flatpak-steam launch-floating-terminal-with-presentation.sh flatpak install flathub com.valvesoftware.Steam"},
+  "install.flatpak.graphics": {"icon":"brush","label":"Graphics"},
+  "install.flatpak.graphics.gimp": {"icon":"brush","label":"GIMP","aliases":["image editor"],"checked":"flatpak list --app --columns=application | grep -Fxq org.gimp.GIMP","action":"foot --app-id=dotfiles.flatpak-gimp launch-floating-terminal-with-presentation.sh flatpak install flathub org.gimp.GIMP"},
+  "install.flatpak.graphics.inkscape": {"icon":"draw","label":"Inkscape","aliases":["vector graphics"],"checked":"flatpak list --app --columns=application | grep -Fxq org.inkscape.Inkscape","action":"foot --app-id=dotfiles.flatpak-inkscape launch-floating-terminal-with-presentation.sh flatpak install flathub org.inkscape.Inkscape"},
+  "install.flatpak.media": {"icon":"play_circle","label":"Media"},
+  "install.flatpak.media.vlc": {"icon":"play_circle","label":"VLC","aliases":["media player"],"checked":"flatpak list --app --columns=application | grep -Fxq org.videolan.VLC","action":"foot --app-id=dotfiles.flatpak-vlc launch-floating-terminal-with-presentation.sh flatpak install flathub org.videolan.VLC"},
+  "install.flatpak.productivity": {"icon":"work","label":"Productivity"},
+  "install.flatpak.productivity.calibre": {"icon":"menu_book","label":"Calibre","aliases":["ebooks"],"checked":"flatpak list --app --columns=application | grep -Fxq com.calibre_ebook.calibre","action":"foot --app-id=dotfiles.flatpak-calibre launch-floating-terminal-with-presentation.sh flatpak install flathub com.calibre_ebook.calibre"},
+  "install.flatpak.productivity.libreoffice": {"icon":"description","label":"LibreOffice","aliases":["office"],"checked":"flatpak list --app --columns=application | grep -Fxq org.libreoffice.LibreOffice","action":"foot --app-id=dotfiles.flatpak-libreoffice launch-floating-terminal-with-presentation.sh flatpak install flathub org.libreoffice.LibreOffice"},
+  "install.flatpak.productivity.obsidian": {"icon":"edit_note","label":"Obsidian","aliases":["notes"],"checked":"flatpak list --app --columns=application | grep -Fxq md.obsidian.Obsidian","action":"foot --app-id=dotfiles.flatpak-obsidian launch-floating-terminal-with-presentation.sh flatpak install flathub md.obsidian.Obsidian"},
+  "install.flatpak.security": {"icon":"security","label":"Security"},
+  "install.flatpak.security.bitwarden": {"icon":"key","label":"Bitwarden","aliases":["password manager"],"checked":"flatpak list --app --columns=application | grep -Fxq com.bitwarden.desktop","action":"foot --app-id=dotfiles.flatpak-bitwarden launch-floating-terminal-with-presentation.sh flatpak install flathub com.bitwarden.desktop"},
+  "install.flatpak.utilities": {"icon":"build","label":"Utilities"},
+  "install.flatpak.utilities.gearlever": {"icon":"inventory_2","label":"Gear Lever","aliases":["appimage manager"],"checked":"flatpak list --app --columns=application | grep -Fxq it.mijorus.gearlever","action":"foot --app-id=dotfiles.flatpak-gearlever launch-floating-terminal-with-presentation.sh flatpak install flathub it.mijorus.gearlever"},
+  "install.flatpak.utilities.mediawriter": {"icon":"usb","label":"Fedora Media Writer","aliases":["bootable usb"],"checked":"flatpak list --app --columns=application | grep -Fxq org.fedoraproject.MediaWriter","action":"foot --app-id=dotfiles.flatpak-mediawriter launch-floating-terminal-with-presentation.sh flatpak install flathub org.fedoraproject.MediaWriter"},
+  "install.flatpak.utilities.localsend": {"icon":"send","label":"LocalSend","aliases":["file sharing"],"checked":"flatpak list --app --columns=application | grep -Fxq org.localsend.localsend_app","action":"foot --app-id=dotfiles.flatpak-localsend launch-floating-terminal-with-presentation.sh flatpak install flathub org.localsend.localsend_app"},
+  "install.flatpak.utilities.simplescan": {"icon":"scanner","label":"Simple Scan","aliases":["document scanner"],"checked":"flatpak list --app --columns=application | grep -Fxq org.gnome.SimpleScan","action":"foot --app-id=dotfiles.flatpak-simplescan launch-floating-terminal-with-presentation.sh flatpak install flathub org.gnome.SimpleScan"},
+
+  // Remove
+  "remove.fedora": {"icon":"apps","label":"Fedora"},
+  "remove.fedora.package": {"icon":"package","label":"Package","aliases":["dnf packages"],"action":"dnf-package-remove.sh"},
+  "remove.fedora.utilities": {"icon":"build","label":"Utilities"},
+  "remove.fedora.utilities.file-roller": {"icon":"archive","label":"File Roller","when":"rpm -q file-roller >/dev/null 2>&1","action":"foot --app-id=dotfiles.remove-fedora-file-roller launch-floating-terminal-with-presentation.sh sudo dnf remove file-roller"},
+  "remove.fedora.utilities.seahorse": {"icon":"key","label":"Seahorse","when":"rpm -q seahorse >/dev/null 2>&1","action":"foot --app-id=dotfiles.remove-fedora-seahorse launch-floating-terminal-with-presentation.sh sudo dnf remove seahorse"},
+  "remove.binary": {"icon":"terminal","label":"Binary","aliases":["standalone"]},
+  "remove.binary.bitwarden-cli": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bitwarden cli"],"checked":"test -x \"$HOME/.local/bin/bw\" && \"$HOME/.local/bin/bw\" -v >/dev/null 2>&1","action":"foot --app-id=dotfiles.remove-bw-cli launch-floating-terminal-with-presentation.sh rm -f -- \"$HOME/.local/bin/bw\""},
+  "remove.flatpak": {"icon":"apps","label":"Flatpak"},
+  "remove.flatpak.remotes": {"icon":"dns","label":"Remotes"},
+  "remove.flatpak.remotes.fedora": {"icon":"device_hub","label":"Fedora","when":"flatpak remotes --system --show-disabled --columns=name | grep -Fxq fedora","action":"foot --app-id=dotfiles.remove-flatpak-remote-fedora launch-floating-terminal-with-presentation.sh sudo flatpak remote-delete --system --force fedora"},
+  "remove.flatpak.remotes.flathub": {"icon":"public","label":"Flathub","when":"flatpak remotes --system --show-disabled --columns=name | grep -Fxq flathub","action":"foot --app-id=dotfiles.remove-flatpak-remote-flathub launch-floating-terminal-with-presentation.sh sudo flatpak remote-delete --system --force flathub"},
+  "remove.flatpak.browser": {"icon":"web","label":"Browser"},
+  "remove.flatpak.browser.chromium": {"icon":"language","label":"Chromium","when":"flatpak list --system --app --columns=application | grep -Fxq org.chromium.Chromium","action":"foot --app-id=dotfiles.remove-flatpak-chromium launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.chromium.Chromium"},
+  "remove.flatpak.browser.firefox": {"icon":"local_fire_department","label":"Firefox","when":"flatpak list --system --app --columns=application | grep -Fxq org.mozilla.firefox","action":"foot --app-id=dotfiles.remove-flatpak-firefox launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.mozilla.firefox"},
+  "remove.flatpak.browser.vivaldi": {"icon":"web","label":"Vivaldi","when":"flatpak list --system --app --columns=application | grep -Fxq com.vivaldi.Vivaldi","action":"foot --app-id=dotfiles.remove-flatpak-vivaldi launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.vivaldi.Vivaldi"},
+  "remove.flatpak.development": {"icon":"code","label":"Development"},
+  "remove.flatpak.development.vscode": {"icon":"code","label":"Visual Studio Code","when":"flatpak list --system --app --columns=application | grep -Fxq com.visualstudio.code","action":"foot --app-id=dotfiles.remove-flatpak-vscode launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.visualstudio.code"},
+  "remove.flatpak.gaming": {"icon":"sports_esports","label":"Gaming"},
+  "remove.flatpak.gaming.battlenet": {"icon":"sports_esports","label":"Battle.net (Faugus)","when":"flatpak list --system --app --columns=application | grep -Fxq io.github.Faugus.faugus-launcher","action":"foot --app-id=dotfiles.remove-flatpak-faugus launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system io.github.Faugus.faugus-launcher"},
+  "remove.flatpak.gaming.bottles": {"icon":"wine_bar","label":"Bottles","when":"flatpak list --system --app --columns=application | grep -Fxq com.usebottles.bottles","action":"foot --app-id=dotfiles.remove-flatpak-bottles launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.usebottles.bottles"},
+  "remove.flatpak.gaming.heroic": {"icon":"sports_esports","label":"Heroic Games Launcher","when":"flatpak list --system --app --columns=application | grep -Fxq com.heroicgameslauncher.hgl","action":"foot --app-id=dotfiles.remove-flatpak-heroic launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.heroicgameslauncher.hgl"},
+  "remove.flatpak.gaming.steam": {"icon":"sports_esports","label":"Steam","when":"flatpak list --system --app --columns=application | grep -Fxq com.valvesoftware.Steam","action":"foot --app-id=dotfiles.remove-flatpak-steam launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.valvesoftware.Steam"},
+  "remove.flatpak.graphics": {"icon":"brush","label":"Graphics"},
+  "remove.flatpak.graphics.gimp": {"icon":"brush","label":"GIMP","when":"flatpak list --system --app --columns=application | grep -Fxq org.gimp.GIMP","action":"foot --app-id=dotfiles.remove-flatpak-gimp launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.gimp.GIMP"},
+  "remove.flatpak.graphics.inkscape": {"icon":"draw","label":"Inkscape","when":"flatpak list --system --app --columns=application | grep -Fxq org.inkscape.Inkscape","action":"foot --app-id=dotfiles.remove-flatpak-inkscape launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.inkscape.Inkscape"},
+  "remove.flatpak.media": {"icon":"play_circle","label":"Media"},
+  "remove.flatpak.media.vlc": {"icon":"play_circle","label":"VLC","when":"flatpak list --system --app --columns=application | grep -Fxq org.videolan.VLC","action":"foot --app-id=dotfiles.remove-flatpak-vlc launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.videolan.VLC"},
+  "remove.flatpak.productivity": {"icon":"work","label":"Productivity"},
+  "remove.flatpak.productivity.calibre": {"icon":"menu_book","label":"Calibre","when":"flatpak list --system --app --columns=application | grep -Fxq com.calibre_ebook.calibre","action":"foot --app-id=dotfiles.remove-flatpak-calibre launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.calibre_ebook.calibre"},
+  "remove.flatpak.productivity.libreoffice": {"icon":"description","label":"LibreOffice","when":"flatpak list --system --app --columns=application | grep -Fxq org.libreoffice.LibreOffice","action":"foot --app-id=dotfiles.remove-flatpak-libreoffice launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.libreoffice.LibreOffice"},
+  "remove.flatpak.productivity.obsidian": {"icon":"edit_note","label":"Obsidian","when":"flatpak list --system --app --columns=application | grep -Fxq md.obsidian.Obsidian","action":"foot --app-id=dotfiles.remove-flatpak-obsidian launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system md.obsidian.Obsidian"},
+  "remove.flatpak.security": {"icon":"security","label":"Security"},
+  "remove.flatpak.security.bitwarden": {"icon":"key","label":"Bitwarden","when":"flatpak list --system --app --columns=application | grep -Fxq com.bitwarden.desktop","action":"foot --app-id=dotfiles.remove-flatpak-bitwarden launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system com.bitwarden.desktop"},
+  "remove.flatpak.utilities": {"icon":"build","label":"Utilities"},
+  "remove.flatpak.utilities.gearlever": {"icon":"inventory_2","label":"Gear Lever","when":"flatpak list --system --app --columns=application | grep -Fxq it.mijorus.gearlever","action":"foot --app-id=dotfiles.remove-flatpak-gearlever launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system it.mijorus.gearlever"},
+  "remove.flatpak.utilities.mediawriter": {"icon":"usb","label":"Fedora Media Writer","when":"flatpak list --system --app --columns=application | grep -Fxq org.fedoraproject.MediaWriter","action":"foot --app-id=dotfiles.remove-flatpak-mediawriter launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.fedoraproject.MediaWriter"},
+  "remove.flatpak.utilities.localsend": {"icon":"send","label":"LocalSend","when":"flatpak list --system --app --columns=application | grep -Fxq org.localsend.localsend_app","action":"foot --app-id=dotfiles.remove-flatpak-localsend launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.localsend.localsend_app"},
+  "remove.flatpak.utilities.simplescan": {"icon":"scanner","label":"Simple Scan","when":"flatpak list --system --app --columns=application | grep -Fxq org.gnome.SimpleScan","action":"foot --app-id=dotfiles.remove-flatpak-simplescan launch-floating-terminal-with-presentation.sh sudo flatpak uninstall --system org.gnome.SimpleScan"},
+
+  // Update
+  "update.system": {"icon":"system_update","label":"System","aliases":["system-updates","packages"],"action":"foot --app-id=dotfiles.update launch-floating-terminal-with-presentation.sh update.sh"},
+  "update.codex": {"icon":"code","label":"Codex","aliases":["codex update","openai codex"],"when":"command -v codex >/dev/null 2>&1","action":"foot --app-id=dotfiles.codex-update launch-floating-terminal-with-presentation.sh codex update"},
+  "update.bw": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bw update","bitwarden"],"when":"command -v bw >/dev/null 2>&1","action":"foot --app-id=dotfiles.bw-update launch-floating-terminal-with-presentation.sh bw-update.sh"},
+  "update.herdr": {"icon":"sync","label":"Herdr","aliases":["herdr update"],"action":"foot --app-id=dotfiles.herdr-update launch-floating-terminal-with-presentation.sh herdr update"},
+
+  // System
+  "system.lock": {"icon":"lock","label":"Lock","action":"loginctl lock-session"},
+  "system.suspend": {"icon":"bedtime","label":"Suspend","action":"systemctl suspend"},
+  "system.logout": {"icon":"logout","label":"Logout","action":"loginctl terminate-session \"$XDG_SESSION_ID\""},
+  "system.reboot": {"icon":"restart_alt","label":"Reboot","action":"systemctl reboot"},
+  "system.shutdown": {"icon":"power_settings_new","label":"Shutdown","action":"systemctl poweroff"}
+}

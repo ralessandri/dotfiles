@@ -8,6 +8,14 @@ window-rule {
   opacity 0.8
 }
 
+// Float terminal windows launched for dotfiles commands.
+window-rule {
+  match app-id=r#"^dotfiles\..+$"#
+  open-floating true
+  default-column-width { fixed 875; }
+  default-window-height { fixed 600; }
+}
+
 window-rule {
   background-effect {
     blur true
