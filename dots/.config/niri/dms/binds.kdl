@@ -17,6 +17,8 @@ binds {
     Mod+Ctrl+Up hotkey-overlay-title="Move Window Up" { move-window-up-or-to-workspace-up; }
     Mod+Down hotkey-overlay-title="Focus Window Below" { focus-window-or-workspace-down; }
     Mod+Shift+D hotkey-overlay-title="Open Workspace Switcher" { spawn "rofi-niri-workspaces.sh"; }
+    Mod+Shift+O hotkey-overlay-title="Open Window Switcher (Rofi)" { spawn "dmenu-windows.sh" "--rofi"; }
+    Mod+Ctrl+O hotkey-overlay-title="Open Window Switcher (DMS)" { spawn "dmenu-windows.sh" "--dms"; }
     Mod+Up hotkey-overlay-title="Focus Window Above" { focus-window-or-workspace-up; }
     Mod+B hotkey-overlay-title="Focus Firefox" { spawn-sh "niri msg action focus-window --id $(niri msg --json windows | jq -r '.[] | select(.app_id == \"org.mozilla.firefox\") | .id' | head -n1)"; }
     Mod+Ctrl+Left hotkey-overlay-title="Move Column Left" { move-column-left-or-to-monitor-left; }
