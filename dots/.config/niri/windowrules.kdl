@@ -10,10 +10,15 @@ window-rule {
 
 // Float terminal windows launched for dotfiles commands.
 window-rule {
-  match app-id=r#"^dotfiles\..+$"#
+  match app-id=r#"^dot\.[^.]+\.[^.]+$"#
   open-floating true
   default-column-width { fixed 875; }
   default-window-height { fixed 600; }
+}
+
+window-rule {
+  match app-id=r#"^dot\.yazi\.floating$"#
+  open-floating true
 }
 
 window-rule {
@@ -22,34 +27,12 @@ window-rule {
   }
 }
 
+// Keep interactive package and Wi-Fi managers above tiled windows.
 window-rule {
-  match app-id="org.mozilla.firefox"
-  match app-id="org.chromium.Chromium"
-  open-maximized true
-}
-
-// Keep the interactive DNF package installer above tiled windows.
-window-rule {
-  match app-id="^dnf-package-install$"
+  match app-id=r#"^(dot\.dnf\.(install|remove)|dot\.wifi\.manager)$"#
   open-floating true
-  default-column-width { proportion 0.3; }
-  default-window-height { proportion 0.6; }
-}
-
-// Keep the interactive DNF package remover above tiled windows.
-window-rule {
-  match app-id="^dnf-package-remove$"
-  open-floating true
-  default-column-width { proportion 0.3; }
-  default-window-height { proportion 0.6; }
-}
-
-// Keep the interactive Wi-Fi manager above tiled windows.
-window-rule {
-  match app-id="^wifi-manager$"
-  open-floating true
-  default-column-width { fixed 650; }
-  default-window-height { fixed 400; }
+  default-column-width { fixed 800; }
+  default-window-height { fixed 600; }
 }
 
 window-rule {

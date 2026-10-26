@@ -4,7 +4,7 @@ set -euo pipefail
 export LC_ALL=C.UTF-8
 
 readonly SCRIPT_PATH="$(readlink -f "$0")"
-readonly APP_ID='wifi-manager'
+readonly APP_ID='dot.wifi.manager'
 readonly DEFAULT_FZF_COLOR='fg:#dfe3e7,bg:-1,fg+:#00344a,bg+:#90cef4,hl:#90cef4,hl+:#00344a,info:#90cef4,prompt:#90cef4,pointer:#90cef4,marker:#90cef4,spinner:#90cef4,header:#dfe3e7,border:#90cef4,separator:#90cef4,preview-border:#90cef4,preview-fg:#dfe3e7,preview-bg:-1'
 
 # Parse nmcli's escaped colon-separated fields.

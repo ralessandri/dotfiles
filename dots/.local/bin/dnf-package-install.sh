@@ -33,13 +33,13 @@ run_in_terminal() {
 
   case "$terminal" in
   wezterm)
-    exec wezterm start --class dnf-package-install --always-new-process -- "$SCRIPT_PATH" --in-terminal
+    exec wezterm start --class dot.dnf.install --always-new-process -- "$SCRIPT_PATH" --in-terminal
     ;;
   foot)
-    exec foot --app-id=dnf-package-install "$SCRIPT_PATH" --in-terminal
+    exec foot --app-id=dot.dnf.install "$SCRIPT_PATH" --in-terminal
     ;;
   alacritty)
-    exec alacritty --class dnf-package-install -e "$SCRIPT_PATH" --in-terminal
+    exec alacritty --class dot.dnf.install -e "$SCRIPT_PATH" --in-terminal
     ;;
   *)
     die "unsupported terminal: $terminal (choose alacritty, wezterm, or foot)"
