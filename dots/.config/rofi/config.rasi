@@ -1,7 +1,7 @@
 @import "colors.rasi"
 
 configuration {
-    font: "Adwaita Sans 11";
+    font: "monospace 11";
 }
 window {
     background-color: @window-background;

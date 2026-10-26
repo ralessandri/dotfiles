@@ -49,6 +49,7 @@
 # resize-overlay-duration = 4s 200ms
 
 background = #282c34
+font-family = monospace
 
 keybind = alt+arrow_up=goto_split:up
 keybind = alt+arrow_down=goto_split:down

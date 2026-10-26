@@ -6,7 +6,7 @@ local mod = "ALT"
 local mod_shift = mod .. "|SHIFT"
 
 config.color_scheme = "dank-theme"
-config.font = wezterm.font("JetBrainsMono Nerd Font")
+config.font = wezterm.font("monospace")
 config.font_size = 11
 config.hide_tab_bar_if_only_one_tab = true
 
