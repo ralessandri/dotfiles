@@ -191,9 +191,9 @@
 
   // Update
   "update.system": {"icon":"system_update","label":"System","aliases":["system-updates","packages"],"action":"foot --app-id=dot.system.update launch-floating-terminal-with-presentation.sh update.sh"},
-  "update.codex": {"icon":"code","label":"Codex","aliases":["codex update","openai codex"],"when":"command -v codex >/dev/null 2>&1","action":"foot --app-id=dot.codex.update launch-floating-terminal-with-presentation.sh codex update"},
-  "update.bw": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bw update","bitwarden"],"when":"command -v bw >/dev/null 2>&1","action":"foot --app-id=dot.bw.update launch-floating-terminal-with-presentation.sh bw-update.sh"},
-  "update.herdr": {"icon":"sync","label":"Herdr","aliases":["herdr update"],"action":"foot --app-id=dot.herdr.update launch-floating-terminal-with-presentation.sh herdr update"},
+  "update.codex": {"icon":"code","label":"Codex","aliases":["codex update","openai codex"],"when":"command -v codex >/dev/null 2>&1","action":"foot --app-id=dot.codex.update launch-floating-terminal-with-presentation.sh --title \"Update Codex\" codex update"},
+  "update.bw": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bw update","bitwarden"],"when":"command -v bw >/dev/null 2>&1","action":"foot --app-id=dot.bw.update launch-floating-terminal-with-presentation.sh --title \"Update Bitwarden CLI\" bw-update.sh"},
+  "update.herdr": {"icon":"sync","label":"Herdr","aliases":["herdr update"],"action":"foot --app-id=dot.herdr.update launch-floating-terminal-with-presentation.sh --title \"Update Herdr\" herdr update"},
 
   // System
   "system.lock": {"icon":"lock","label":"Lock","action":"loginctl lock-session"},

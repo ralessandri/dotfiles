@@ -3,10 +3,11 @@ set -euo pipefail
 
 show_help() {
   printf '%s\n' \
-    'Usage: launch-floating-terminal-with-presentation.sh COMMAND [ARG...]' \
-    '       launch-floating-terminal-with-presentation.sh -- COMMAND [ARG...]' \
+    'Usage: launch-floating-terminal-with-presentation.sh [--title TITLE] COMMAND [ARG...]' \
+    '       launch-floating-terminal-with-presentation.sh [--title TITLE] -- COMMAND [ARG...]' \
     '' \
-    'Run a command in the current terminal and wait for a key after it exits.' \
+    'Show an optional title, run a command in the current terminal, and wait for a key after it exits.' \
+    'The title is displayed as a section header.' \
     'A command exit status of 130 skips the final prompt.'
 }
 
@@ -26,6 +27,16 @@ if (($# > 0)) && [[ "$1" == --help || "$1" == -h ]]; then
   exit 0
 fi
 
+title=""
+if (($# > 0)) && [[ "$1" == --title ]]; then
+  if (($# < 2)) || [[ -z "$2" ]]; then
+    printf '%s\n' 'Error: --title requires a non-empty title.' >&2
+    exit 2
+  fi
+  title="$2"
+  shift 2
+fi
+
 if (($# > 0)) && [[ "$1" == -- ]]; then
   shift
 fi
@@ -33,6 +44,10 @@ fi
 if (($# == 0)); then
   show_help >&2
   exit 2
+fi
+
+if [[ -n "$title" ]]; then
+  printf '\n:: %s\n\n' "$title"
 fi
 
 status=0
