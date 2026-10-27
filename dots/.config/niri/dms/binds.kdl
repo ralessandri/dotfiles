@@ -19,6 +19,9 @@ binds {
     Mod+Shift+P hotkey-overlay-title="Rofi Bitwarden" { spawn "rofi-bitwarden.sh"; }
 
     // Window and workspace management
+    Mod+Ctrl+N hotkey-overlay-title="Niri Toggles" { spawn "dmenu-niri-toggles.sh" "--dms"; }
+    Mod+Ctrl+Alt+C hotkey-overlay-title="Toggle Center Focused Column Always" { spawn "niri-action-manager.sh" "toggle" "center-focused-column-always"; }
+    Mod+Ctrl+S hotkey-overlay-title="Reserve space at screen edges" { spawn "niri-action-manager.sh" "toggle" "struts-on"; }
     Mod+Ctrl+Down hotkey-overlay-title="Move Window Down" { move-window-down-or-to-workspace-down; }
     Mod+Ctrl+Up hotkey-overlay-title="Move Window Up" { move-window-up-or-to-workspace-up; }
     Mod+Down hotkey-overlay-title="Focus Window Below" { focus-window-or-workspace-down; }

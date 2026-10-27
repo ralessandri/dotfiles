@@ -55,6 +55,8 @@
   "trigger.toggle.idle": {"icon":"coffee","label":"Stay Awake","aliases":["caffeine","inhibit"],"checked":"dms ipc call inhibit status | grep -q enabled","action":"dms ipc call inhibit toggle"},
   "trigger.toggle.night": {"icon":"nightlight","label":"Night Mode","aliases":["nightlight"],"checked":"dms ipc call night status | grep -q enabled","action":"dms ipc call night toggle"},
   "trigger.toggle.do-not-disturb": {"icon":"notifications_off","label":"Do Not Disturb","checked":"dms ipc call notifications getDoNotDisturb | grep -qi true","action":"dms ipc call notifications toggleDoNotDisturb"},
+  "trigger.toggle.niri-struts": {"icon":"vertical_align_top","label":"Reserve space at screen edges","aliases":["struts"],"checked":"niri-action-manager.sh status struts-on | grep -Fxq on","action":"niri-action-manager.sh toggle struts-on"},
+  "trigger.toggle.niri-center-focused-column": {"icon":"center_focus_strong","label":"Center Focused Column","aliases":["niri center column"],"checked":"niri-action-manager.sh status center-focused-column-always | grep -Fxq on","action":"niri-action-manager.sh toggle center-focused-column-always"},
   "trigger.power": {"icon":"bolt","label":"Power"},
   "trigger.power.powerprofile": {"icon":"bolt","label":"Power Profile","aliases":["power mode"],"action":"dms ipc powerprofile toggle"},
   "trigger.power.powermenu": {"icon":"power_settings_new","label":"Power Menu","aliases":["power","power options"],"action":"dms ipc powermenu toggle"},
