@@ -3,5 +3,8 @@
 default:
   @just -l
 
+clone:
+  if [[ ! -d lazydocker/.git ]]; then git clone https://github.com/jesseduffield/lazydocker.git lazydocker; fi
+
 build:
   ./build.sh

@@ -2,6 +2,9 @@
 default:
   @just -l
 
+clone:
+  if [[ ! -d DankPinentry/.git ]]; then git clone https://github.com/Pacman99/DankPinentry.git DankPinentry; fi
+
 build:
   HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose run --rm pinentry-dms-build
 
