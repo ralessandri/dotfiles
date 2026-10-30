@@ -19,7 +19,7 @@ binds {
     Mod+Shift+P hotkey-overlay-title="Rofi Bitwarden" { spawn "rofi-bitwarden.sh"; }
 
     // Window and workspace management
-    Mod+Ctrl+N hotkey-overlay-title="Niri Toggles" { spawn "dmenu-niri-toggles.sh" "--dms"; }
+    Mod+Ctrl+N hotkey-overlay-title="Niri Toggles" { spawn "dmenu-toggle-menu.sh"; }
     Mod+Ctrl+Alt+C hotkey-overlay-title="Toggle Center Focused Column Always" { spawn "niri-action-manager.sh" "toggle" "center-focused-column-always"; }
     Mod+Ctrl+S hotkey-overlay-title="Reserve space at screen edges" { spawn "niri-action-manager.sh" "toggle" "struts-on"; }
     Mod+Ctrl+Down hotkey-overlay-title="Move Window Down" { move-window-down-or-to-workspace-down; }
@@ -35,14 +35,14 @@ binds {
     Mod+Ctrl+Tab hotkey-overlay-title="Focus Previous Workspace" { focus-workspace-previous; }
     Mod+Shift+Tab hotkey-overlay-title="Cycle Column Focus" { spawn-sh "niri msg action focus-column-right; niri msg action move-column-to-last; niri msg action focus-window-previous"; }
     Mod+Shift+D hotkey-overlay-title="Open Workspace Switcher" { spawn "rofi-niri-workspaces.sh"; }
-    Mod+Shift+O hotkey-overlay-title="Open Window Switcher (Rofi)" { spawn "dmenu-windows.sh" "--rofi"; }
-    Mod+Ctrl+O hotkey-overlay-title="Open Window Switcher (DMS)" { spawn "dmenu-windows.sh" "--dms"; }
+    Mod+Shift+O hotkey-overlay-title="Open Window Switcher (Rofi)" { spawn "dmenu-window-picker.sh" "--rofi"; }
+    Mod+Ctrl+O hotkey-overlay-title="Open Window Switcher (DMS)" { spawn "dmenu-window-picker.sh" "--dms"; }
     Mod+S hotkey-overlay-title="Toggle Window Stack" { spawn "niri-window-stack.sh" "toggle" "-m" "70%" "-f" "main-at-stack" "-w" "current"; }
     Mod+Shift+S hotkey-overlay-title="Promote Stacked Window" { spawn "niri-window-stack.sh" "promote"; }
     Mod+Shift+T hotkey-overlay-title="Switch Tiling and Floating Focus" { switch-focus-between-floating-and-tiling; }
     Mod+T hotkey-overlay-title="Toggle Floating" { spawn "niri-toggle-floating.sh"; }
     Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
-    // Mod+Tab hotkey-overlay-title="Open Window Switcher" { spawn "dmenu-windows.sh"; }
+    // Mod+Tab hotkey-overlay-title="Open Window Switcher" { spawn "dmenu-window-picker.sh"; }
 
     // Applications and launchers
     Mod+Return hotkey-overlay-title="Open Terminal" { spawn "foot"; }
