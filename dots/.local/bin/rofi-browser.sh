@@ -18,8 +18,10 @@ search_dirs=(
   "$HOME/.local/share/flatpak/exports/share/applications"
 )
 
-# Build a map of display name -> .desktop file path
+# Build an ordered list of names and a map to their .desktop files
 declare -A menu
+browser_names=()
+default_browser=$(xdg-settings get default-web-browser 2>/dev/null) || default_browser=""
 
 for id in "${application_ids[@]}"; do
   for dir in "${search_dirs[@]}"; do
@@ -28,6 +30,11 @@ for id in "${application_ids[@]}"; do
       # Extract the localized Name= entry from the .desktop file
       name=$(grep "^Name=" "$file" | head -1 | cut -d= -f2-)
       menu["$name"]="$file"
+      if [[ "$id" == "$default_browser" ]]; then
+        browser_names=("$name" "${browser_names[@]}")
+      else
+        browser_names+=("$name")
+      fi
       break
     fi
   done
@@ -36,7 +43,7 @@ done
 # Show selection menu using rofi
 selection_status=0
 choice=$(
-  printf '%s\n' "${!menu[@]}" |
+  printf '%s\n' "${browser_names[@]}" |
     rofi -dmenu \
       -kb-custom-1 'Alt+Return' \
       -theme-str "window { width: 300px; }" \
