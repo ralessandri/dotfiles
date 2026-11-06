@@ -34,22 +34,43 @@ for id in "${application_ids[@]}"; do
 done
 
 # Show selection menu using rofi
+selection_status=0
 choice=$(
   printf '%s\n' "${!menu[@]}" |
     rofi -dmenu \
+      -kb-custom-1 'Alt+Return' \
       -theme-str "window { width: 300px; }" \
       -theme-str "listview { lines: ${#menu[@]}; }" \
       -theme-str "inputbar { enabled: false; }"
-)
+) || selection_status=$?
 
 # Exit if nothing was selected
 [ -z "$choice" ] && exit 0
+[[ $selection_status -eq 0 || $selection_status -eq 10 ]] || exit 0
 
 # Get the full path to the chosen .desktop file
 desktop_file="${menu[$choice]}"
 
 # Extract Exec= line and strip field codes (%f, %u, %U, etc.)
 exec_cmd=$(grep "^Exec=" "$desktop_file" | head -1 | cut -d= -f2- | sed 's/%[a-zA-Z]//g')
+
+# Prefer the browser's own private-window desktop action when available.
+if [[ $selection_status -eq 10 ]]; then
+  private_exec=$(awk '
+    $0 == "[Desktop Action new-private-window]" { in_action = 1; next }
+    in_action && /^\[/ { exit }
+    in_action && /^Exec=/ { sub(/^Exec=/, ""); print; exit }
+  ' "$desktop_file")
+
+  if [[ -n "$private_exec" ]]; then
+    exec_cmd=$(printf '%s\n' "$private_exec" | sed 's/%[a-zA-Z]//g')
+  else
+    case "${desktop_file##*/}" in
+    org.mozilla.firefox.desktop) exec_cmd="$exec_cmd --private-window" ;;
+    com.vivaldi.Vivaldi.desktop | org.chromium.Chromium.desktop) exec_cmd="$exec_cmd --incognito" ;;
+    esac
+  fi
+fi
 
 # Execute the command
 exec $exec_cmd
