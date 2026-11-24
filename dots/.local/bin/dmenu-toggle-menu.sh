@@ -8,7 +8,11 @@ options=()
 
 for index in "${!actions[@]}"; do
   state=$(niri-action-manager.sh status "${actions[index]}")
-  options+=("${labels[index]} [$state]")
+  indicator=""
+  if [[ "${state}" == "on" ]]; then
+    indicator=" ✓"
+  fi
+  options+=("${labels[index]}${indicator}")
 done
 
 case $launcher in
