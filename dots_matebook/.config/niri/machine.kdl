@@ -1,0 +1,11 @@
+workspace "media" {
+    open-on-output "eDP-1"
+}
+
+window-rule {
+    match app-id=r#"^chrome-www\.youtube\.com__-Default$"#
+    open-on-workspace "media"
+    open-maximized true
+    open-focused false
+    opacity 1.0
+}

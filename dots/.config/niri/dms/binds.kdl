@@ -56,7 +56,7 @@ binds {
     Mod+B hotkey-overlay-title="Focus Firefox" { spawn-sh "niri msg action focus-window --id $(niri msg --json windows | jq -r '.[] | select(.app_id == \"org.mozilla.firefox\") | .id' | head -n1)"; }
     Mod+Shift+Return hotkey-overlay-title="Focus Firefox" { spawn "niri-cycle.sh" "org.mozilla.firefox" "flatpak" "run" "org.mozilla.firefox"; }
     Mod+A hotkey-overlay-title="ChatGPT" { spawn "niri-cycle.sh" "chrome-chatgpt.com__-Default" "gtk-launch" "ChatGPT"; }
-    Mod+Y hotkey-overlay-title="Open YouTube" { spawn "gtk-launch" "Youtube"; }
+    Mod+Y hotkey-overlay-title="Focus YouTube" { spawn "niri-cycle.sh" "chrome-www.youtube.com__-Default" "gtk-launch" "Youtube"; }
 
     // Screenshots and text capture
     Mod+Ctrl+Print hotkey-overlay-title="Extract Text From Screen" { spawn "dms-screenshot-ocr.sh" "--notify"; }
