@@ -34,14 +34,16 @@ binds {
     Mod+Shift+Right hotkey-overlay-title="Move Window Into Right Column" { consume-or-expel-window-right; }
     Mod+Ctrl+Tab hotkey-overlay-title="Focus Previous Workspace" { focus-workspace-previous; }
     Mod+Shift+Tab hotkey-overlay-title="Cycle Column Focus" { spawn-sh "niri msg action focus-column-right; niri msg action move-column-to-last; niri msg action focus-window-previous"; }
-    Mod+Shift+D hotkey-overlay-title="Open Workspace Switcher" { spawn "rofi-niri-workspaces.sh"; }
+    Mod+D repeat=false hotkey-overlay-title="Open Focus Actions" { spawn "rofi-niri-workspaces.sh" "--focus"; }
+    Mod+Ctrl+D repeat=false hotkey-overlay-title="Open Window Actions" { spawn "rofi-niri-workspaces.sh" "--window"; }
+    Mod+Shift+D repeat=false hotkey-overlay-title="Open Workspace Actions" { spawn "rofi-niri-workspaces.sh" "--workspaces"; }
+    Mod+Ctrl+Shift+D repeat=false hotkey-overlay-title="Open All Niri Actions" { spawn "rofi-niri-workspaces.sh"; }
     Mod+Shift+O hotkey-overlay-title="Open Window Switcher (Rofi)" { spawn "dmenu-window-picker.sh" "--rofi"; }
     Mod+Ctrl+O hotkey-overlay-title="Open Window Switcher (DMS)" { spawn "dmenu-window-picker.sh" "--dms"; }
     Mod+S hotkey-overlay-title="Toggle Window Stack" { spawn "niri-window-stack.sh" "toggle" "-m" "70%" "-f" "main-at-stack" "-w" "current"; }
     Mod+Shift+S hotkey-overlay-title="Promote Stacked Window" { spawn "niri-window-stack.sh" "promote"; }
     Mod+Shift+T hotkey-overlay-title="Switch Tiling and Floating Focus" { switch-focus-between-floating-and-tiling; }
     Mod+T hotkey-overlay-title="Toggle Floating" { spawn "niri-toggle-floating.sh"; }
-    Mod+D hotkey-overlay-title="Toggle Overview" { toggle-overview; }
     // Mod+Tab hotkey-overlay-title="Open Window Switcher" { spawn "dmenu-window-picker.sh"; }
 
     // Applications and launchers
