@@ -30,7 +30,7 @@ fi
 title=""
 if (($# > 0)) && [[ "$1" == --title ]]; then
   if (($# < 2)) || [[ -z "$2" ]]; then
-    printf '%s\n' 'Error: --title requires a non-empty title.' >&2
+    printf '%s\n' '→ Error: --title requires a non-empty title.' >&2
     exit 2
   fi
   title="$2"
@@ -47,18 +47,17 @@ if (($# == 0)); then
 fi
 
 if [[ -n "$title" ]]; then
-  printf '\n:: %s\n\n' "$title"
+  printf '\n── %s ──\n\n' "$title"
 fi
 
 status=0
 "$@" || status=$?
 
 if ((status != 130)); then
-  if ((status == 0)); then
-    wait_for_key '● Done! Press any key to close...'
-  else
-    wait_for_key "● Failed (exit status ${status}). Press any key to close..."
+  if ((status != 0)); then
+    printf '\n→ Error: Command failed (exit status %s).\n' "${status}" >&2
   fi
+  wait_for_key '→ Press any key to close…'
 fi
 
 exit "${status}"
