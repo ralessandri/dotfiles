@@ -30,11 +30,11 @@ fi
 
 # Output helpers
 
-_header() { printf '\n%s:: %s%s\n\n' "${C_BLUE}${C_BOLD}" "$1" "$C_RESET"; }
+_header() { printf '\n%s── %s ──%s\n\n' "${C_BLUE}${C_BOLD}" "$1" "$C_RESET"; }
 _info() { printf '%s→%s %s\n' "$C_BLUE" "$C_RESET" "$1"; }
 _ok() { printf '%s✔%s %s\n' "$C_GREEN" "$C_RESET" "$1"; }
-_warn() { printf '%s⚠%s %s\n' "$C_YELLOW" "$C_RESET" "$1" >&2; }
-_err() { printf '%s✖%s %s\n' "$C_RED" "$C_RESET" "$1" >&2; }
+_warn() { printf '%s→%s Warning: %s\n' "$C_YELLOW" "$C_RESET" "$1" >&2; }
+_err() { printf '%s→%s Error: %s\n' "$C_RED" "$C_RESET" "$1" >&2; }
 _indent() { sed 's/^/  /'; }
 
 # Helpers
@@ -379,7 +379,7 @@ main() {
     -v | --verbose) VERBOSE=true ;;
     *)
       _err "Unknown option: $1"
-      printf 'Try %s --help for usage information.\n' "$SCRIPT_NAME" >&2
+      printf '→ Try %s --help for usage information.\n' "$SCRIPT_NAME" >&2
       return 1
       ;;
     esac
@@ -446,7 +446,7 @@ main() {
 
   # Confirmation
   if [[ "$assume_yes" == false ]]; then
-    printf '\n%s::%s Proceed with upgrade? [y/N] ' "${C_BLUE}${C_BOLD}" "$C_RESET"
+    printf '\n%s→%s Proceed with upgrade? [y/N] ' "${C_BLUE}${C_BOLD}" "$C_RESET"
     read -r answer || answer=n
     if [[ ! "$answer" =~ ^[yY]$ ]]; then
       _info "Aborted."

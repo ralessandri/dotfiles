@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'Installing PHP...\n'
+printf '→ Installing PHP...\n'
 
 sudo dnf install -y \
   php-cli \
@@ -20,9 +20,9 @@ sudo dnf install -y \
   php-pecl-msgpack \
   php-pecl-zip
 
-if gum confirm 'Install Composer?'; then
-  printf 'Installing Composer...\n'
+if gum confirm '→ Install Composer?'; then
+  printf '→ Installing Composer...\n'
   sudo dnf install -y composer
 fi
 
-printf '\nPHP setup complete.\n'
+printf '\n✔ PHP setup complete.\n'

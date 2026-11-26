@@ -17,7 +17,7 @@ EOF
 }
 
 die() {
-  printf 'dnf-package-install: %s\n' "$1" >&2
+  printf '→ Error: dnf-package-install: %s\n' "$1" >&2
   exit 1
 }
 
@@ -82,7 +82,8 @@ fi
 require_command dnf
 require_command fzf
 
-printf 'Loading available Fedora packages...\n' >&2
+printf '\n── Install Fedora Packages ──\n\n'
+printf '→ Loading available Fedora packages...\n' >&2
 
 selected_line="$(
   dnf repoquery --available --queryformat=$'%{name}\t%{summary}\n' 2>/dev/null |
@@ -98,9 +99,9 @@ selected_line="$(
       --bind='alt-d:preview-half-page-down,alt-u:preview-half-page-up' \
       --bind='alt-k:preview-up,alt-j:preview-down' \
       --color='fg:#dfe3e7,bg:-1,fg+:#00344a,bg+:#90cef4,hl:#90cef4,hl+:#00344a,info:#90cef4,prompt:#90cef4,pointer:#90cef4,marker:#90cef4,spinner:#90cef4,header:#dfe3e7,border:#90cef4,separator:#90cef4,preview-border:#90cef4,preview-fg:#dfe3e7,preview-bg:-1' \
-      --header='Enter: install | Esc: cancel' \
+      --header='→ Enter: install | Esc: cancel' \
       --layout=reverse \
-      --prompt='Package> ' \
+      --prompt='→ Package: ' \
       --with-nth=1,2
 )" || exit 0
 
@@ -113,8 +114,8 @@ mapfile -t packages < <(
 
 ((${#packages[@]} > 0)) || exit 0
 
-printf '\nInstalling package(s): %s\n\n' "${packages[*]}"
+printf '\n→ Installing package(s): %s\n\n' "${packages[*]}"
 sudo dnf install "${packages[@]}"
 
-printf '\nPackage installation finished. Press Enter to close.\n'
+printf '\n→ Press Enter to close…\n'
 read -r

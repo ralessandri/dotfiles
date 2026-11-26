@@ -19,7 +19,7 @@ EOF
 }
 
 _die() {
-  printf 'dms-screenshot-ocr: %s\n' "$1" >&2
+  printf '→ Error: dms-screenshot-ocr: %s\n' "$1" >&2
   exit "${2:-1}"
 }
 

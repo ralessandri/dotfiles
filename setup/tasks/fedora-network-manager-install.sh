@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-printf 'Installing NetworkManager and connection editor...\n'
+printf '→ Installing NetworkManager and connection editor...\n'
 
 sudo dnf install -y \
   NetworkManager \
@@ -9,4 +9,4 @@ sudo dnf install -y \
   nm-connection-editor \
   nm-connection-editor-desktop
 
-printf '\nNetworkManager setup complete.\n'
+printf '\n✔ NetworkManager setup complete.\n'

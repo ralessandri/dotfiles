@@ -3,11 +3,11 @@ set -euo pipefail
 
 if [[ ! -f /etc/yum.repos.d/rpmfusion-free.repo ]] ||
   [[ ! -f /etc/yum.repos.d/rpmfusion-nonfree.repo ]]; then
-  printf 'RPM Fusion Free and Nonfree repositories are required.\n' >&2
+  printf '→ Error: RPM Fusion Free and Nonfree repositories are required.\n' >&2
   exit 1
 fi
 
-printf 'Installing multimedia codecs...\n'
+printf '→ Installing multimedia codecs...\n'
 
 sudo dnf swap -y \
   ffmpeg-free \
@@ -27,4 +27,4 @@ sudo dnf install -y \
   x265 \
   ffmpeg
 
-printf '\nMultimedia codec setup complete.\n'
+printf '\n✔ Multimedia codec setup complete.\n'

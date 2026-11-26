@@ -26,7 +26,7 @@ EOF
 fi
 
 die() {
-  printf 'niri-action-manager: %s\n' "$*" >&2
+  printf '→ Error: niri-action-manager: %s\n' "$*" >&2
   exit 1
 }
 

@@ -14,7 +14,7 @@ readonly usage_message="Usage: $(basename -- "$0") [--help|list|active|select|ac
 # Helpers
 
 _fail() {
-  printf '%s\n' "${1}" >&2
+  printf '→ Error: %s\n' "${1}" >&2
   exit 1
 }
 
@@ -246,7 +246,7 @@ _select_theme() {
     for index in "${!labels[@]}"; do
       gum_options+=("${labels[${index}]}${label_delimiter}${index}")
     done
-    if ! selected_index="$(gum choose --header "Theme" --label-delimiter "${label_delimiter}" "${gum_options[@]}")"; then
+    if ! selected_index="$(gum choose --header "→ Select theme" --label-delimiter "${label_delimiter}" "${gum_options[@]}")"; then
       return 2
     fi
     ;;

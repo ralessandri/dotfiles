@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ ! -f /etc/yum.repos.d/ddev.repo ]]; then
-  printf 'Adding DDEV repository...\n'
+  printf '→ Adding DDEV repository...\n'
 
   sudo tee /etc/yum.repos.d/ddev.repo >/dev/null <<'EOF'
 [ddev]
@@ -13,13 +13,13 @@ enabled=1
 EOF
 fi
 
-printf 'Installing DDEV...\n'
+printf '→ Installing DDEV...\n'
 
 sudo dnf install -y --refresh ddev
 
 if ! mkcert -CAROOT >/dev/null 2>&1; then
-  printf 'Initializing mkcert...\n'
+  printf '→ Initializing mkcert...\n'
   mkcert -install
 fi
 
-printf '\nDDEV setup complete.\n'
+printf '\n✔ DDEV setup complete.\n'

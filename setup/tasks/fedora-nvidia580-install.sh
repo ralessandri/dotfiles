@@ -2,11 +2,11 @@
 set -euo pipefail
 
 if [[ ! -f /etc/yum.repos.d/rpmfusion-nonfree.repo ]]; then
-  printf 'RPM Fusion Nonfree repository is required.\n' >&2
+  printf '→ Error: RPM Fusion Nonfree repository is required.\n' >&2
   exit 1
 fi
 
-printf 'Installing NVIDIA 580xx drivers...\n'
+printf '→ Installing NVIDIA 580xx drivers...\n'
 
 sudo dnf install -y \
   akmod-nvidia-580xx \
@@ -16,7 +16,7 @@ sudo dnf install -y \
   xorg-x11-drv-nvidia-580xx-cuda-libs \
   nvidia-settings-580xx
 
-printf 'Enabling NVIDIA services...\n'
+printf '→ Enabling NVIDIA services...\n'
 
 sudo systemctl enable \
   nvidia-hibernate.service \
@@ -24,4 +24,4 @@ sudo systemctl enable \
   nvidia-resume.service \
   nvidia-powerd.service
 
-printf '\nNVIDIA 580xx setup complete.\n'
+printf '\n✔ NVIDIA 580xx setup complete.\n'

@@ -4,7 +4,7 @@ set -euo pipefail
 readonly WEBAPP_PROFILE="Default"
 
 die() {
-  printf 'Error: %s\n' "$*" >&2
+  printf '→ Error: %s\n' "$*" >&2
   exit 1
 }
 
@@ -42,13 +42,13 @@ main() {
     Youtube
   )
 
-  printf 'Installing Default Webapps...\n'
+  printf '→ Installing Default Webapps...\n'
 
   local selected_webapps_raw
   if ! selected_webapps_raw=$(
-    printf '%s\n' "${webapps[@]}" | gum choose --no-limit --header "Select web apps to install"
+    printf '%s\n' "${webapps[@]}" | gum choose --no-limit --header "→ Select web apps to install"
   ); then
-    printf 'No web apps selected.\n'
+    printf '→ No web apps selected.\n'
     exit 0
   fi
 
@@ -56,7 +56,7 @@ main() {
   mapfile -t selected_webapps <<<"$selected_webapps_raw"
 
   if ((${#selected_webapps[@]} == 0)); then
-    printf 'No web apps selected.\n'
+    printf '→ No web apps selected.\n'
     exit 0
   fi
 
@@ -65,7 +65,7 @@ main() {
     install_webapp "$app" "$(webapp_url_for "$app")"
   done
 
-  printf '\nDefault Webapps setup complete.\n'
+  printf '\n✔ Default Webapps setup complete.\n'
 }
 
 main "$@"

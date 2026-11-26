@@ -6,7 +6,7 @@ set -euo pipefail
 nodejs_version=24
 
 if [[ ! "${nodejs_version}" =~ ^[1-9][0-9]*$ ]]; then
-  printf 'ERROR: nodejs_version must be a positive integer.\n' >&2
+  printf '→ Error: nodejs_version must be a positive integer.\n' >&2
   exit 1
 fi
 
@@ -25,7 +25,7 @@ _backup_nvim() {
 
   [[ -e "${path}" || -L "${path}" ]] || return 0
   mv -T -- "${path}" "${path}${backup_suffix}"
-  printf 'Backed up %s to %s\n' "${path}" "${path}${backup_suffix}"
+  printf '→ Backed up %s to %s\n' "${path}" "${path}${backup_suffix}"
 }
 
 _check_node_package_available() {
@@ -40,7 +40,7 @@ _check_node_package_available() {
     return 0
   fi
 
-  printf 'ERROR: Fedora package "%s" is neither installed nor available in enabled repositories.\n' \
+  printf '→ Error: Fedora package "%s" is neither installed nor available in enabled repositories.\n' \
     "${package}" >&2
   return 1
 }
@@ -69,8 +69,8 @@ _select_default_node_package() {
 
 # Package installation
 
-printf 'Installing LazyVim prerequisites...\n'
-printf 'Selected Node.js major version: %s\n' "${nodejs_version}"
+printf '→ Installing LazyVim prerequisites...\n'
+printf '→ Selected Node.js major version: %s\n' "${nodejs_version}"
 
 # Verify that all required Node.js packages are available
 # before changing the installed configuration.
@@ -97,7 +97,7 @@ sudo dnf install -y \
 
 # Configure the selected Node.js and npm versions as defaults.
 
-printf '\nConfiguring Node.js %s and npm...\n' "${nodejs_version}"
+printf '\n→ Configuring Node.js %s and npm...\n' "${nodejs_version}"
 
 _select_default_node_package \
   "${node_bin_package}" \
@@ -115,18 +115,18 @@ node_version="$(node --version)"
 npm_version="$(npm --version)"
 npm_major="${npm_version%%.*}"
 
-printf 'Node.js: %s\n' "${node_version}"
-printf 'npm:     %s\n' "${npm_version}"
+printf '→ Node.js: %s\n' "${node_version}"
+printf '→ npm:     %s\n' "${npm_version}"
 
 if [[ "${node_version}" != "v${nodejs_version}".* ]]; then
-  printf 'ERROR: Expected Node.js %s, got %s\n' \
+  printf '→ Error: Expected Node.js %s, got %s\n' \
     "${nodejs_version}" "${node_version}" >&2
   exit 1
 fi
 
 if [[ ! "${npm_major}" =~ ^[0-9]+$ ]] ||
   ((npm_major < 11)); then
-  printf 'ERROR: Expected npm 11 or newer, got %s\n' \
+  printf '→ Error: Expected npm 11 or newer, got %s\n' \
     "${npm_version}" >&2
   exit 1
 fi
@@ -150,19 +150,19 @@ done < <(
 )
 
 if ((${#old_node_packages[@]} > 0)); then
-  printf '\nFound Node.js packages older than version %s:\n' \
+  printf '\n→ Found Node.js packages older than version %s:\n' \
     "${nodejs_version}"
   printf '  - %s\n' "${old_node_packages[@]}"
 
-  if gum confirm "Remove these older Node.js packages?"; then
+  if gum confirm "→ Remove these older Node.js packages?"; then
     sudo dnf remove "${old_node_packages[@]}"
   else
-    printf 'Keeping older Node.js packages.\n'
+    printf '→ Keeping older Node.js packages.\n'
   fi
 fi
 
 if ! command -v lazygit >/dev/null 2>&1 &&
-  gum confirm 'Install lazygit for Git integration?'; then
+  gum confirm '→ Install lazygit for Git integration?'; then
   sudo dnf copr enable -y dejan/lazygit
   sudo dnf install -y lazygit
 fi
@@ -170,10 +170,10 @@ fi
 # Neovim configuration
 
 if [[ ! -e "${nvim_config}" && ! -L "${nvim_config}" ]] ||
-  gum confirm "Back up ${nvim_config} and replace it with the LazyVim starter?"; then
+  gum confirm "→ Back up ${nvim_config} and replace it with the LazyVim starter?"; then
   _backup_nvim "${nvim_config}"
 
-  if gum confirm 'Back up existing Neovim data, state and cache (recommended)?'; then
+  if gum confirm '→ Back up existing Neovim data, state and cache (recommended)?'; then
     _backup_nvim "${XDG_DATA_HOME:-${HOME}/.local/share}/nvim"
     _backup_nvim "${XDG_STATE_HOME:-${HOME}/.local/state}/nvim"
     _backup_nvim "${XDG_CACHE_HOME:-${HOME}/.cache}/nvim"
@@ -186,9 +186,9 @@ fi
 
 # Health check
 
-printf '\nLazyVim setup complete.\n'
-printf 'Start Neovim in foot and run :LazyHealth to check the installation.\n'
+printf '\n✔ LazyVim setup complete.\n'
+printf '→ Start Neovim in foot and run :LazyHealth to check the installation.\n'
 
-if gum confirm 'Start Neovim and run :LazyHealth now?'; then
+if gum confirm '→ Start Neovim and run :LazyHealth now?'; then
   nvim +LazyHealth
 fi

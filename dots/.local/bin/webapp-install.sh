@@ -43,7 +43,7 @@ EOF
 
 # Abort with an error message on stderr.
 die() {
-  echo "Error: $*" >&2
+  printf '→ Error: %s\n' "$*" >&2
   exit 1
 }
 
@@ -114,10 +114,10 @@ download_icon() {
 
 # Prompt the user for all required values via gum.
 prompt_for_app_details() {
-  echo -e "${COLOR_GREEN}Let's create a new web app you can start with the app launcher.\n${COLOR_RESET}"
+  printf "%b→ Let's create a new web app you can start with the app launcher.%b\n\n" "${COLOR_GREEN}" "${COLOR_RESET}"
 
-  APP_NAME=$(gum input --prompt "Name> " --placeholder "My favorite web app")
-  APP_URL=$(gum input --prompt "URL> " --placeholder "https://example.com")
+  APP_NAME=$(gum input --prompt "→ Name: " --placeholder "My favorite web app")
+  APP_URL=$(gum input --prompt "→ URL: " --placeholder "https://example.com")
   APP_URL=$(normalize_url "$APP_URL")
 
   mkdir -p "$ICON_DIR"
@@ -126,7 +126,7 @@ prompt_for_app_details() {
     ICON_REF="$APP_NAME.png"
   else
     ICON_REF=$(gum input \
-      --prompt "Icon URL> " \
+      --prompt "→ Icon URL: " \
       --placeholder "Could not fetch favicon automatically. Enter PNG icon URL (see https://dashboardicons.com)")
   fi
 
@@ -143,14 +143,14 @@ prompt_for_profile() {
   if ((${#available_profiles[@]} > 0)); then
     local choice
     choice=$(gum choose \
-      --header "Select Chromium profile" \
+      --header "→ Select Chromium profile" \
       "$NO_PROFILE_LABEL" \
       "${available_profiles[@]}")
     [[ $choice == "$NO_PROFILE_LABEL" ]] && choice=""
     printf '%s' "$choice"
   else
-    echo -e "${COLOR_YELLOW}No Chromium profiles found under $FLATPAK_CONFIG_DIR. You can enter a profile name manually.${COLOR_RESET}" >&2
-    gum input --prompt "Chromium Profile> " --placeholder "Leave empty for default (e.g. Default, Profile 1)"
+    printf '%b→ Warning: No Chromium profiles found under %s. You can enter a profile name manually.%b\n' "${COLOR_YELLOW}" "${FLATPAK_CONFIG_DIR}" "${COLOR_RESET}" >&2
+    gum input --prompt "→ Chromium Profile: " --placeholder "Leave empty for default (e.g. Default, Profile 1)"
   fi
 }
 
@@ -280,9 +280,9 @@ EOF
 
 print_summary() {
   local desktop_file=$1
-  echo -e "You can now find $APP_NAME using the app launcher (SUPER + SPACE)\n"
+  printf '✔ You can now find %s using the app launcher (SUPER + SPACE)\n\n' "${APP_NAME}"
   if [[ -n $PROFILE ]]; then
-    echo -e "Using Chromium profile: ${COLOR_YELLOW}$PROFILE${COLOR_RESET}\n"
+    printf '→ Using Chromium profile: %b%s%b\n\n' "${COLOR_YELLOW}" "${PROFILE}" "${COLOR_RESET}"
   fi
 }
 

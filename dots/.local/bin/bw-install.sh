@@ -9,7 +9,7 @@ trap 'rm -rf -- "$work_dir"; [[ -z "$staged_path" ]] || rm -f -- "$staged_path"'
 
 # Helpers
 _fail() {
-  printf 'Error: %s\n' "$*" >&2
+  printf '→ Error: %s\n' "$*" >&2
   exit 1
 }
 
@@ -52,7 +52,7 @@ expected_hash="${asset_digest#sha256:}"
 archive_path="${work_dir}/bw.zip"
 gum spin --spinner dot --title "Downloading Bitwarden CLI ${expected_version}…" -- curl --fail --location --silent --show-error --output "$archive_path" "$download_url" || _fail 'Download failed.'
 printf '%s  %s\n' "$expected_hash" "$archive_path" | sha256sum --check --status || _fail 'SHA-256 verification failed.'
-printf 'Verified SHA-256 for Bitwarden CLI %s.\n' "$expected_version"
+printf '✔ Verified SHA-256 for Bitwarden CLI %s.\n' "$expected_version"
 
 candidate_path="${work_dir}/bw"
 unzip -p "$archive_path" bw > "$candidate_path" || _fail 'Could not extract the bw executable from the archive.'
@@ -62,4 +62,4 @@ candidate_version="$("$candidate_path" -v 2>&1 | tr -d '\r')"
 
 install -m 0755 -- "$candidate_path" "$staged_path"
 mv -fT -- "$staged_path" "$target"
-printf 'Installed Bitwarden CLI %s at %s.\n' "$expected_version" "$target"
+printf '✔ Installed Bitwarden CLI %s at %s.\n' "$expected_version" "$target"
