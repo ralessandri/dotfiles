@@ -24,7 +24,7 @@ mkdir -p -- "${target%/*}"
 staged_path="$(mktemp "${target}.new.XXXXXX")"
 
 releases_path="${work_dir}/releases.json"
-gum spin --spinner dot --title 'Finding the latest Bitwarden CLI release…' -- curl --fail --location --silent --show-error --header 'Accept: application/vnd.github+json' --output "$releases_path" 'https://api.github.com/repos/bitwarden/clients/releases?per_page=100' || _fail 'Could not retrieve Bitwarden releases.'
+gum spin --spinner minidot --title 'Finding the latest Bitwarden CLI release…' -- curl --fail --location --silent --show-error --header 'Accept: application/vnd.github+json' --output "$releases_path" 'https://api.github.com/repos/bitwarden/clients/releases?per_page=100' || _fail 'Could not retrieve Bitwarden releases.'
 asset_metadata="$(python3 -c 'import json, sys
 for release in json.load(open(sys.argv[1], encoding="utf-8")):
     tag = release.get("tag_name", "")
@@ -50,7 +50,7 @@ if [[ ! "$asset_digest" =~ ^sha256:[[:xdigit:]]{64}$ ]]; then
 fi
 expected_hash="${asset_digest#sha256:}"
 archive_path="${work_dir}/bw.zip"
-gum spin --spinner dot --title "Downloading Bitwarden CLI ${expected_version}…" -- curl --fail --location --silent --show-error --output "$archive_path" "$download_url" || _fail 'Download failed.'
+gum spin --spinner minidot --title "Downloading Bitwarden CLI ${expected_version}…" -- curl --fail --location --silent --show-error --output "$archive_path" "$download_url" || _fail 'Download failed.'
 printf '%s  %s\n' "$expected_hash" "$archive_path" | sha256sum --check --status || _fail 'SHA-256 verification failed.'
 printf '✔ Verified SHA-256 for Bitwarden CLI %s.\n' "$expected_version"
 

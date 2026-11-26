@@ -25,7 +25,7 @@ command -v bw >/dev/null 2>&1 || _fail 'Bitwarden CLI (bw) is not installed.'
 current_version="$(bw -v 2>&1 | tr -d '\r')"
 
 output_path="${work_dir}/update-output"
-if ! gum spin --spinner dot --title 'Checking for Bitwarden CLI updates…' -- sh -c "bw update >\"\$1\" 2>&1" _ "$output_path"; then
+if ! gum spin --spinner minidot --title 'Checking for Bitwarden CLI updates…' -- sh -c "bw update >\"\$1\" 2>&1" _ "$output_path"; then
   cat "$output_path" >&2
   _fail 'Bitwarden update check failed.'
 fi
@@ -45,7 +45,7 @@ expected_version="${download_url##*/bw-linux-}"
 expected_version="${expected_version%.zip}"
 printf '→ Downloading Bitwarden CLI %s.\n' "$expected_version"
 release_path="${work_dir}/release.json"
-gum spin --spinner dot --title 'Retrieving the release SHA-256…' -- curl --fail --location --silent --show-error --header 'Accept: application/vnd.github+json' --output "$release_path" "https://api.github.com/repos/bitwarden/clients/releases/tags/cli-v${expected_version}" || _fail 'Could not retrieve release checksum metadata.'
+gum spin --spinner minidot --title 'Retrieving the release SHA-256…' -- curl --fail --location --silent --show-error --header 'Accept: application/vnd.github+json' --output "$release_path" "https://api.github.com/repos/bitwarden/clients/releases/tags/cli-v${expected_version}" || _fail 'Could not retrieve release checksum metadata.'
 asset_digest="$(python3 -c 'import json, sys
 release = json.load(open(sys.argv[1], encoding="utf-8"))
 for asset in release.get("assets", []):
@@ -58,7 +58,7 @@ if [[ ! "$asset_digest" =~ ^sha256:[[:xdigit:]]{64}$ ]]; then
 fi
 expected_hash="${asset_digest#sha256:}"
 archive_path="${work_dir}/bw.zip"
-gum spin --spinner dot --title "Downloading Bitwarden CLI ${expected_version}…" -- curl --fail --location --silent --show-error --output "$archive_path" "$download_url" || _fail 'Download failed.'
+gum spin --spinner minidot --title "Downloading Bitwarden CLI ${expected_version}…" -- curl --fail --location --silent --show-error --output "$archive_path" "$download_url" || _fail 'Download failed.'
 printf '%s  %s\n' "$expected_hash" "$archive_path" | sha256sum --check --status || _fail 'SHA-256 verification failed.'
 printf '✔ Verified SHA-256 for Bitwarden CLI %s.\n' "$expected_version"
 
