@@ -190,7 +190,7 @@
   "remove.cli-tools.bitwarden": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bitwarden cli"],"checked":"test -x \"$HOME/.local/bin/bw\" && \"$HOME/.local/bin/bw\" -v >/dev/null 2>&1","action":"foot --app-id=dot.bw-cli.remove launch-floating-terminal-with-presentation.sh --title \"Remove Bitwarden CLI\" rm -f -- \"$HOME/.local/bin/bw\""},
 
   // Update
-  "update.system": {"icon":"system_update","label":"System","aliases":["system-updates","packages"],"action":"foot --app-id=dot.system.update launch-floating-terminal-with-presentation.sh --title \"Update System\" update.sh"},
+  "update.system": {"icon":"system_update","label":"System","aliases":["system-updates","packages"],"action":"foot --app-id=dot.system.update launch-floating-terminal-with-presentation.sh --title \"Update System\" dms system update"},
   "update.cargo": {"icon":"code","label":"Cargo","aliases":["cargo update","rust","crates"],"when":"command -v cargo-install-update >/dev/null 2>&1","action":"foot --app-id=dot.cargo.update launch-floating-terminal-with-presentation.sh --title \"Update Cargo\" cargo install-update --all"},
   "update.codex": {"icon":"code","label":"Codex","aliases":["codex update","openai codex"],"when":"command -v codex >/dev/null 2>&1","action":"foot --app-id=dot.codex.update launch-floating-terminal-with-presentation.sh --title \"Update Codex\" codex update"},
   "update.bw": {"icon":"key","label":"Bitwarden CLI","aliases":["bw","bw update","bitwarden"],"when":"command -v bw >/dev/null 2>&1","action":"foot --app-id=dot.bw.update launch-floating-terminal-with-presentation.sh --title \"Update Bitwarden CLI\" bw-update.sh"},
