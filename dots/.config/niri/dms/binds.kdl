@@ -4,6 +4,7 @@ binds {
     Mod+Ctrl+Comma hotkey-overlay-title="Toggle Do Not Disturb" { spawn "dms" "ipc" "call" "notifications" "toggleDoNotDisturb"; }
     Mod+Ctrl+L hotkey-overlay-title="Lock Screen" { spawn "dms" "ipc" "call" "lock" "lock"; }
     Mod+Ctrl+P hotkey-overlay-title="Toggle Power Profile" { spawn "dms" "ipc" "powerprofile" "toggle"; }
+    Mod+Alt+P repeat=false hotkey-overlay-title="Select Display Profile" { spawn "dmenu-display-profiles.sh" "--rofi"; }
     Mod+Ctrl+T hotkey-overlay-title="Toggle System Monitor" { spawn "dms" "ipc" "call" "processlist" "focusOrToggle"; }
     Mod+N hotkey-overlay-title="Notepad: Toggle" { spawn "dms" "ipc" "call" "notepad" "toggle"; }
     Mod+Shift+N hotkey-overlay-title="Notepad: Expand" { spawn "dms" "ipc" "notepad" "toggleExpand"; }
